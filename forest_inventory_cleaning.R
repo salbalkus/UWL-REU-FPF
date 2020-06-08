@@ -1,7 +1,7 @@
 library(tidyverse)
 
 #Set working directory to the repository
-setwd("C:/Users/salba/Desktop/REU/UWL-REU-FPF")
+setwd("C:/Users/salba/Desktop/REU/")
 
 ###ST PAUL CLEANING###
 StPaul <- read_csv("Forest_Inventory_Data/mvp_p2prism_testdataclean.csv")
@@ -104,12 +104,26 @@ Odessa_Burn_Areas <- read_csv("Odessa_Burn_Areas_Prism_2010.txt") %>% select(PID
 P14_Smiths <- read_csv("P14_Smiths_Prism.txt") %>% select(PID, POOL, TR_SP, TR_DIA, TR_HLTH) %>% mutate(File = "P14_Smiths_Prism.txt")
 
 P14_Steamboat <- read_csv("P14_Steamboat_Prism.txt") %>% select(PID_NEW, POOL_1, TR_SP, TR_DIA, TR_HLTH) %>% mutate(File = "P14_Steamboat_Prism.txt")
-P14_Wapsi <- read_csv("P14_Wapsi_Prism.txt") %>% select(PID_NEW, POOL_1, TR_SP, TR_DIA, TR_HLTH2) %>% mutate(File = "P14_Wapsi_Prism.txt")
 colnames(P14_Steamboat) <- c("PID","POOL","TR_SP","TR_DIA","TR_HLTH", "File")
+
+P14_Wapsi <- read_csv("P14_Wapsi_Prism.txt")# %>% select(PID_NEW, POOL_1, TR_SP, TR_DIA, TR_HLTH2) %>% mutate(File = "P14_Wapsi_Prism.txt")
+test <- P14_Wapsi[is.na(P14_Wapsi$PID_NEW),]
+
 colnames(P14_Wapsi) <- c("PID","POOL","TR_SP","TR_DIA","TR_HLTH", "File")
 
-Pecan_Grove <- read.csv("Pecan_Grove_Prism_Merge.txt", stringsAsFactors = FALSE) %>% select(PID_NEW, POOL, TR_SP, TR_DIA2, TR_HLTH) %>% mutate(File = "Pecan_Grove_Prism_Merge.txt")
-colnames(Pecan_Grove) <- c("PID","POOL","TR_SP","TR_DIA","TR_HLTH", "File")
+#Here we have to split the file, since some observations have a PID and some have PID_NEW
+Pecan_Grove <- read.csv("Pecan_Grove_Prism_Merge.txt", stringsAsFactors = FALSE)# %>% select(PID_NEW, POOL, TR_SP, TR_DIA2, TR_HLTH) %>% mutate(File = "Pecan_Grove_Prism_Merge.txt")
+Pecan_Grove_new <- Pecan_Grove %>% 
+  select(PID_NEW, POOL, TR_SP, TR_DIA2, TR_HLTH) %>% 
+  filter(!is.na(PID_NEW) & PID_NEW != " ")
+colnames(Pecan_Grove_new) <- c("PID","POOL","TR_SP","TR_DIA","TR_HLTH")
+Pecan_Grove_old <- Pecan_Grove %>% 
+  select(PID, POOL, TR_SP, TR_DIA2, TR_HLTH) %>% 
+  filter(!is.na(PID)& PID != " ")
+colnames(Pecan_Grove_old) <- c("PID","POOL","TR_SP","TR_DIA","TR_HLTH")
+
+Pecan_Grove <- rbind(Pecan_Grove_old, Pecan_Grove_new)
+Pecan_Grove <- mutate(Pecan_Grove, File = "Pecan_Grove_Prism_Merge.txt")
 
 #Pool13 requires creation of a PID, since it does not have a PID column
 Pool13 <- read_csv("Pool13_Prism.txt")%>%
@@ -184,7 +198,7 @@ write_csv(clean, "RockIsland_clean.csv")
 
 
 ###Combining the three datasets###
-setwd("C:/Users/salba/Desktop/REU/UWL-REU-FPF")
+setwd("C:/Users/salba/Desktop/REU/")
 
 StPaul <- read_csv("StPaul_clean.csv") %>% mutate(File = "StPaul", District = "StPaul")
 StLouis <- read_csv("StLouis_clean.csv") %>% mutate(File = "StLouis", District = "StLouis")
