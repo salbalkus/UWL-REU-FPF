@@ -1,0 +1,152 @@
+---
+title: "Initial Question about the UMRS Floodplain Forest"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+
+setwd("C:/Users/salba/Desktop/REU")
+
+df <- read_csv("UMRS_FPF_clean.csv")
+nrow(df)
+```
+
+##How many unique species are inventoried?##
+There are 72 unique species, plus the "SNAG" species indicating a dead tree, "Other" species, and "NONE" species
+
+```{r}
+length(unique(df$TR_SP))
+unique(df$TR_SP)
+
+```
+
+##What are the five most abundant species by number of observations?##
+##How abundant are they?##
+
+The five most abundant species are silver maple (ACSA2), cottonwood (PODE3), dead tree (SNAG), green ash (FRPE), and willow (SALIX). The silver maple is the most frequent by far, with 136,089  observations making up 53.8 percent of the UMR floodplain forest. Cottonwood (33,654 observations) makes up 13.3 percent of the forest, green ash (17,962 observations) makes up 7.1 percent of the forest, and willow (10,129 observations) makes up 4.0 percent of the forest. Dead trees (18,216 observations), make up 7.2 percent.
+
+```{r}
+output <- df %>%
+  group_by(TR_SP) %>%
+  summarize(Count = n()) %>%
+  mutate(Pct = Count / sum(Count)) %>%
+  arrange(desc(Count)) %>%
+  top_n(5)
+
+
+ggplot(data = output) + geom_col(aes(x = reorder(TR_SP, -Count), y = Count, fill = TR_SP)) + 
+  scale_fill_viridis_d() + scale_y_continuous(n.breaks = 10, labels = function(x) format(x, scientific = FALSE)) +
+  xlab("Species")
+
+output
+
+```
+##Does this list vary by health class?##
+While the silver maple makes up the largest proportion for all health classes, there is variation among the other tree species. Cottonwood makes up 17.3 percent of the vigorous trees, but only 10.4 and 5.4 percent of those in stressed and significant decline, respectively, indicating that the species in is better health than the others. Green ash makes up 7.6 percent of the vigorous population,7.4 percent of the stressed population, and 9.1 percent of the significant decline population. Willow makes up 3.6 percent of the vigorous population, 4.5 percent of the stressed population, and 9.7 percent of the significant decline population. American elm makes the top 5 for vigorous population, with 3.1 percent, but does not appear as frequently in the others. The boxelder does not appear in the top 5 most frequent species in the vigorous population, but does appear in the top 5 stressed and significant decline species populations, with 5.5 and 7.6 percent, respectively.
+
+
+```{r}
+output <- df %>%
+  group_by(TR_SP, TR_HLTH) %>%
+  summarize(Count = n()) %>%
+  group_by(TR_HLTH) %>%
+  mutate(Pct = Count / sum(Count)) %>%
+  top_n(5, Count) %>%
+  arrange(TR_HLTH,desc(Count)) %>%
+  filter(TR_HLTH %in% c("V","S","SD"))
+
+#This plot is misleading, so I do not include it
+#ggplot(output)  + geom_col(aes(x = reorder(TR_SP, -Pct), y = Pct, fill = TR_SP)) + 
+  #scale_fill_viridis_d() + scale_y_continuous(n.breaks = 10, labels = function(x) format(x, scientific = FALSE)) +
+  #xlab("Species") + facet_wrap(facets = vars(TR_HLTH))
+
+legend_ord <- levels(with(output, reorder(TR_SP, -Pct)))
+
+ggplot(output[output$TR_HLTH == "V",])  + geom_col(aes(x = reorder(TR_SP, -Pct), y = Pct, fill = TR_SP)) + 
+  scale_fill_viridis_d(breaks = legend_ord) + 
+  scale_y_continuous(n.breaks = 10, labels = function(x) format(x, scientific = FALSE)) +
+  xlab("Species") + ylab("Proportion of forest") + ggtitle("Trees in health category \"Vigorous\"") + theme_light()
+
+ggplot(output[output$TR_HLTH == "S",])  + geom_col(aes(x = reorder(TR_SP, -Pct), y = Pct, fill = TR_SP)) + 
+  scale_fill_viridis_d(breaks = legend_ord) + 
+  scale_y_continuous(n.breaks = 10, labels = function(x) format(x, scientific = FALSE)) +
+  xlab("Species") + ylab("Proportion of forest") + ggtitle("Trees in health category \"Stressed\"") + theme_light()
+
+ggplot(output[output$TR_HLTH == "SD",])  + geom_col(aes(x = reorder(TR_SP, -Pct), y = Pct, fill = TR_SP)) + 
+  scale_fill_viridis_d(breaks = legend_ord) + 
+  scale_y_continuous(n.breaks = 10, labels = function(x) format(x, scientific = FALSE)) +
+  xlab("Species") + ylab("Proportion of forest") + ggtitle("Trees in health category \"Significant Decline\"") + theme_light()
+
+output
+```
+
+##What are the five most abundant species by Basal Area?##
+##Are they the same as the 5 most abundant species by stem count?##
+
+The five most abundant species by basal area are the same as by stem count: silver maple (ACSA2), cottonwood (PODE3), dead tree (SNAG), green ash (FRPE), and willow (SALIX). The silver maple makes up 57.1 percent of the basal area in the UMR floodplain forest, a larger proportion than their stem count. Cottonwoon makes up 23.1 percent of the forest, which also is a much larger proportion than for its stem count. Green ash makes up 4.3 percent of the forest's basal area, and willow (10,129 observations) makes up 1.8 percent of the forest - both much smaller proportions than for their stem count. Dead trees (18,216 observations), make up 5.5 percent of the basal area.
+
+```{r}
+output <- df %>%
+  group_by(TR_SP) %>%
+  summarize(Sum_BA = sum(BasalArea)) %>%
+  mutate(Pct = Sum_BA / sum(Sum_BA)) %>%
+  arrange(desc(Sum_BA)) %>%
+  top_n(5)
+
+
+ggplot(data = output) + geom_col(aes(x = reorder(TR_SP, -Sum_BA), y = Sum_BA, fill = TR_SP)) + 
+  scale_fill_viridis_d() + scale_y_continuous(n.breaks = 10, labels = function(x) format(x, scientific = FALSE)) +
+  xlab("Species")
+
+output
+```
+
+
+##What are the rarest species?##
+##How many plots are there in which they occur?##
+##Where are the plots located?##
+##What is their basal area?##
+##What is the health condition of these trees?##
+
+There are seven species that were only sampled once in the UMR Floodplain Forest. These are the Ohio buckeye (AEGL), hickory spp. (CARYA), possumhaw (ILDE), sweetgum (LIST2), black cherry (PRSE2), pin oak (QUPA), and grapes (VITIS). Each of these observations is in a separate plot (seven in total). The total basal area of these species is 1240.1, and all are in vigorous condition except the hickory spp. which is stressed.
+
+The single observation of the black cherry is especially notable, as it is listed as one of the most common species in the USACE spcies list.
+
+Pin Oak code was found here: http://www.treebenefits.com/calculator/climatezonespecieslist.cfm?thisClimateZone=Northeast&SortBy=sppCode
+
+```{r}
+output <- df %>%
+  group_by(TR_SP) %>%
+  summarize(Count = n()) %>%
+  mutate(Pct = Count / sum(Count)) %>%
+  arrange(Count) %>%
+  slice_min(n = 5, order_by = Count)
+
+
+ggplot(data = output) + geom_col(aes(x = reorder(TR_SP, -Count), y = Count, fill = TR_SP)) + 
+  scale_fill_viridis_d() + scale_y_continuous(n.breaks = 10, labels = function(x) format(x, scientific = FALSE)) +
+  xlab("Species")
+
+output
+
+sum(df[df$TR_SP %in% output$TR_SP,]$BasalArea)
+
+df[df$TR_SP %in% output$TR_SP,]
+```
+
+  
+##How many "pure" plots, i.e., plots with only a single species present, are there?##
+##How many plots have only 2 species present?##
+##Express results both as counts and as percentages of the total # of plots.##
+
+##Are there any species unique to a navigation pool or USACE district? Where?##
+  
+##How common are snags in terms of abundances, proportion of plots with snags in them, and/or basal area?##
+##What is the distribution of DBHs for snags, and does that vary by species?##
+##Are there plots in which all tree stem observations are snags?##
+
+
+
+
+
