@@ -284,7 +284,7 @@ clean[clean$TR_HLTH %in% c("D"),"TR_SP"] <- "SNAG"
 #I am not sure if the formula is correct...
 clean_TPA <- clean %>%
   mutate(TR_DIA = as.numeric(TR_DIA)) %>%
-  mutate(TreesPerAcre = 1 / (pi*(TR_DIA*2.75)^2) / 43560,
+  mutate(TreesPerAcre = 1 / ((pi*(TR_DIA*2.75)^2) / 43560),
          BasalArea = 0.25*pi*(TR_DIA^2))
 
 #number of NA TR_DIA
