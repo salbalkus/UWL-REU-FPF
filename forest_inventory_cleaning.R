@@ -54,6 +54,7 @@ nrow(clean[clean$TR_HLTH %in% c("D"),"TR_SP"])
 setwd(clean_data_repository)
 write_csv(clean, "StPaul_clean.csv")
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
+setwd("./Datasets")
 
 ###ST LOUIS CLEANING###
 
