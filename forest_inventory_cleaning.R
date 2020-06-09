@@ -1,7 +1,10 @@
 library(tidyverse)
 
 #Set working directory to the repository
-setwd("C:/Users/salba/Desktop/REU/")
+
+path_of_code <- dirname(rstudioapi::getSourceEditorContext()$path)
+
+setwd("./Datasets")
 
 ###ST PAUL CLEANING###
 StPaul <- read_csv("Forest_Inventory_Data/mvp_p2prism_testdataclean.csv")
@@ -80,9 +83,9 @@ write_csv(clean, "StLouis_clean.csv")
 
 ###Rock Island###
 #First, set your working directory to be the folder with your Rock Island data
-setwd("C:/Users/salba/Desktop/REU")
-path <- paste(getwd(), "/Forest_Inventory_Data/RockIsland", sep = "")
-setwd(path)
+setwd(path_of_code)
+setwd('./Datasets/Forest_Inventory_Data/RockIsland')
+getwd()
 
 #Then, we read in the data and select only the columns that we want to use
 Beaver_Island <- read_csv("Beaver_Island_Prism_2014.txt") %>% select(PID, POOL, TR_SP, TR_DIA, TR_HLTH) %>% mutate(File = "Beaver_Island_Prism_2014.txt")
@@ -289,3 +292,5 @@ clean_TPA[clean_TPA$TR_HLTH %in% c("H"), "TR_HLTH"] <- "V"
 clean_TPA[clean_TPA$TR_HLTH %in% c("NT"),] #should we remove "NT"?
 
 write_csv(clean_TPA, "UMRS_FPF_clean.csv")
+
+
