@@ -3,7 +3,6 @@ library(tidyverse)
 #Set working directory to the repository
 
 path_of_code <- dirname(rstudioapi::getSourceEditorContext()$path)
-
 setwd("./Datasets")
 
 clean_data_repository <- paste(path_of_code, '/clean_data', sep = '')
@@ -296,8 +295,16 @@ unique(clean_TPA$POOL)
 unique(clean_TPA$TR_SP)
 unique(clean_TPA$TR_HLTH) #looks like we have some incorrect classifications here
 
+#fix some spelling and denotation errors identified by me via recoding
 clean_TPA[clean_TPA$TR_HLTH %in% c("H"), "TR_HLTH"] <- "V"
-clean_TPA[clean_TPA$TR_HLTH %in% c("NT"),] #should we remove "NT"?
+#Fix typos in species names
+clean_TPA[clean_TPA$TR_SP %in% c("ACNE12"), "TR_SP"] <- "ACNE2"
+clean_TPA[clean_TPA$TR_SP %in% c("OTH1"), "TR_SP"] <- "OTHER"
+clean_TPA[clean_TPA$TR_SP %in% c("Other"), "TR_SP"] <- "OTHER"
+#Recode hickory genus to bitternut hickory based on investigation from Molly
+clean_TPA[clean_TPA$TR_SP %in% c("CARYA"), "TR_SP"] <- "CACO15"
+clean_TPA <- filter(clean_TPA, TR_SP != "UNK" & TR_SP != "UNKNO")
+
 
 setwd(clean_data_repository)
 write_csv(clean_TPA, "UMRS_FPF_clean.csv")
