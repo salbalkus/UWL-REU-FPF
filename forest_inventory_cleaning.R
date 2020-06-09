@@ -200,7 +200,7 @@ nrow(clean[clean$TR_SP %in% c("SNAG"),"TR_SP"])
 
 setwd(clean_data_repository)
 write_csv(clean, "RockIsland_clean.csv")
-setwd(dirname(rstudioapi::getSourceEditorContext()$path))
+
 
 ###Combining the three datasets###
 
