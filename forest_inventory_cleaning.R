@@ -3,8 +3,8 @@ library(tidyverse)
 #Set working directory to the repository
 
 path_of_code <- dirname(rstudioapi::getSourceEditorContext()$path)
-setwd(path_of_code)
-setwd("./Datasets")
+datasets <- paste(path_of_code, '/Datasets', sep = '')
+setwd(datasets)
 
 clean_data_repository <- paste(path_of_code, '/clean_data', sep = '')
 
@@ -54,8 +54,8 @@ nrow(clean[clean$TR_HLTH %in% c("D"),"TR_SP"])
 
 setwd(clean_data_repository)
 write_csv(clean, "StPaul_clean.csv")
-setwd(dirname(rstudioapi::getSourceEditorContext()$path))
-setwd("./Datasets")
+setwd(datasets)
+
 
 ###ST LOUIS CLEANING###
 
@@ -87,13 +87,13 @@ clean[clean$TR_SP %in% c("ACSA"), "TR_SP"] <- "ACSA2"
 
 setwd(clean_data_repository)
 write_csv(clean, "StLouis_clean.csv")
-setwd(path_of_code)
+
 
 ###Rock Island###
 #First, set your working directory to be the folder with your Rock Island data
-setwd(path_of_code)
-setwd('./Datasets/Forest_Inventory_Data/RockIsland')
-getwd()
+
+setwd(paste(datasets, '/Forest_Inventory_Data/RockIsland', sep =''))
+
 
 #Then, we read in the data and select only the columns that we want to use
 Beaver_Island <- read_csv("Beaver_Island_Prism_2014.txt") %>% select(PID, POOL, TR_SP, TR_DIA, TR_HLTH) %>% mutate(File = "Beaver_Island_Prism_2014.txt")
@@ -285,7 +285,7 @@ clean[clean$TR_SP %in% c("Other"), "TR_SP"] <- "OTHER"
 clean[clean$TR_SP %in% c("CARYA"), "TR_SP"] <- "CACO15"
 
 #Remove misspelled unknown
-clean_TPA <- filter(clean_TPA, TR_SP != "UNK" & TR_SP != "UNKNO")
+clean <- filter(clean, TR_SP != "UNK" & TR_SP != "UNKNO")
 
 #Then, we FINALLY recode all of the snags. We preserve a "TR_SP2" column with the original species in order to analyze the species of the snags
 clean <- clean %>% mutate(TR_SP2 = TR_SP)
@@ -307,10 +307,7 @@ unique(clean_TPA$POOL)
 unique(clean_TPA$TR_SP)
 unique(clean_TPA$TR_HLTH) #looks like we have some incorrect classifications here
 
-
-
-
 setwd(clean_data_repository)
 write_csv(clean_TPA, "UMRS_FPF_clean.csv")
-setwd(dirname(rstudioapi::getSourceEditorContext()$path))
+
 
