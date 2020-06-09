@@ -56,7 +56,6 @@ setwd(clean_data_repository)
 write_csv(clean, "StPaul_clean.csv")
 setwd(datasets)
 
-
 ###ST LOUIS CLEANING###
 
 StLouis <- read_tsv("Forest_Inventory_Data/mvs_p2prism_3_6_2019.txt")
@@ -200,6 +199,10 @@ nrow(clean[clean$TR_SP %in% c("SNAG"),"TR_SP"])
 
 setwd(clean_data_repository)
 write_csv(clean, "RockIsland_clean.csv")
+<<<<<<< HEAD
+#setwd(dirname(rstudioapi::getSourceEditorContext()$path))
+=======
+>>>>>>> d0220fea366d5ea574dadd5394b5dfef5ba5bc43
 
 ###Combining the three datasets###
 
