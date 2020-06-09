@@ -1,6 +1,7 @@
 *.csv
 
 Datasets/
+clean_data/
 
 # History files
 .Rhistory

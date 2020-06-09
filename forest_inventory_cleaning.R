@@ -6,6 +6,10 @@ path_of_code <- dirname(rstudioapi::getSourceEditorContext()$path)
 
 setwd("./Datasets")
 
+clean_data_repository <- paste(path_of_code, '/clean_data', sep = '')
+
+clean_data_repository
+
 ###ST PAUL CLEANING###
 StPaul <- read_csv("Forest_Inventory_Data/mvp_p2prism_testdataclean.csv")
 colnames(StPaul)
@@ -48,7 +52,9 @@ clean2[xor(is.na(clean2$TR_HLTH17), is.na(clean2$TR_HLTH)),] #Shows that all "NA
 #In total, 3631 observations were dead. :^(
 nrow(clean[clean$TR_HLTH %in% c("D"),"TR_SP"])
 
+setwd(clean_data_repository)
 write_csv(clean, "StPaul_clean.csv")
+setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 
 ###ST LOUIS CLEANING###
 
@@ -78,8 +84,9 @@ clean[clean$TR_SP %in% c("CARYA"), "TR_SP"] <- "CAIL2"
 clean[clean$TR_SP %in% c("CODR","COSES","COFL2"), "TR_SP"] <- "CORNU"
 clean[clean$TR_SP %in% c("ACSA"), "TR_SP"] <- "ACSA2"
 
-
+setwd(clean_data_repository)
 write_csv(clean, "StLouis_clean.csv")
+setwd(path_of_code)
 
 ###Rock Island###
 #First, set your working directory to be the folder with your Rock Island data
@@ -189,12 +196,13 @@ nrow(RockIsland[RockIsland$TR_SP %in% c("UNKNOWN"),])
 nrow(clean[clean$TR_SP %in% c("SNAG"),"TR_SP"])
 
 #Should we filter out "NONE" species as well?
-setwd("C:/Users/salba/Desktop/REU")
-write_csv(clean, "RockIsland_clean.csv")
 
+
+setwd(clean_data_repository)
+write_csv(clean, "RockIsland_clean.csv")
+setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 
 ###Combining the three datasets###
-setwd("C:/Users/salba/Desktop/REU/")
 
 StPaul <- read_csv("StPaul_clean.csv") %>% mutate(File = "StPaul", District = "StPaul")
 StLouis <- read_csv("StLouis_clean.csv") %>% mutate(File = "StLouis", District = "StLouis")
@@ -291,6 +299,7 @@ unique(clean_TPA$TR_HLTH) #looks like we have some incorrect classifications her
 clean_TPA[clean_TPA$TR_HLTH %in% c("H"), "TR_HLTH"] <- "V"
 clean_TPA[clean_TPA$TR_HLTH %in% c("NT"),] #should we remove "NT"?
 
+setwd(clean_data_repository)
 write_csv(clean_TPA, "UMRS_FPF_clean.csv")
-
+setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 
