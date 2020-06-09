@@ -19,7 +19,7 @@ nrow(df)
 ```
 
 ##How many unique species are inventoried?##
-There are 68 unique species, not counting the "SNAG" species indicating a dead tree, "Other" species, or the "NONE" species.
+There are 66 unique species, not counting the "SNAG" species indicating a dead tree, "OTHER" species, or the "NONE" species.
 
 ```{r}
 length(unique(df$TR_SP))
@@ -112,7 +112,7 @@ output
 
 ##What are the rarest species? How many plots are there in which they occur? Where are the plots located? What is their basal area? What is the health condition of these trees?##
 
-There are seven species that were only sampled once in the UMR Floodplain Forest. These are the Ohio buckeye (AEGL), bitternut hickory (CACO15), possumhaw (ILDE), sweetgum (LIST2), black cherry (PRSE2), pin oak (QUPA), and grapes (VITIS). Each of these observations is in a separate plot (seven in total). The total basal area of these species is 1240.1, and all are in vigorous condition except the hickory spp. which is stressed.
+There are six species that were only sampled once in the UMR Floodplain Forest. These are the Ohio buckeye (AEGL), possumhaw (ILDE), sweetgum (LIST2), black cherry (PRSE2), pin oak (QUPA), and grapes (VITIS). Each of these observations is in a separate plot (six in total). The total basal area of these species is 1237.0, and all are in vigorous condition.
 
 The single observation of the black cherry is especially notable, as it is listed as one of the most common species in the USACE spcies list.
 
@@ -141,7 +141,7 @@ df[df$TR_SP %in% output$TR_SP,]
   
 ##How many "pure" plots, i.e., plots with only a single species present, are there?##
 
-There are 2,454 plots containing just a single species. These plots make up 12.9 percent of the 18,967 plots in the UMRS.
+There are 2,494 plots containing just a single species. These plots make up 13.1 percent of the 18,957 plots in the UMRS.
 
 ```{r}
 output <- df %>%
@@ -158,7 +158,7 @@ cat("Percentage of pure plots:",nrow(filter(output, N_species == 1)) / nrow(outp
 
 ##How many plots have only 2 species present? Express results both as counts and as percentages of the total # of plots.##
 
-There are 4,471 plots containing only two species, which comprises 23.6 percent of the UMRS.
+There are 4,483 plots containing only two species, which comprises 23.6 percent of the UMRS.
 
 
 ```{r}
@@ -177,9 +177,9 @@ cat("Percentage of two-species plots:",nrow(filter(output, N_species == 2)) / nr
 
 ##Are there any species unique to a navigation pool or USACE district? Where?##
 
-Yes, there 34 species unique to their USACE district. Four species (CACO15, NONE, OTH1, and UNK) are unique to Rock Island, 18 are unique to St. Louis, and 12 are unique to St. Paul. Not counting NONE, the most frequent species unique to Rock Island is UNK, with 5 observations. In St. Louis, the most frequent unique species is swamp privet (FOAC), with 496 observations. For St. Paul, the most frequent unique species is ACNE12, with 390 observations, with black ash (FRNI) the second most frequent with 81 observations.
+Yes, not counting the occurrence of "NONE" in Rock Island, there 26 species unique to their USACE district. 18 are unique to St. Louis, and 12 are unique to St. Paul. Not counting NONE, the most frequent species unique to Rock Island is UNK, with 5 observations. In St. Louis, the most frequent unique species is swamp privet (FOAC), with 496 observations. For St. Paul, the most frequent unique species is ACNE12, with 390 observations, with black ash (FRNI) the second most frequent with 81 observations.
 
-For the navigation pools, there are 20 species unique to their pool. Eight species are unique to p24, 3 are unique to p26, 2 are unique to p05 and to p08, and the rest of the plots with a unique species have only one. 
+For the navigation pools, there are 17 species unique to their pool. Eight species are unique to p24, 3 are unique to p26, 2 are unique to p05 and to p08, and the rest of the plots with a unique species have only one. 
 
 ```{r}
 #Analysis by district
