@@ -106,9 +106,7 @@ P14_Smiths <- read_csv("P14_Smiths_Prism.txt") %>% select(PID, POOL, TR_SP, TR_D
 P14_Steamboat <- read_csv("P14_Steamboat_Prism.txt") %>% select(PID_NEW, POOL_1, TR_SP, TR_DIA, TR_HLTH) %>% mutate(File = "P14_Steamboat_Prism.txt")
 colnames(P14_Steamboat) <- c("PID","POOL","TR_SP","TR_DIA","TR_HLTH", "File")
 
-P14_Wapsi <- read_csv("P14_Wapsi_Prism.txt")# %>% select(PID_NEW, POOL_1, TR_SP, TR_DIA, TR_HLTH2) %>% mutate(File = "P14_Wapsi_Prism.txt")
-test <- P14_Wapsi[is.na(P14_Wapsi$PID_NEW),]
-
+P14_Wapsi <- read_csv("P14_Wapsi_Prism.txt") %>% mutate(PID = paste(Site_ID, "sXXXXp", PLOT_NEW, sep = "")) %>% select(PID, POOL_1, TR_SP, TR_DIA, TR_HLTH2) %>% mutate(File = "P14_Wapsi_Prism.txt")
 colnames(P14_Wapsi) <- c("PID","POOL","TR_SP","TR_DIA","TR_HLTH", "File")
 
 #Here we have to split the file, since some observations have a PID and some have PID_NEW
@@ -182,7 +180,7 @@ clean <- RockIsland %>%
 
 #61 observations with DBH = 0 are removed, including all trees with no health code
 nrow(RockIsland[RockIsland$TR_DIA == 0,])
-#0 observations were unknown, 69 are NONE
+#0 observations were unknown,  69 are NONE
 nrow(RockIsland[RockIsland$TR_SP %in% c("UNKNOWN"),])
 
 #Recode dead tree species as "SNAG

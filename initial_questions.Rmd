@@ -5,6 +5,8 @@ output: html_notebook
 
 ```{r}
 library(tidyverse)
+library(moments)
+
 
 setwd("C:/Users/salba/Desktop/REU")
 
@@ -103,11 +105,7 @@ output
 ```
 
 
-##What are the rarest species?##
-##How many plots are there in which they occur?##
-##Where are the plots located?##
-##What is their basal area?##
-##What is the health condition of these trees?##
+##What are the rarest species? How many plots are there in which they occur? Where are the plots located? What is their basal area?## What is the health condition of these trees?##
 
 There are seven species that were only sampled once in the UMR Floodplain Forest. These are the Ohio buckeye (AEGL), hickory spp. (CARYA), possumhaw (ILDE), sweetgum (LIST2), black cherry (PRSE2), pin oak (QUPA), and grapes (VITIS). Each of these observations is in a separate plot (seven in total). The total basal area of these species is 1240.1, and all are in vigorous condition except the hickory spp. which is stressed.
 
@@ -124,9 +122,9 @@ output <- df %>%
   slice_min(n = 5, order_by = Count)
 
 
-ggplot(data = output) + geom_col(aes(x = reorder(TR_SP, -Count), y = Count, fill = TR_SP)) + 
-  scale_fill_viridis_d() + scale_y_continuous(n.breaks = 10, labels = function(x) format(x, scientific = FALSE)) +
-  xlab("Species")
+#ggplot(data = output) + geom_col(aes(x = reorder(TR_SP, -Count), y = Count, fill = TR_SP)) + 
+  #scale_fill_viridis_d() + scale_y_continuous(n.breaks = 10, labels = function(x) format(x, scientific = FALSE)) +
+  #xlab("Species")
 
 output
 
@@ -137,14 +135,120 @@ df[df$TR_SP %in% output$TR_SP,]
 
   
 ##How many "pure" plots, i.e., plots with only a single species present, are there?##
-##How many plots have only 2 species present?##
-##Express results both as counts and as percentages of the total # of plots.##
+
+There are 2,454 plots containing just a single species. These plots make up 12.9 percent of the 18,967 plots in the UMRS.
+
+```{r}
+output <- df %>%
+  filter(!is.na(TR_SP)) %>%
+  group_by(PID) %>%
+  summarize(N_species = length(unique(TR_SP))) %>%
+  arrange(desc(N_species))
+
+cat("Plots with a single species:", nrow(filter(output, N_species == 1)),"\n")
+cat("Total plots:", nrow(output),"\n")
+cat("Percentage of pure plots:",nrow(filter(output, N_species == 1)) / nrow(output))
+
+```
+
+##How many plots have only 2 species present? Express results both as counts and as percentages of the total # of plots.##
+
+There are 4,471 plots containing only two species, which comprises 23.6 percent of the UMRS.
+
+
+```{r}
+output <- df %>%
+  filter(!is.na(TR_SP)) %>%
+  group_by(PID) %>%
+  summarize(N_species = length(unique(TR_SP))) %>%
+  arrange(desc(N_species))
+
+cat("Plots with only two species:", nrow(filter(output, N_species == 2)),"\n")
+cat("Total plots:", nrow(output),"\n")
+cat("Percentage of two-species plots:",nrow(filter(output, N_species == 2)) / nrow(output))
+
+```
+
 
 ##Are there any species unique to a navigation pool or USACE district? Where?##
+
+Yes, there 34 species unique to their USACE district. Four species (CARYA, NONE, OTH1, and UNK) are unique to Rock Island, 18 are unique to St. Louis, and 12 are unique to St. Paul. Not counting NONE, the most frequent species unique to Rock Island is UNK, with 5 observations. In St. Louis, the most frequent unique species is swamp privet (FOAC), with 496 observations. For St. Paul, the most frequent unique species is ACNE12, with 390 observations, with black ash (FRNI) the second most frequent with 81 observations.
+
+For the navigation pools, 
+
+```{r}
+output <- df %>%
+  group_by(TR_SP, District) %>%
+  summarize(Count = n())
+
+#This is how many districts that they appear in
+N_districts_appearing <- output %>%
+  group_by(TR_SP) %>%
+  summarize(Count = n()) %>%
+  arrange(Count)
+
+nrow(N_districts_appearing[N_districts_appearing$Count == 1,])
+
+unique_species <- output[output$TR_SP %in% N_districts_appearing[N_districts_appearing$Count == 1,]$TR_SP,] %>% arrange(District, desc(Count))
+unique_species %>% group_by(District) %>% summarize(Count = n())
+unique_species
+
+
+```
+
   
-##How common are snags in terms of abundances, proportion of plots with snags in them, and/or basal area?##
-##What is the distribution of DBHs for snags, and does that vary by species?##
-##Are there plots in which all tree stem observations are snags?##
+##How common are snags in terms of abundances, proportion of plots with snags in them, and/or basal area? What is the distribution of DBHs for snags, and does that vary by species? Are there plots in which all tree stem observations are snags?##
+
+There are 17,639 observations of snags within the UMRS, which is 7.1 percent of all observations. These snags make up a Basal Area of 6,490,402, or about 5.5 percent of the total basal area of the UMRS. Out of all plots in the UMRS, 48.2 contain snags, and a total of 115 plots, or about 0.6 percent, contain exclusively snags. The plot with exclusively snags that has the greatest number of observations is p03244, containing 16 snags in total. The average snag diameter is 19.25 inches, and the distribution is right-skewed with a skewness of 0.95.
+
+```{r}
+output <- df %>%
+  filter(TR_SP == "SNAG")
+
+cat("Number of snags:", nrow(output), "\n")
+cat("Proportion of snags:", nrow(output) / nrow(df), "\n")
+
+cat("Total Basal area:", sum(output$BasalArea), "\n")
+cat("Proportion of Basal area:", sum(output$BasalArea) / sum(df$BasalArea), "\n")
+
+
+output_plots <- df %>%
+  group_by(PID, TR_SP) %>%
+  summarize(Count = n()) %>%
+  mutate(Pct = Count / sum(Count)) %>%
+  filter(TR_SP == "SNAG") %>%
+  arrange(desc(Count))
+
+total_plots <- df %>%
+  group_by(PID) %>%
+  summarize(Count = n())
+
+
+cat("Proportion of plots with snags: ", nrow(output_plots) / nrow(total_plots), "\n")
+
+ggplot(output) + geom_density(aes(x = TR_DIA), fill = "lightblue") + theme_light() + xlab("Diameter at Breast Height for Snags")
+
+cat("Mean diameter of snags:", mean(output$TR_DIA), "\n")
+cat("Skewness of snag diameter distribution:", skewness(output$TR_DIA), "\n")
+
+only_snags <- output_plots %>%
+  filter(Pct == 1)
+
+cat("Number of plots with exclusively snags:", nrow(only_snags), "\n")
+cat("Proportion of plots with exclusively snags:", nrow(only_snags) / nrow(total_plots))
+
+
+legend_ord <- levels(with(only_snags, reorder(PID, -Count)))
+
+ggplot(only_snags[1:5,]) + geom_col(aes(x = reorder(PID, -Count), y = Count, fill = PID)) + 
+  scale_fill_viridis_d(breaks = legend_ord) + 
+  scale_y_continuous(labels = function(x) format(x, scientific = FALSE)) +
+  xlab("Plot") + ylab("Number of snags") + theme(axis.text.x = element_text(angle=30, hjust=1))
+
+
+
+```
+
 
 
 
