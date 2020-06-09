@@ -40,8 +40,7 @@ unique(clean2$TR_HLTH17) #Shows that there are no "D" in TR_HLTH17, or any besid
 unique(clean2$TR_HLTH) #Shows that all in TR_HLTH are D or NA, meaning that they do not need recoding
 clean2[xor(is.na(clean2$TR_HLTH17), is.na(clean2$TR_HLTH)),] #Shows that all "NA" are NA in both 17- and other years
 
-#Replace all dead observation species names with "SNAG"
-clean[clean$TR_HLTH %in% c("D"),"TR_SP"] <- "SNAG"
+#We wait to replace all dead observation species names with "SNAG" until end so that correct species is preserved
 
 #In total, 3631 observations were dead. :^(
 nrow(clean[clean$TR_HLTH %in% c("D"),"TR_SP"])
@@ -61,8 +60,6 @@ clean <- StLouis %>%
 #only one unknown species is dropped
 nrow(StLouis[StLouis$TR_SP == "UNKNOWN", ])
 
-#Then, we recode dead tree species as SNAG
-clean[clean$TR_HLTH %in% c("D"), "TR_SP"] <- "SNAG"
 #10774 observations were recoded as snags
 nrow(clean[clean$TR_HLTH %in% c("D"), "TR_SP"])
 
@@ -106,9 +103,7 @@ P14_Smiths <- read_csv("P14_Smiths_Prism.txt") %>% select(PID, POOL, TR_SP, TR_D
 P14_Steamboat <- read_csv("P14_Steamboat_Prism.txt") %>% select(PID_NEW, POOL_1, TR_SP, TR_DIA, TR_HLTH) %>% mutate(File = "P14_Steamboat_Prism.txt")
 colnames(P14_Steamboat) <- c("PID","POOL","TR_SP","TR_DIA","TR_HLTH", "File")
 
-P14_Wapsi <- read_csv("P14_Wapsi_Prism.txt")# %>% select(PID_NEW, POOL_1, TR_SP, TR_DIA, TR_HLTH2) %>% mutate(File = "P14_Wapsi_Prism.txt")
-test <- P14_Wapsi[is.na(P14_Wapsi$PID_NEW),]
-
+P14_Wapsi <- read_csv("P14_Wapsi_Prism.txt") %>% mutate(PID = paste(Site_ID, "sXXXXp", PLOT_NEW, sep = "")) %>% select(PID, POOL_1, TR_SP, TR_DIA, TR_HLTH2) %>% mutate(File = "P14_Wapsi_Prism.txt")
 colnames(P14_Wapsi) <- c("PID","POOL","TR_SP","TR_DIA","TR_HLTH", "File")
 
 #Here we have to split the file, since some observations have a PID and some have PID_NEW
@@ -182,11 +177,10 @@ clean <- RockIsland %>%
 
 #61 observations with DBH = 0 are removed, including all trees with no health code
 nrow(RockIsland[RockIsland$TR_DIA == 0,])
-#0 observations were unknown, 69 are NONE
+#0 observations were unknown,  69 are NONE
 nrow(RockIsland[RockIsland$TR_SP %in% c("UNKNOWN"),])
 
-#Recode dead tree species as "SNAG
-clean[clean$TR_HLTH %in% c("D"),"TR_SP"] <- "SNAG"
+#we wait to recode dead tree species as "SNAG
 
 #3814 observations were recoded as SNAG
 nrow(clean[clean$TR_SP %in% c("SNAG"),"TR_SP"])
@@ -194,7 +188,6 @@ nrow(clean[clean$TR_SP %in% c("SNAG"),"TR_SP"])
 #Should we filter out "NONE" species as well?
 setwd("C:/Users/salba/Desktop/REU")
 write_csv(clean, "RockIsland_clean.csv")
-
 
 
 ###Combining the three datasets###
@@ -271,6 +264,10 @@ nrow(clean[clean$TR_SP %in% c("RHAM"),])
 clean[clean$TR_SP %in% c("VIRI", "VITI5","VIVU"),"TR_SP"] <- "VITIS"
 nrow(clean[clean$TR_SP %in% c("VITIS"),])
 #1 grapes
+
+#Then, we FINALLY recode all of the snags. We preserve a "TR_SP2" column with the original species in order to analyze the species of the snags
+clean <- clean %>% mutate(TR_SP2 = TR_SP)
+clean[clean$TR_HLTH %in% c("D"),"TR_SP"] <- "SNAG"
 
 ##Calculate Trees per Acre based on BasalAreaAndPointSampling.pdf
 #I am not sure if the formula is correct...
