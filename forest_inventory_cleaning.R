@@ -54,10 +54,11 @@ nrow(clean[clean$TR_HLTH %in% c("D"),"TR_SP"])
 setwd(clean_data_repository)
 write_csv(clean, "StPaul_clean.csv")
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
+setwd("./Datasets")
 
 ###ST LOUIS CLEANING###
 
-StLouis <- read_tsv("Forest_Inventory_Data/mvs_p2prism_3_6_2019.txt")
+StLouis <- read_tsv("Datasets/Forest_Inventory_Data/mvs_p2prism_3_6_2019.txt")
 StLouis <- StLouis[,1:20]
 
 #Remove Unknown species and select only the columns that we need
