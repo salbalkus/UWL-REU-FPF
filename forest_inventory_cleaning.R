@@ -29,12 +29,19 @@ clean <- StPaul %>%
 nrow(filter(StPaul, SITE == "TRMB"))
 nrow(filter(StPaul, SITE == "RUSH"))
 
+#1 unknown observation is contained outside the UMR floodplain
+nrow(filter(StPaul, (SITE == "TRMB" | SITE == "RUSH") & TR_SP == "UNKNOWN"))
+
+#59 plots were outside the floodplain
+length(unique(StPaul$PID)) - length(unique(clean$PID))
+
 
 #Then, we recode some of the observations to their proper species
 clean[clean$OBJECTID %in% c(10722, 10724, 10786),"TR_SP"] <- "PRSE2"
 clean[clean$OBJECTID %in% c(10725),"TR_SP"] <- "JUVI"
 clean[clean$OBJECTID %in% c(10727, 10728, 10729, 10730),"TR_SP"] <- "POTR5"
 #In total, 8 observation species names are changed
+
 
 #Then, we select only the columns that we are interested in
 clean <- clean %>% 
@@ -186,15 +193,15 @@ clean <- RockIsland %>%
   filter(TR_DIA > 0) %>%
   filter(TR_SP != "UNKNOWN")
 
+#60 plots are removed, meaning 60 plots had exclusively trees with DBH = 0
+length(unique(RockIsland$PID)) - length(unique(clean$PID))
+
 #61 observations with DBH = 0 are removed, including all trees with no health code
 nrow(RockIsland[RockIsland$TR_DIA == 0,])
 #0 observations were unknown,  69 are NONE
 nrow(RockIsland[RockIsland$TR_SP %in% c("UNKNOWN"),])
 
 #we wait to recode dead tree species as "SNAG
-
-#3814 observations were recoded as SNAG
-nrow(clean[clean$TR_SP %in% c("SNAG"),"TR_SP"])
 
 #Should we filter out "NONE" species as well?
 
@@ -218,6 +225,7 @@ filter(df, TR_SP == "See 226") #What does this mean?
 filter(df, TR_SP == "BLANK") #These will be removed in final filter
 filter(df, TR_SP == "UNKNOWN")
 
+
 #here we remove any with diameter 0 or UNKNOWN species
 clean <- df %>%
   filter(TR_SP != "UNKNOWN") %>%
@@ -227,6 +235,10 @@ clean <- df %>%
 nrow(filter(df, TR_SP == "UNKNOWN"))
 #6128 observations with TR_DIA == 0 are removed
 nrow(filter(df, TR_DIA == 0))
+
+#5,741 plots with only trees of either unknown species or diameter 0 are eliminated
+length(unique(df$PID)) - length(unique(clean$PID))
+
 
 ###Species groupings###
 #Note that the number of species recoded for each step is printed in the subsequent line of code
@@ -288,9 +300,15 @@ clean[clean$TR_SP %in% c("CARYA"), "TR_SP"] <- "CACO15"
 #Remove misspelled unknown
 clean <- filter(clean, TR_SP != "UNK" & TR_SP != "UNKNO")
 
+#10 plots with only trees of unknown species (misspelled) are removed
+length(unique(df$PID)) - length(unique(clean$PID))
+
 #Then, we FINALLY recode all of the snags. We preserve a "TR_SP2" column with the original species in order to analyze the species of the snags
 clean <- clean %>% mutate(TR_SP2 = TR_SP)
 clean[clean$TR_HLTH %in% c("D"),"TR_SP"] <- "SNAG"
+
+#3814 observations were recoded as SNAG
+nrow(clean[clean$TR_SP %in% c("SNAG"),])
 
 ##Calculate Trees per Acre based on BasalAreaAndPointSampling.pdf
 #I am not sure if the formula is correct...
@@ -310,5 +328,7 @@ unique(clean_TPA$TR_HLTH) #looks like we have some incorrect classifications her
 
 setwd(clean_data_repository)
 write_csv(clean_TPA, "UMRS_FPF_clean.csv")
+
+
 
 

@@ -17,7 +17,7 @@ original <- read_csv("clean_data/Unclean_combined.csv")
 ```
 ##How many total plots are in the cleaned data vs the original data? How many plots were excluded vs included in each cleaning step? Would those values differ if you had an alternative order of cleaning operations? Why? Is that problematic?##
 
-The cleaned data has 18,957 plots, while the unclean data has 24,827 plots.
+The cleaned data has 18,957 plots, while the unclean data has 24,827 plots - a difference of 5,870. This does not count the unlabeled plots from Rock Island which were labeled in R, which are counted in the "unclean" dataset as well, since they have no identifier. Most plots (5,811) are removed from the dataset because they contain only unknown species or were recorded as having 0 diameter. In addition, 59 plots were removed due to being outside of the UMR Floodplain Forest. If unknowns were removed before the non-floodplain plots, it is possible the number of outside plots removed could differ since there is at least 1 unknown observation in this subset of the data; however, this would not matter, seeing as the same number of plots would be removed in the end. 
 
 ```{r}
 cat("Number of plots in cleaned dataset:", length(unique(df$PID)), "\n")
