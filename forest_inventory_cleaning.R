@@ -275,6 +275,18 @@ clean[clean$TR_SP %in% c("VIRI", "VITI5","VIVU"),"TR_SP"] <- "VITIS"
 nrow(clean[clean$TR_SP %in% c("VITIS"),])
 #1 grapes
 
+#fix some spelling and denotation errors identified by me via recoding
+clean[clean$TR_HLTH %in% c("H"), "TR_HLTH"] <- "V"
+#Fix typos in species names
+clean[clean$TR_SP %in% c("ACNE12"), "TR_SP"] <- "ACNE2"
+clean[clean$TR_SP %in% c("OTH1"), "TR_SP"] <- "OTHER"
+clean[clean$TR_SP %in% c("Other"), "TR_SP"] <- "OTHER"
+#Recode hickory genus to bitternut hickory based on investigation from Molly
+clean[clean$TR_SP %in% c("CARYA"), "TR_SP"] <- "CACO15"
+
+#Remove misspelled unknown
+clean_TPA <- filter(clean_TPA, TR_SP != "UNK" & TR_SP != "UNKNO")
+
 #Then, we FINALLY recode all of the snags. We preserve a "TR_SP2" column with the original species in order to analyze the species of the snags
 clean <- clean %>% mutate(TR_SP2 = TR_SP)
 clean[clean$TR_HLTH %in% c("D"),"TR_SP"] <- "SNAG"
@@ -295,15 +307,7 @@ unique(clean_TPA$POOL)
 unique(clean_TPA$TR_SP)
 unique(clean_TPA$TR_HLTH) #looks like we have some incorrect classifications here
 
-#fix some spelling and denotation errors identified by me via recoding
-clean_TPA[clean_TPA$TR_HLTH %in% c("H"), "TR_HLTH"] <- "V"
-#Fix typos in species names
-clean_TPA[clean_TPA$TR_SP %in% c("ACNE12"), "TR_SP"] <- "ACNE2"
-clean_TPA[clean_TPA$TR_SP %in% c("OTH1"), "TR_SP"] <- "OTHER"
-clean_TPA[clean_TPA$TR_SP %in% c("Other"), "TR_SP"] <- "OTHER"
-#Recode hickory genus to bitternut hickory based on investigation from Molly
-clean_TPA[clean_TPA$TR_SP %in% c("CARYA"), "TR_SP"] <- "CACO15"
-clean_TPA <- filter(clean_TPA, TR_SP != "UNK" & TR_SP != "UNKNO")
+
 
 
 setwd(clean_data_repository)
