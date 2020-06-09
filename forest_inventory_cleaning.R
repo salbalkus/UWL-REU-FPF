@@ -3,7 +3,7 @@ library(tidyverse)
 #Set working directory to the repository
 
 path_of_code <- dirname(rstudioapi::getSourceEditorContext()$path)
-
+setwd(path_of_code)
 setwd("./Datasets")
 
 clean_data_repository <- paste(path_of_code, '/clean_data', sep = '')
@@ -55,7 +55,7 @@ nrow(clean[clean$TR_HLTH %in% c("D"),"TR_SP"])
 setwd(clean_data_repository)
 write_csv(clean, "StPaul_clean.csv")
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
-
+setwd("./Datasets")
 ###ST LOUIS CLEANING###
 
 StLouis <- read_tsv("Forest_Inventory_Data/mvs_p2prism_3_6_2019.txt")
@@ -200,7 +200,7 @@ nrow(clean[clean$TR_SP %in% c("SNAG"),"TR_SP"])
 
 setwd(clean_data_repository)
 write_csv(clean, "RockIsland_clean.csv")
-setwd(dirname(rstudioapi::getSourceEditorContext()$path))
+#setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 
 ###Combining the three datasets###
 
