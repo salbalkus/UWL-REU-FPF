@@ -15,7 +15,9 @@ path_of_code <- dirname(rstudioapi::getSourceEditorContext()$path)
 
 
 
+
 df <- read_csv(paste(path_of_code, '/clean_data/UMRS_FPF_clean.csv', sep = ''))
+
 nrow(df)
 ```
 
