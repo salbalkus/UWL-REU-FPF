@@ -10,15 +10,12 @@ library(tidyverse)
 library(moments)
 
 
-<<<<<<< HEAD
-=======
+
 path_of_code <- dirname(rstudioapi::getSourceEditorContext()$path)
-setwd(path_of_code)
-setwd("./clean_data")
->>>>>>> a781e6fc388e25495d294f84bd840cce7b5f37f0
 
 
-df <- read_csv('clean_data/UMRS_FPF_clean.csv')
+
+df <- read_csv(paste(path_of_code, 'clean_data/UMRS_FPF_clean.csv', sep = ''))
 nrow(df)
 ```
 
