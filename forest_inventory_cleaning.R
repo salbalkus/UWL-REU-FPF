@@ -3,8 +3,6 @@ library(tidyverse)
 #Set working directory to the repository
 
 path_of_code <- dirname(rstudioapi::getSourceEditorContext()$path)
-setwd(path_of_code)
-setwd("./Datasets")
 
 clean_data_repository <- paste(path_of_code, '/clean_data', sep = '')
 
@@ -56,6 +54,10 @@ setwd(clean_data_repository)
 write_csv(clean, "StPaul_clean.csv")
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 setwd("./Datasets")
+<<<<<<< HEAD
+=======
+
+>>>>>>> d0220fea366d5ea574dadd5394b5dfef5ba5bc43
 ###ST LOUIS CLEANING###
 
 StLouis <- read_tsv("Forest_Inventory_Data/mvs_p2prism_3_6_2019.txt")
@@ -197,10 +199,12 @@ nrow(clean[clean$TR_SP %in% c("SNAG"),"TR_SP"])
 
 #Should we filter out "NONE" species as well?
 
-
 setwd(clean_data_repository)
 write_csv(clean, "RockIsland_clean.csv")
+<<<<<<< HEAD
 #setwd(dirname(rstudioapi::getSourceEditorContext()$path))
+=======
+>>>>>>> d0220fea366d5ea574dadd5394b5dfef5ba5bc43
 
 ###Combining the three datasets###
 
@@ -276,6 +280,18 @@ clean[clean$TR_SP %in% c("VIRI", "VITI5","VIVU"),"TR_SP"] <- "VITIS"
 nrow(clean[clean$TR_SP %in% c("VITIS"),])
 #1 grapes
 
+#fix some spelling and denotation errors identified by me via recoding
+clean[clean$TR_HLTH %in% c("H"), "TR_HLTH"] <- "V"
+#Fix typos in species names
+clean[clean$TR_SP %in% c("ACNE12"), "TR_SP"] <- "ACNE2"
+clean[clean$TR_SP %in% c("OTH1"), "TR_SP"] <- "OTHER"
+clean[clean$TR_SP %in% c("Other"), "TR_SP"] <- "OTHER"
+#Recode hickory genus to bitternut hickory based on investigation from Molly
+clean[clean$TR_SP %in% c("CARYA"), "TR_SP"] <- "CACO15"
+
+#Remove misspelled unknown
+clean_TPA <- filter(clean_TPA, TR_SP != "UNK" & TR_SP != "UNKNO")
+
 #Then, we FINALLY recode all of the snags. We preserve a "TR_SP2" column with the original species in order to analyze the species of the snags
 clean <- clean %>% mutate(TR_SP2 = TR_SP)
 clean[clean$TR_HLTH %in% c("D"),"TR_SP"] <- "SNAG"
@@ -296,8 +312,8 @@ unique(clean_TPA$POOL)
 unique(clean_TPA$TR_SP)
 unique(clean_TPA$TR_HLTH) #looks like we have some incorrect classifications here
 
-clean_TPA[clean_TPA$TR_HLTH %in% c("H"), "TR_HLTH"] <- "V"
-clean_TPA[clean_TPA$TR_HLTH %in% c("NT"),] #should we remove "NT"?
+
+
 
 setwd(clean_data_repository)
 write_csv(clean_TPA, "UMRS_FPF_clean.csv")
