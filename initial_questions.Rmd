@@ -1,25 +1,33 @@
 ---
 title: "Initial Question about the UMRS Floodplain Forest"
-output:
-  html_document:
-    df_print: paged
+output: html_notebook
 ---
 
-```{r}
+```{r setup}
 library(tidyverse)
 library(moments)
 
-
-path_of_code <- dirname(rstudioapi::getSourceEditorContext()$path)
-setwd(path_of_code)
-setwd("./clean_data")
-
-df <- read_csv("UMRS_FPF_clean.csv")
-nrow(df)
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
 ```
+
+```{r}
+df <- read_csv("clean_data/UMRS_FPF_clean.csv")
+original <- read_csv("clean_data/Unclean_combined.csv")
+
+```
+##How many total plots are in the cleaned data vs the original data? How many plots were excluded vs included in each cleaning step? Would those values differ if you had an alternative order of cleaning operations? Why? Is that problematic?##
+
+The cleaned data has 18,957 plots, while the unclean data has 24,827 plots.
+
+```{r}
+cat("Number of plots in cleaned dataset:", length(unique(df$PID)), "\n")
+cat("Number of plots in unclean dataset:", length(unique(original$PID)))
+```
+
 
 ##How many unique species are inventoried?##
 There are 66 unique species, not counting the "SNAG" species indicating a dead tree, "OTHER" species, or the "NONE" species.
+
 
 ```{r}
 length(unique(df$TR_SP))
@@ -89,7 +97,8 @@ ggplot(output[output$TR_HLTH == "SD",])  + geom_col(aes(x = reorder(TR_SP, -Pct)
 output
 ```
 
-##What are the five most abundant species by Basal Area? Are they the same as the 5 most abundant species by stem count?##
+##What are the five most abundant species by Basal Area?##
+##Are they the same as the 5 most abundant species by stem count?##
 
 The five most abundant species by basal area are the same as by stem count: silver maple (ACSA2), cottonwood (PODE3), dead tree (SNAG), green ash (FRPE), and willow (SALIX). The silver maple makes up 57.1 percent of the basal area in the UMR floodplain forest, a larger proportion than their stem count. Cottonwoon makes up 23.1 percent of the forest, which also is a much larger proportion than for its stem count. Green ash makes up 4.3 percent of the forest's basal area, and willow (10,129 observations) makes up 1.8 percent of the forest - both much smaller proportions than for their stem count. Dead trees (18,216 observations), make up 5.5 percent of the basal area.
 
@@ -110,9 +119,10 @@ output
 ```
 
 
-##What are the rarest species? How many plots are there in which they occur? Where are the plots located? What is their basal area? What is the health condition of these trees?##
+##What are the rarest species? How many plots are there in which they occur? Where are the plots located? What is their basal area?## What is the health condition of these trees?##
 
 There are six species that were only sampled once in the UMR Floodplain Forest. These are the Ohio buckeye (AEGL), possumhaw (ILDE), sweetgum (LIST2), black cherry (PRSE2), pin oak (QUPA), and grapes (VITIS). Each of these observations is in a separate plot (six in total). The total basal area of these species is 1237.0, and all are in vigorous condition.
+
 
 The single observation of the black cherry is especially notable, as it is listed as one of the most common species in the USACE spcies list.
 
@@ -177,7 +187,7 @@ cat("Percentage of two-species plots:",nrow(filter(output, N_species == 2)) / nr
 
 ##Are there any species unique to a navigation pool or USACE district? Where?##
 
-Yes, not counting the occurrence of "NONE" in Rock Island, there 26 species unique to their USACE district. 18 are unique to St. Louis, and 12 are unique to St. Paul. Not counting NONE, the most frequent species unique to Rock Island is UNK, with 5 observations. In St. Louis, the most frequent unique species is swamp privet (FOAC), with 496 observations. For St. Paul, the most frequent unique species is ACNE12, with 390 observations, with black ash (FRNI) the second most frequent with 81 observations.
+Yes, not counting the occurrence of "NONE" in Rock Island, there are 26 species unique to their USACE district. 18 are unique to St. Louis, and 12 are unique to St. Paul. Not counting NONE, the most frequent species unique to Rock Island is UNK, with 5 observations. In St. Louis, the most frequent unique species is swamp privet (FOAC), with 496 observations. For St. Paul, the most frequent unique species is ACNE12, with 390 observations, with black ash (FRNI) the second most frequent with 81 observations.
 
 For the navigation pools, there are 17 species unique to their pool. Eight species are unique to p24, 3 are unique to p26, 2 are unique to p05 and to p08, and the rest of the plots with a unique species have only one. 
 
