@@ -66,7 +66,6 @@ setwd(clean_data_repository)
 write_csv(plot_level, 'plot_level.csv')
 setwd(path_of_code)
 
-
 ##### First other question #####
 
 # This section has a function that answers the first other question.  So the function will be able to filter rare species based on the number of
