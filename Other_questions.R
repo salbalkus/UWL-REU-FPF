@@ -2,6 +2,10 @@ library(tidyverse)
 library(rlist)
 library(gridExtra)
 
+path_of_code <- dirname(rstudioapi::getSourceEditorContext()$path)
+datasets <- paste(path_of_code, '/Datasets', sep = '')
+clean_data_repository <- paste(path_of_code, '/clean_data', sep = '')
+
 ##### Second other question #####
 
 # This first section is code to answer the second 'Other question'.  This is a script that will generate another dataframe that states if a tree species
@@ -9,7 +13,7 @@ library(gridExtra)
 # relative trees per acre for each species (SPECIES_RTPA)
 
 
-df <- read_csv(paste(dirname(rstudioapi::getSourceEditorContext()$path), '/clean_data/UMRS_FPF_clean.csv', sep =''))
+df <- read_csv(paste(path_of_code, '/clean_data/UMRS_FPF_clean.csv', sep =''))
 
 df
 
@@ -56,6 +60,12 @@ colnames(RTPA) <- c('PID', paste(species, '_RTPA', sep = ''))
 
 RTPA
 plot_level <- plot_level %>% left_join(RTPA, by = 'PID')
+
+
+setwd(clean_data_repository)
+write_csv(plot_level, 'plot_level.csv')
+setwd(path_of_code)
+
 
 ##### First other question #####
 
