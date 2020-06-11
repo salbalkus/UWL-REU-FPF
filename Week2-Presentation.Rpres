@@ -6,6 +6,20 @@ autosize: true
 css: Week2-Presentation.css
 type: section
 
+```{r echo = F}
+
+knitr::opts_chunk$set(warning = F, error = F, message = F, echo = F, include = F)
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+
+
+library(tidyverse)
+library(rlist)
+library(gridExtra)
+
+df <- read_csv('clean_data/UMRS_FPF_clean.csv')
+plots <- read_csv("clean_data/plots.csv")
+```
+
 
 Summary of Project
 ========================================================
@@ -59,16 +73,6 @@ Initial Questions: Unique species and abundance
 
 ```{r echo = F, include = F}
 
-knitr::opts_chunk$set(warning = F, error = F, message = F, echo = F, include = F)
-knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
-
-
-library(tidyverse)
-library(rlist)
-library(gridExtra)
-
-df <- read_csv('clean_data/UMRS_FPF_clean.csv')
-plots <- read_csv("clean_data/plots.csv")
 
 species_count <- n_distinct(df[df$TR_SP != "NONE" & df$TR_SP != "OTHER" & df$TR_SP != "SNAG", "TR_SP"])
 
@@ -270,11 +274,16 @@ BA_plot_all <- grid.arrange(overall_ba_plot, bapl[[1]], bapl[[2]], bapl[[3]])
 Initial Questions: Unique species and abundance
 ========================================================
 
-```{r include = T}
+```{r, out.width = '60%',  fig.fullwidth = TRUE, include = T, fig.align = 'center'}
 plot(count_plot_all)
 ```
 
+Initial Questions: Unique species and abundance
+========================================================
 
+```{r, out.width = '60%',  fig.fullwidth = TRUE, include = T, fig.align = 'center'}
+plot(BA_plot_all)
+```
 
 Initial Questions: Rare species
 ========================================================
@@ -299,7 +308,7 @@ rare_species_tab_clean <- rare_species_tab %>% select(TR_SP, PID, TR_HLTH, Basal
 colnames(rare_species_tab_clean) <- c('Species', 'Plot ID', 'TR_HLTH', 'Basal Area')
 
 rare_species_tab_clean$Species <- species_dict[rare_species_tab_clean$Species]
-rare_species_tab_clean
+
 rare_species_tab_clean['Basal Area'] <- round(rare_species_tab_clean['Basal Area'], digits = 2)
 
 ```
@@ -324,16 +333,18 @@ purity <- df %>% group_by(PID) %>%
 
 purity
 
-purity_tab <- tibble(present = c(1, 2), num <- purity$count[1:2], percent <- 100*round(num/sum(purity$count), digits = 3))
+purity_tab <- tibble(present = 1:length(purity$count), num <- purity$count, percent <- 100*round(num/sum(purity$count), digits = 3))
 
 colnames(purity_tab) = c('Species present', 'Count', 'Percentage')
 ```
 
-```{r include = T}
+- Nearly 40% of the plots have very low diversity
+
+```{r, out.width = '60%',  fig.fullwidth = TRUE, include = T, fig.align = 'center'}
 knitr::kable(purity_tab)
 ```
 
-- In total, nearly 40% of the plots have less than 3 species
+
 
 Initial Questions: Species uniqueness
 ========================================================
@@ -376,7 +387,7 @@ dist_with_uniques <- unique((df %>% filter(TR_SP %in% dist_uniques))$District)
 
 - The pools with unique species are `r c(pools_with_uniques[-length(pools_with_uniques)], paste('and', pools_with_uniques[length(pools_with_uniques)]))`
 
-
+- `r dist_with_uniques` is the only district with unique species
 
 Initial Questions: Snag distribution
 ========================================================
@@ -401,7 +412,7 @@ all_snag_plots <- (snag_proportion %>% filter(p == 1))$PID
 snag_count_greater <- df %>% filter(TR_SP == 'SNAG') %>% 
   group_by(TR_SP2) %>% 
   summarize(count = length(TR_SP2)) %>% 
-  filter(count >= 100)
+  filter(count >= 500)
 
 snag_count_lesser <- df %>% filter(TR_SP == 'SNAG') %>% 
   group_by(TR_SP2) %>% 
@@ -416,7 +427,9 @@ snag_DBH_lesser <- df %>% filter(TR_SP == 'SNAG', TR_SP2 %in% snag_count_lesser$
 # Generates a histogram based on the DBH of snags for each species
 snag_DBH_hist_greater <- snag_DBH_greater %>% ggplot(aes(x = TR_DIA)) +
   geom_histogram() + 
-  ggtitle('Histogram of snag DBH when the total count is greater than 100') +
+  ggtitle('Histogram of snag DBH when the total count is greater than 500') +
+  xlab('Diameter at breast height') + 
+  ylab('Count') + 
   facet_wrap(~TR_SP2) 
   
   
@@ -431,7 +444,7 @@ snag_DBH_hist_lesser
 
 ```
 
-```{r include = T}
+```{r, out.width = '60%',  fig.fullwidth = TRUE, include = T, fig.align = 'center'}
 plot(snag_hist)
 ```
 
@@ -439,7 +452,7 @@ plot(snag_hist)
 Initial Questions: Snag distribution
 ========================================================
 
-```{r include = T}
+```{r, out.width = '60%',  fig.fullwidth = TRUE, include = T, fig.align = 'center'}
 plot(snag_DBH_hist_greater)
 ```
 
