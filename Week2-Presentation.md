@@ -10,14 +10,6 @@ type: section
 Summary of Project
 ========================================================
 
-```r
-library(tidyverse)
-library(gridExtra)
-plots <- read_csv("clean_data/plots.csv")
-```
-
-
-
 
 
 
@@ -42,50 +34,107 @@ What we got out of the literature
 Data Cleaning
 ========================================================
 
+- Several steps to cleaning the data
+
+- General process:
+
+  - Exclude sites not on the UMRS floodplain proper
+
+  - Change species codes to match USACE system
+  
+  - Retain the relevent columns
+  
+  - Translate health codes to `D`, `V`. `S`, and `SD`
+  
+  - Remove unknown species
+  
+  - Remove entries with DBH of 0
+  
 
 
 
 
+Initial Questions: Unique species and abundance
+========================================================
 
 
-Initial Questions
+
+- 66 distinct species were recorded
+
+- The top five species by stem count were silver maple, cottonwood, green ash, snag, and willow spp.
+
+- The top five species by basal area were silver maple, cottonwood, snag, green ash, and willow spp.
+
+
+Initial Questions: Unique species and abundance
+========================================================
+
+![plot of chunk unnamed-chunk-2](Week2-Presentation-figure/unnamed-chunk-2-1.png)
+
+
+
+Initial Questions: Rare species
+========================================================
+
+
+
+- The 5 rarest species are ohio buckeye, possumhaw, sweetgum, black cherry, and pin oak
+
+
+
+|Species      |Plot ID       |TR_HLTH | Basal Area|
+|:------------|:-------------|:-------|----------:|
+|ohio buckeye |GILBERT-2-139 |V       |      19.63|
+|possumhaw    |UDRIFT-2-108  |V       |     660.52|
+|sweetgum     |LINCOLN-1-92  |V       |     346.36|
+|black cherry |p03711        |V       |     153.94|
+|pin oak      |p02281        |V       |      28.27|
+
+
+
+Initial Questions: Pure plots
 ========================================================
 
 
 
 
+| Species present| Count| Percentage|
+|---------------:|-----:|----------:|
+|               1|  2494|       13.2|
+|               2|  4483|       23.6|
 
+- In total, nearly 40% of the plots have less than 3 species
 
-Initial Questions
+Initial Questions: Species uniqueness
 ========================================================
 
 
 
 
+- 17 species are unique to a pool
+
+- 27 species are unique to a district
+
+- The pools with unique species are p05, p08, p24, p25, p26, pOR, and p18
 
 
 
-Initial Questions
+Initial Questions: Snag distribution
 ========================================================
 
 
 
+![plot of chunk unnamed-chunk-9](Week2-Presentation-figure/unnamed-chunk-9-1.png)
 
 
-
-
-Initial Questions
+Initial Questions: Snag distribution
 ========================================================
 
-
-
-
-
+![plot of chunk unnamed-chunk-10](Week2-Presentation-figure/unnamed-chunk-10-1.png)
 
 
 Preparation for Analyzing by Plot
 ========================================================
-
 - Function to filter out species that only appear in fewer than n plots
 - Pivot table listing frequency, trees per acre, and relative trees per acre for each plot
   - dataset of plots, rather than trees; important for later
@@ -97,7 +146,9 @@ Preparation for Analyzing by Plot
 ACSA2 Trees-per-acre distributions
 ========================================================
 
-![plot of chunk unnamed-chunk-1](Week2-Presentation-figure/unnamed-chunk-1-1.png)
+
+
+![plot of chunk unnamed-chunk-12](Week2-Presentation-figure/unnamed-chunk-12-1.png)
 
   
 Main Questions Raised

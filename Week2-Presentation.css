@@ -20,3 +20,7 @@
   opacity: 0.85;
 
 }
+
+.reveal .state-background {
+  background: white;
+} 

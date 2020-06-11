@@ -9,14 +9,6 @@ type: section
 
 Summary of Project
 ========================================================
-```{r, setup}
-library(tidyverse)
-library(gridExtra)
-plots <- read_csv("clean_data/plots.csv")
-
-```
-
-
 
 
 
@@ -46,7 +38,7 @@ Data Cleaning
 
 - General process:
 
-  - Exlude sites not on the UMRS floodplain proper
+  - Exclude sites not on the UMRS floodplain proper
 
   - Change species codes to match USACE system
   
@@ -68,18 +60,17 @@ Initial Questions: Unique species and abundance
 ```{r echo = F, include = F}
 
 knitr::opts_chunk$set(warning = F, error = F, message = F, echo = F, include = F)
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
 
 
 library(tidyverse)
 library(rlist)
 library(gridExtra)
 
-setwd("~/REU_2020/UWL-REU-FPF/clean_data")
+df <- read_csv('clean_data/UMRS_FPF_clean.csv')
+plots <- read_csv("clean_data/plots.csv")
 
-df <- read_csv('UMRS_FPF_clean.csv')
-
-species_count <- n_distinct(df$TR_SP)
-
+species_count <- n_distinct(df[df$TR_SP != "NONE" & df$TR_SP != "OTHER" & df$TR_SP != "SNAG", "TR_SP"])
 
 # Changes theme to put title in center
 theme_update(plot.title = element_text(hjust = 0.5), legend.position = 'none')
@@ -275,6 +266,10 @@ BA_plot_all <- grid.arrange(overall_ba_plot, bapl[[1]], bapl[[2]], bapl[[3]])
 
 - The top five species by basal area were `r read_dict(ba_species$TR_SP[1:5])`
 
+
+Initial Questions: Unique species and abundance
+========================================================
+
 ```{r include = T}
 plot(count_plot_all)
 ```
@@ -329,7 +324,7 @@ purity <- df %>% group_by(PID) %>%
 
 purity
 
-purity_tab <- tibble(present = c(1, 2), num <- purity$count[1:2], percent <- 100*round(num/sum(purity$count), digits = 4))
+purity_tab <- tibble(present = c(1, 2), num <- purity$count[1:2], percent <- 100*round(num/sum(purity$count), digits = 3))
 
 colnames(purity_tab) = c('Species present', 'Count', 'Percentage')
 ```
@@ -381,7 +376,6 @@ dist_with_uniques <- unique((df %>% filter(TR_SP %in% dist_uniques))$District)
 
 - The pools with unique species are `r c(pools_with_uniques[-length(pools_with_uniques)], paste('and', pools_with_uniques[length(pools_with_uniques)]))`
 
-- `r dist_with_uniques` is the only district that has unique species
 
 
 Initial Questions: Snag distribution
@@ -463,9 +457,7 @@ Preparation for Analyzing by Plot
 ACSA2 Trees-per-acre distributions
 ========================================================
 
-```{r, echo = FALSE}
-plots <- read_csv("clean_data/plots.csv")
-
+```{r}
 
 #By TPA
 b <- ggplot(plots) + geom_boxplot(aes(x = log(ACSA2_TPA,10))) + xlab("log-transformed Trees Per Acre, Silver Maple") + theme_light()
@@ -474,8 +466,10 @@ b <- ggplot(plots) + geom_boxplot(aes(x = log(ACSA2_TPA,10))) + xlab("log-transf
 #By relative TPA
 c <- ggplot(plots) + geom_histogram(aes(x = ACSA2_rel_TPA), binwidth = 0.01) + xlab("Relative Trees Per Acre, Silver Maple") + theme_light()
 
-grid.arrange(b,c)
+```
 
+```{r include = T}
+grid.arrange(b,c)
 ```
 
   
