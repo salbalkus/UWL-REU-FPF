@@ -78,7 +78,7 @@ plots <- read_csv("clean_data/plots.csv")
 
 ##Explore data transformations - what do the variable distributions look like?##
 
-The variable distributions for frequency are generally right-skewed, in some cases extremely so, with most plots not having any of the species of interest. In additional, for the relative trees per acre, there is often a higher number of observations of 0 or 1; either the plot contains none of the specified species, or it is made up exclusively of the species in question. This dichotomy is especially prevalent within the silver maple species. Outliers are most prominent in the trees per acre, where the maximum value can be hundreds of times larger than the mean value. The worst offender is willow - its mean TPA is 30 across all plots, but 18334 at the maximum value. This occurs in ThompsonBend-1-305, which contains just 13 observations of willow trees.
+The variable distributions for frequency are generally right-skewed, in some cases extremely so, with most plots not having any of the species of interest. In additional, for the relative trees per acre, there is often a higher number of observations of 0 or 1; either the plot contains none of the specified species, or it is made up exclusively of the species in question. This dichotomy is especially prevalent within the silver maple species. Outliers are most prominent in the trees per acre, where the maximum value can be hundreds of times larger than the mean value. The worst offender is willow - its mean TPA is 30 across all plots, but 18334 at the maximum value. This occurs in ThompsonBend-1-305, which contains just 13 observations of willow trees that are all only 1-2 inches in diameter. 
 
 
 
@@ -125,6 +125,13 @@ mean(plots$SALIX_TPA)
 
 plots[which.max(plots$SALIX_TPA),]
 
+
+df %>%
+  group_by(PID) %>%
+  summarize(Count = n()) %>%
+  arrange(desc(Count))
+
+filter(df, TR_SP == "SALIX" & PID == "ThompsonBend-1-305")
 
 ```
 
