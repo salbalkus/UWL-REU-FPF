@@ -186,7 +186,7 @@ cat("Percentage of two-species plots:",nrow(filter(output, N_species == 2)) / nr
 
 ##Are there any species unique to a navigation pool or USACE district? Where?##
 
-Yes, not counting the occurrence of "NONE" in Rock Island, there are 26 species unique to their USACE district. 17 are unique to St. Louis, and 9 are unique to St. Paul. Not counting NONE, the most frequent species unique to Rock Island is UNK, with 5 observations. In St. Louis, the most frequent unique species is swamp privet (FOAC), with 496 observations. For St. Paul, the most frequent unique species is ACNE12, with 390 observations, with black ash (FRNI) the second most frequent with 81 observations.
+Yes, not counting the occurrence of "NONE" in Rock Island, there are 26 species unique to their USACE district. 17 are unique to St. Louis, and 9 are unique to St. Paul. Not counting NONE, the most frequent species unique to Rock Island is UNK, with 5 observations. In St. Louis, the most frequent unique species is swamp privet (FOAC), with 496 observations. For St. Paul, black ash (FRNI) was the most frequent with 81 observations.
 
 For the navigation pools, there are 17 species unique to their pool. Eight species are unique to p24, 3 are unique to p26, 2 are unique to p05 and to p08, and the rest of the plots with a unique species have only one. 
 
