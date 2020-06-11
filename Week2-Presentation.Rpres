@@ -6,28 +6,114 @@ autosize: true
 css: Week2-Presentation.css
 type: section
 
-First Slide
-========================================================
-type: test 
-For more details on authoring R presentations please visit <https://support.rstudio.com/hc/en-us/articles/200486468>.
 
-- Bullet 1
-- Bullet 2 
-- Bullet 3
-
-Slide With Code
+Summary of Project
 ========================================================
 
-```{r}
-summary(cars)
-```
 
-Slide With Plot
+
+
+
+
+Literature Review
 ========================================================
 
-```{r, echo=FALSE}
-plot(cars)
-```
+
+
+
+
+
+
+What we got out of the literature
+========================================================
+
+
+
+
+
+
+
+Data Cleaning
+========================================================
+
+
+
+
+
+
+
+Initial Questions
+========================================================
+
+
+
+
+
+
+Initial Questions
+========================================================
+
+
+
+
+
+
+
+Initial Questions
+========================================================
+
+
+
+
+
+
+
+Initial Questions
+========================================================
+
+
+
+
+
+
+
+
+
+Questions that this exploration raises
+========================================================
+
+
+
+
+
+
+
+Additional Work in Preparation
+========================================================
+
+
+
+
+
+
+
+Next Steps
+========================================================
+
+
+
+
+
+
+Questions for the next steps
+========================================================
+
+
+
+
+
+
+
 
 References
 ========================================================
