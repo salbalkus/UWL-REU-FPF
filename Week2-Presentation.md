@@ -13,17 +13,17 @@ Context
 ========================================================
 
 Floodplain forests are essential for...
-- Survival and movements of plant and wildlife
+- Survival and movement of plant and wildlife
 - Wetland and aquatic ecosystems 
 - Economy & recreation 
 
 Issues:
 - Loss of species diversity 
 - Climate change 
-- Management: composition-based classification systems that disregards size structure
+- Management: composition-based classification systems that disregard size structure
 
 
-Overview & Goals
+Overview of Data & Goals
 ========================================================
 
 Datasets: forest composition, land use change, and hydrology
@@ -46,7 +46,7 @@ Common topics and themes:
 - Overview of previous research 
 - Composition and structure: 
   - Vegetation
-  - Species diversity and invasive species
+  - Species diversity
   - Forest succession 
   - Plant community distributions
   - Size structure
