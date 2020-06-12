@@ -7,25 +7,56 @@ css: Week2-Presentation.css
 type: section
 
 
-Summary of Project
+
+
+Context
 ========================================================
 
+Floodplain forests are essential for...
+- Survival and movements of plant and wildlife
+- Wetland and aquatic ecosystems 
+- Economy & recreation 
 
+Issues:
+- Loss of species diversity 
+- Climate change 
+- Management: composition-based classification systems that disregards size structure
+
+
+Overview & Goals
+========================================================
+
+Datasets: forest composition, land use change, and hydrology
+
+1) Characterize the diversity of UMRS floodplain forests in terms of composition & structure
+
+Primary Topics: 
+- Species diversity
+- Forest succession
+
+2) Determine what influences the patterns found in this characterization
+
+Overarching Goal: Inform forest management decisions 
 
 
 Literature Review
 ========================================================
 
+Common topics and themes: 
+- Overview of previous research 
+- Composition and structure: 
+  - Vegetation
+  - Species diversity and invasive species
+  - Forest succession 
+  - Plant community distributions
+  - Size structure
 
-
-
-
-
-
-What we got out of the literature
+Literature Review cont'd.
 ========================================================
 
-
+- Relevance to future studies 
+- Implications for restoration & overall management 
+- Connections to climate change 
 
 
 
@@ -69,9 +100,12 @@ Initial Questions: Unique species and abundance
 Initial Questions: Unique species and abundance
 ========================================================
 
-![plot of chunk unnamed-chunk-2](Week2-Presentation-figure/unnamed-chunk-2-1.png)
+<img src="Week2-Presentation-figure/unnamed-chunk-3-1.png" title="plot of chunk unnamed-chunk-3" alt="plot of chunk unnamed-chunk-3" width="60%" style="display: block; margin: auto;" />
 
+Initial Questions: Unique species and abundance
+========================================================
 
+<img src="Week2-Presentation-figure/unnamed-chunk-4-1.png" title="plot of chunk unnamed-chunk-4" alt="plot of chunk unnamed-chunk-4" width="60%" style="display: block; margin: auto;" />
 
 Initial Questions: Rare species
 ========================================================
@@ -97,13 +131,24 @@ Initial Questions: Pure plots
 
 
 
+- Nearly 40% of the plots have very low diversity
+
 
 | Species present| Count| Percentage|
 |---------------:|-----:|----------:|
 |               1|  2494|       13.2|
 |               2|  4483|       23.6|
+|               3|  5263|       27.8|
+|               4|  3862|       20.4|
+|               5|  1912|       10.1|
+|               6|   688|        3.6|
+|               7|   192|        1.0|
+|               8|    44|        0.2|
+|               9|    15|        0.1|
+|              10|     2|        0.0|
+|              11|     2|        0.0|
 
-- In total, nearly 40% of the plots have less than 3 species
+
 
 Initial Questions: Species uniqueness
 ========================================================
@@ -117,20 +162,20 @@ Initial Questions: Species uniqueness
 
 - The pools with unique species are p05, p08, p24, p25, p26, pOR, and p18
 
+- StPaul, StLouis, RockIsland is the only district with unique species
+
+Initial Questions: Snag distribution
+========================================================
+
+
+
+<img src="Week2-Presentation-figure/unnamed-chunk-11-1.png" title="plot of chunk unnamed-chunk-11" alt="plot of chunk unnamed-chunk-11" width="60%" style="display: block; margin: auto;" />
 
 
 Initial Questions: Snag distribution
 ========================================================
 
-
-
-![plot of chunk unnamed-chunk-9](Week2-Presentation-figure/unnamed-chunk-9-1.png)
-
-
-Initial Questions: Snag distribution
-========================================================
-
-![plot of chunk unnamed-chunk-10](Week2-Presentation-figure/unnamed-chunk-10-1.png)
+<img src="Week2-Presentation-figure/unnamed-chunk-12-1.png" title="plot of chunk unnamed-chunk-12" alt="plot of chunk unnamed-chunk-12" width="60%" style="display: block; margin: auto;" />
 
 
 Preparation for Analyzing by Plot
@@ -148,7 +193,7 @@ ACSA2 Trees-per-acre distributions
 
 
 
-![plot of chunk unnamed-chunk-12](Week2-Presentation-figure/unnamed-chunk-12-1.png)
+![plot of chunk unnamed-chunk-14](Week2-Presentation-figure/unnamed-chunk-14-1.png)
 
   
 Main Questions Raised
