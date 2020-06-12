@@ -162,8 +162,6 @@ Initial Questions: Species uniqueness
 
 - The pools with unique species are p05, p08, p24, p25, p26, pOR, and p18
 
-- StPaul, StLouis, RockIsland is the only district with unique species
-
 Initial Questions: Snag distribution
 ========================================================
 
@@ -185,7 +183,7 @@ Preparation for Analyzing by Plot
   - dataset of plots, rather than trees; important for later
 - Exploration of distributions for top 5 species:
   - Frequency and TPA very right-skewed with few high outliers; requires log-transform
-  - Relative TPA [0-1] skewed either 0 or 1 (mostly 0)
+  - Relative TPA [0,1] skewed either 0 or 1 (mostly 0)
   
 
 ACSA2 Trees-per-acre distributions
@@ -206,7 +204,7 @@ To explore:
 
 To ask:
 - How ecologically important are unique species?
-- In how many plots should a species be present to be considered in our further analysis?
+- In how many plots should a species be present to be considered in later analysis?
 
 
 
@@ -235,9 +233,6 @@ Tasks:
 
 
 
-References
 ========================================================
 
 Cover Image: Forest Landscape Ecology of the Upper Mississippi River Floodplain, United States Geological Survey
-
-Floodplain Forest Classification Overview (Van Appledorn)
