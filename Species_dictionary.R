@@ -62,7 +62,7 @@ species_dict = list(
   'ULRU' = 'red/slippery elm',
   'NONE' = 'none',
   'OTHER' = 'other',
-  'SMAG' = 'snag',
+  'SNAG' = 'snag',
   'UNKNOWN' = 'unknown',
   'ALIN2' = 'gray alder',
   'AMFR' = 'false indigobush',
@@ -85,6 +85,19 @@ species_dict = list(
   'SAMBU' = 'elderberry',
   'STTR' = 'american bladdernut',
   'VILE' = 'nannyberry',
-  'XAAM' = 'prickly ash'
+  'XAAM' = 'prickly ash',
+  'CATO6' = 'mockernut hickory',
+  'QUPA' = 'pin oak'
 )
 
+read_dict <- function(species){
+  full_sp <- c()
+  
+  for (i in 1:length(species)){
+    full_sp <- c(full_sp, species_dict[[species[i]]])
+    if (i == length(species)){
+      full_sp <- c(full_sp[-length(species)], paste('and', species_dict[[species[i]]]))
+    }
+  }
+  return(full_sp)
+}
