@@ -63,6 +63,7 @@ plot_rel_TPA <- df %>%
   spread(TR_SP, rel_TPA) %>%
   replace(is.na(.), 0)
 
+
 #Rename columns
 
 plots <- inner_join(plot_TPA, plot_rel_TPA, by = c("PID"), suffix = c("_TPA","_rel_TPA"))
