@@ -61,7 +61,7 @@ for (i in 1:nrow(plot_level)){
 plot_level$class
 end <- now()
 
-write_csv(plot_level, './clean_data/plot_level_with_class')
+write_csv(plot_level, './clean_data/plot_level_with_class.csv')
 
 
 
