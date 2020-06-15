@@ -1,5 +1,5 @@
 library(tidyverse)
-
+library(lubridate)
 
 
 path_of_code <- rprojroot::find_rstudio_root_file()
@@ -49,7 +49,19 @@ plot_classifier <- function(plot){
   }
 }
 
-for (i in 1:1000){
+start <- now()
+for (i in 1:nrow(plot_level)){
   plot_level$class[i] <- plot_classifier(plot_level[i, ]) 
+  
+  if (i %% 250 == 0){
+    print(i)
+    now() - start
+  }
 }
 plot_level$class
+end <- now()
+
+write_csv(plot_level, './clean_data/plot_level_with_class')
+
+
+
