@@ -2,8 +2,6 @@ library(tidyverse)
 
 df <- read_csv("clean_data/UMRS_FPF_clean.csv")
 
-df
-
 plot_density <- df %>%
   group_by(PID, TR_SP) %>%
   summarize(Count = n()) %>%
@@ -23,7 +21,6 @@ plot_BasalArea <- df %>%
   replace(is.na(.), 0)
 
 plots <- inner_join(plot_density, plot_BasalArea, by = c("PID", "TR_SP"))#, suffix = c("", "_ba"))
-#plots$Label <- "Mixed"
 
 dominant <- plots %>%
   filter(Density > 0.8 & PctBasalArea > 0.8)
@@ -48,5 +45,14 @@ codominant <- codominant %>%
   group_by(PID) %>%
   summarize(Density = sum(Density), PctBasalArea = sum(PctBasalArea), Type = paste0(TR_SP, collapse= " and "), Label = "Codominant")
 
-  
-  
+dominant <- select(dominant, PID, Type, Label)
+codominant <- select(codominant, PID, Type, Label)
+mixed <- df %>%
+  filter(!PID %in% dominant$PID) %>%
+  filter(!PID %in% codominant$PID) %>%
+  select(PID) %>%
+  mutate(Type = NA, Label = "Mixed") %>%
+  distinct()
+
+output <- bind_rows(dominant, codominant, mixed)
+write_csv(output, "clean_data/plot_classification.csv")
