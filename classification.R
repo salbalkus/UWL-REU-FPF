@@ -41,28 +41,36 @@ plot_classifier <- function(plot){
   
   # Second most abundant species
   # Will probably need to include 
-  s2 <- species[percentage_order[2]]
-
-  # Checks criteria that each individual species must meet to be considered codominant
-  s1_crit <- ((percentage[s1] > 0.2) | (plot[paste(s1, 'rel_TPA', sep = '_')] > 0.2))
-  s2_crit <- ((percentage[s2] > 0.2) | (plot[paste(s2, 'rel_TPA', sep = '_')] > 0.2))
-
-  if (s1_crit & s2_crit){
-    # If both criteria are met, then we check if the total percentage and total TPA 
-    # is greater than 80%
-    tot_percent <- percentage[s1] + percentage[s2]
-    tot_TPA <-plot[paste(s1, 'rel_TPA', sep = '_')] + plot[paste(s2, 'rel_TPA', sep = '_')]
-
-    if ((tot_percent > 0.8) & (tot_TPA > 0.8)){
-      output <- paste(s1, s2, 'CD', sep ='_')
-      return(output)
-    } else {
-      # If not, it's mixed
-      return('M')
+  extra_percent <- 0
+  extra_TPA <- 0
+  
+  for (i in 2:(length(species))){  
+    s2 <- species[percentage_order[i]]
+  
+    # Checks criteria that each individual species must meet to be considered codominant
+    s1_crit <- ((percentage[s1] > 0.2) | (plot[paste(s1, 'rel_TPA', sep = '_')] > 0.2))
+    s2_crit <- ((percentage[s2] > 0.2) | (plot[paste(s2, 'rel_TPA', sep = '_')] > 0.2))
+    
+    extra_percent <- extra_percent + percentage[s2]
+    extra_TPA <- extra_TPA + plot[paste(s2, 'rel_TPA', sep = '_')]
+    
+    if (s1_crit & s2_crit){
+      # If both criteria are met, then we check if the total percentage and total TPA 
+      # is greater than 80%
+      tot_percent <- percentage[s1] + percentage[s2]
+      tot_TPA <-plot[paste(s1, 'rel_TPA', sep = '_')] + plot[paste(s2, 'rel_TPA', sep = '_')]
+  
+      if ((tot_percent > 0.8) & (tot_TPA > 0.8)){
+        output <- paste(s1, s2, 'CD', sep ='_')
+        return(output)
+      }
     }
-  } else {
-    return('M')
-  }
+    if ((extra_percent > 0.2) | (extra_TPA > 0.2)){
+        # If not, it's mixed
+        return('M')
+    }
+  }  
+  return('M')
 }
 
 start <- now()
@@ -71,13 +79,14 @@ for (i in 1:nrow(plot_level)){
   
   if (i %% 250 == 0){
     print(i)
-    now() - start
+    print(now() - start)
   }
 }
 end <- now()
 end - start
 
-write_csv(plot_level, './clean_data/plot_level_with_class.csv')
+write_csv(plot_level, './clean_data/plot_level_with_class2.csv')
 
+unique(plot_level$class)
 
-
+plot_level %>% count(class, sort = T)
