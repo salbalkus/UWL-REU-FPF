@@ -7,16 +7,44 @@ path_of_code <- rprojroot::find_rstudio_root_file()
 
 # Imports relevant csv files to get the plot level information 
 # as well as all the species that we recorded
-plot_level <- read_csv('./clean_data/plots.csv')
 clean_data <- read_csv('./clean_data/UMRS_FPF_clean.csv')
 
 # Obtains unique species that were observed
 species <- clean_data %>% count(TR_SP, sort = T) %>%
   .$TR_SP
 
+df <- clean_data
+
+plot_freq <- df %>%
+  group_by(PID, TR_SP) %>%
+  summarize(Freq = n()) %>%
+  spread(TR_SP, Freq) %>%
+  replace(is.na(.), 0)
+
+plot_BA <- df %>%
+  group_by(PID, TR_SP) %>%
+  summarize(BA = sum(BasalArea)) %>%
+  spread(TR_SP, BA) %>%
+  replace(is.na(.), 0)
+
+plot_rel_BA<- df %>%
+  group_by(PID, TR_SP) %>%
+  summarize(BA = sum(BasalArea)) %>%
+  group_by(PID) %>%
+  mutate(rel_BA = BA / sum(BA)) %>%
+  select(-BA) %>%
+  spread(TR_SP, rel_BA) %>%
+  replace(is.na(.), 0)
+
+plots <- inner_join(plot_BA, plot_rel_BA, by = c("PID"), suffix = c("_BA","_rel_BA"))
+plots <- inner_join(plot_freq, plots, by = c("PID"))
+plots
 
 # Adds a class column to the plot data frame
 # All entries should be NA to start
+
+plot_level <- plots
+
 plot_level <- plot_level %>% mutate(class = NA)
 plot_level$class
 
@@ -38,7 +66,7 @@ plot_classifier <- function(plot){
   s1 <- species[percentage_order[1]]
 
   # single species dominance check
-  if ((percentage[s1] > 0.8) & (plot[paste(s1, 'rel_TPA', sep = '_')] > 0.8)){
+  if ((percentage[s1] > 0.8) & (plot[paste(s1, 'rel_BA', sep = '_')] > 0.8)){
     output <- paste('D', s1, sep = '_')
     return(output)
   }
@@ -60,19 +88,19 @@ plot_classifier <- function(plot){
     s2 <- species[percentage_order[i]]
   
     # Checks criteria that each individual species must meet to be considered codominant
-    s1_crit <- ((percentage[s1] > 0.2) | (plot[paste(s1, 'rel_TPA', sep = '_')] > 0.2))
-    s2_crit <- ((percentage[s2] > 0.2) | (plot[paste(s2, 'rel_TPA', sep = '_')] > 0.2))
+    s1_crit <- ((percentage[s1] > 0.2) | (plot[paste(s1, 'rel_BA', sep = '_')] > 0.2))
+    s2_crit <- ((percentage[s2] > 0.2) | (plot[paste(s2, 'rel_BA', sep = '_')] > 0.2))
     
     # adds the percentage of tree and tpa that species 2 makes up
     # if either is above 20% after checking the criteria, then we break the loop
     extra_percent <- extra_percent + percentage[s2]
-    extra_TPA <- extra_TPA + plot[paste(s2, 'rel_TPA', sep = '_')]
+    extra_TPA <- extra_TPA + plot[paste(s2, 'rel_BA', sep = '_')]
     
     if (s1_crit & s2_crit){
       # If both criteria are met, then we check if the total percentage and total TPA 
       # is greater than 80%
       tot_percent <- percentage[s1] + percentage[s2]
-      tot_TPA <-plot[paste(s1, 'rel_TPA', sep = '_')] + plot[paste(s2, 'rel_TPA', sep = '_')]
+      tot_TPA <-plot[paste(s1, 'rel_BA', sep = '_')] + plot[paste(s2, 'rel_BA', sep = '_')]
   
       if ((tot_percent > 0.8) & (tot_TPA > 0.8)){
         # if both are above 80%, then we classify the forest as a codominant
@@ -116,3 +144,6 @@ unique(plot_level$class)
 # would probably then want to do some sort of clustering algorithm on just the 
 # mixed forests since this is such a broad category
 plot_level %>% count(class, sort = T)
+
+
+
