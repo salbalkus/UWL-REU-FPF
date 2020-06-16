@@ -88,8 +88,8 @@ plot_classifier <- function(plot){
     s2 <- species[percentage_order[i]]
   
     # Checks criteria that each individual species must meet to be considered codominant
-    s1_crit <- ((percentage[s1] > 0.2) | (plot[paste(s1, 'rel_BA', sep = '_')] > 0.2))
-    s2_crit <- ((percentage[s2] > 0.2) | (plot[paste(s2, 'rel_BA', sep = '_')] > 0.2))
+    s1_crit <- ((percentage[s1] >= 0.2) | (plot[paste(s1, 'rel_BA', sep = '_')] >= 0.2))
+    s2_crit <- ((percentage[s2] >= 0.2) | (plot[paste(s2, 'rel_BA', sep = '_')] >= 0.2))
     
     # adds the percentage of tree and tpa that species 2 makes up
     # if either is above 20% after checking the criteria, then we break the loop
@@ -109,7 +109,7 @@ plot_classifier <- function(plot){
         return(output)
       }
     }
-    if ((extra_percent > 0.2) | (extra_TPA > 0.2)){
+    if ((extra_percent >= 0.2) | (extra_TPA >= 0.2)){
       # If either of these are met, then species 1 and any other species 
       # cannot make up at least 80% of the trees/TPA.  So the forest then
       # must be a mixed forest
@@ -135,7 +135,7 @@ end <- now() # end of classification algorithm
 end - start # cam run this to see how long it took
 
 # writes a csv to the clean_data directory called plot_level_with_class.csv
-write_csv(plot_level, './clean_data/plot_level_with_class.csv')
+write_csv(plot_level, './clean_data/plot_level_with_class2.csv')
 
 # can see all the unique classes
 unique(plot_level$class)
