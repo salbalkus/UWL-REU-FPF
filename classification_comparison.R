@@ -5,8 +5,8 @@
 library(tidyverse)
 
 path_of_code <- rprojroot::find_rstudio_root_file()
-
-noah <- read_csv('./clean_data/plot_level_with_class.csv')
+noah$class
+noah <- read_csv('./clean_data/plot_level_with_class2.csv')
 sal <- read_csv('./clean_data/plot_classification.csv')
 plot_level <- read_csv('./clean_data/plots.csv')
 clean_data <- read_csv('./clean_data/UMRS_FPF_clean.csv')
@@ -41,7 +41,7 @@ plots
 
 species <- unique(df$TR_SP)
 
-plot_classifier <- function(plot, print = F){
+plot_classifier <- function(plot){
   
   # Finds percentage of total trees each species makes in the plot
   percentage <- plot[species]/sum(plot[species])
@@ -72,11 +72,9 @@ plot_classifier <- function(plot, print = F){
     # gets species 2 to check
     s2 <- species[percentage_order[i]]
     
-    if (print) print(s2)
-    
     # Checks criteria that each individual species must meet to be considered codominant
-    s1_crit <- ((percentage[s1] > 0.2) | (plot[paste(s1, 'rel_BA', sep = '_')] > 0.2))
-    s2_crit <- ((percentage[s2] > 0.2) | (plot[paste(s2, 'rel_BA', sep = '_')] > 0.2))
+    s1_crit <- ((percentage[s1] >= 0.2) | (plot[paste(s1, 'rel_BA', sep = '_')] >= 0.2))
+    s2_crit <- ((percentage[s2] >= 0.2) | (plot[paste(s2, 'rel_BA', sep = '_')] >= 0.2))
     
     # adds the percentage of tree and tpa that species 2 makes up
     # if either is above 20% after checking the criteria, then we break the loop
@@ -96,7 +94,7 @@ plot_classifier <- function(plot, print = F){
         return(output)
       }
     }
-    if ((extra_percent > 0.2) | (extra_TPA > 0.2)){
+    if ((extra_percent >= 0.2) | (extra_TPA >= 0.2)){
       # If either of these are met, then species 1 and any other species 
       # cannot make up at least 80% of the trees/TPA.  So the forest then
       # must be a mixed forest
@@ -107,6 +105,7 @@ plot_classifier <- function(plot, print = F){
   # be classified as mixed
   return('M')
 }
+
 
 ##### Cleaning the classifications to be in the same format #####
 
@@ -168,15 +167,9 @@ nrow(plot_level)
 
 comparison <- full_join(noah_fix, sal_fix, by = 'PID', suffix = c('_noah', '_sal'))
 comparison %>% filter(type_noah != type_sal)
+comparison %>% filter(!(sp1_noah == sp1_sal | sp1_noah == sp2_sal))
+comparison %>% filter(!(sp2_noah == sp1_sal | sp2_noah == sp2_sal))
 
-# This was the first one to appear on the above table
-# Noah's function classifies it as mixed
-# Sal's classifies it as codominant between ACSA2 and PODE3
-plot_level <- plots
-wrong_class <- plot_level %>% filter(PID == 'ANGLE-1-85')
+# All of these dataframes end up as empty, so sal and I had the exact same classification for
+# each plot
 
-wrong_class[species]
-sum(wrong_class[species])
-wrong_class[paste(species, 'rel_BA', sep = '_')]
-
-plot_classifier(wrong_class, pr = T)
