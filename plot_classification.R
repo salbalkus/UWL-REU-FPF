@@ -68,3 +68,31 @@ plots_output <- df %>%
 
 plots_output <- inner_join(output, plots_output, by = c("PID"))
 write_csv(plots_output, "clean_data/plots_full.csv")
+
+#Top types just the most common species
+explore1 <- plots_output %>%
+  group_by(Type) %>%
+  summarize(Count = n()) %>%
+  arrange(desc(Count))
+
+explore2 <- plots_output %>%
+  filter(Label == "Dominant") %>%
+  group_by(Type) %>%
+  summarize(Count = n()) %>%
+  arrange(desc(Count))
+
+explore3 <- plots_output %>%
+  filter(Label == "Codominant") %>%
+  group_by(Type) %>%
+  summarize(Count = n()) %>%
+  arrange(desc(Count))
+
+
+#There are 36 dominant plot types and 186 codominant plot types
+nrow(unique(plots_output[plots_output$Label == "Dominant","Type"]))
+nrow(unique(plots_output[plots_output$Label == "Codominant","Type"]))
+
+clusters <- plots_output %>%
+  
+kmeans(clusters, 5)
+
