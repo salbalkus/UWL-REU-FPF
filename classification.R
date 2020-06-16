@@ -39,7 +39,7 @@ plot_classifier <- function(plot){
 
   # single species dominance check
   if ((percentage[s1] > 0.8) & (plot[paste(s1, 'rel_TPA', sep = '_')] > 0.8)){
-    output <- paste(s1, 'D', sep = '_')
+    output <- paste('D', s1, sep = '_')
     return(output)
   }
 
@@ -77,7 +77,7 @@ plot_classifier <- function(plot){
       if ((tot_percent > 0.8) & (tot_TPA > 0.8)){
         # if both are above 80%, then we classify the forest as a codominant
         # with the two species
-        output <- paste(s1, s2, 'CD', sep ='_')
+        output <- paste('CD', s1, s2, sep ='_')
         return(output)
       }
     }
