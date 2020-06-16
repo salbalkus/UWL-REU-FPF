@@ -56,3 +56,15 @@ mixed <- df %>%
 
 output <- bind_rows(dominant, codominant, mixed)
 write_csv(output, "clean_data/plot_classification.csv")
+
+plots_output <- df %>%
+  group_by(PID, TR_SP) %>%
+  summarize(Count = n(), BasalArea = sum(BasalArea)) %>%
+  group_by(PID) %>%
+  mutate(density = Count / sum(Count), ba = BasalArea / sum(BasalArea)) %>%
+  select(-Count, -BasalArea) %>%
+  pivot_wider(names_from = TR_SP, values_from = c(density, ba)) %>%
+  replace(is.na(.), 0)
+
+plots_output <- inner_join(output, plots_output, by = c("PID"))
+write_csv(plots_output, "clean_data/plots_full.csv")
