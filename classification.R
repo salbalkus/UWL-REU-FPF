@@ -75,6 +75,7 @@ for (i in 1:nrow(plot_level)){
   }
 }
 end <- now()
+end - start
 
 write_csv(plot_level, './clean_data/plot_level_with_class.csv')
 
