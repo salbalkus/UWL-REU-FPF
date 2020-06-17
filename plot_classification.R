@@ -105,12 +105,12 @@ mixed_sel <- mixed_sel[,colSums(mixed_sel) != 0]
 #cluster <- kmeans(x = mixed_sel, centers = 20)
 #cluster <- specc(x = mixed_sel, centers = 3) #This one takes too long to run right now...
 #cluster <- dbscan(mixed_sel, eps = 0.23)
-cluster <- hclust(dist(mixed_sel, method = "euclidean"), method = "ward.D")
+cluster <- hclust(dist(mixed_sel, method = "euclidean"), method = "single")
 
 #based on the dendrogram, it looks like it can be cut at a number of heights. Let's do 3.
 plot(cluster)
 
-cluster <- cutree(cluster, k = 3)
+cluster <- cutree(cluster, h = 0.2)
 cluster
 
 
