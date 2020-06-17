@@ -38,6 +38,7 @@ codominant <- plots %>%
   filter(n() > 1) %>%
   filter(sum(relTPA) > 0.8 & sum(relBA) > 0.8)
 
+
 #Proof that the codominant group is correct - should result in empty data frame
 codominant %>% group_by(PID) %>% summarize(d = sum(relTPA), ba = sum(relBA)) %>% filter(d <= 0.8 | ba <= 0.8)
 #Should also result in empty df if codominant is performed correctly
@@ -45,7 +46,10 @@ codominant %>% group_by(PID) %>% summarize(l = length(PID)) %>% filter(l != 2)
 
 codominant <- codominant %>%
   group_by(PID) %>%
+  arrange(TR_SP) %>%
   summarize(relTPA = sum(relTPA), relBA = sum(relBA), Type = paste0(TR_SP, collapse= " and "), Label = "Codominant")
+
+codominant
 
 dominant <- select(dominant, PID, Type, Label)
 codominant <- select(codominant, PID, Type, Label)
@@ -91,7 +95,7 @@ explore3 <- plots_output %>%
   arrange(desc(Count))
 
 
-#There are 36 dominant plot types and 186 codominant plot types
+#There are 36 dominant plot types and 190 codominant plot types
 nrow(unique(plots_output[plots_output$Label == "Dominant","Type"]))
 nrow(unique(plots_output[plots_output$Label == "Codominant","Type"]))
 
@@ -128,3 +132,5 @@ biplot(pc, xlabs=rep("·", nrow(mixed_sel)))
 #Proportion of variance explained for each principal component
 #PC1 and PC2 only make up about 54.9% of the variance 
 summary(pc)$importance[2,]
+
+dist(mixed_sel, method = "euclidean")
