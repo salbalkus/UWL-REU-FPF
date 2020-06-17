@@ -1,4 +1,6 @@
 library(tidyverse)
+library(kernlab)
+library(dbscan)
 
 df <- read_csv("clean_data/UMRS_FPF_clean.csv")
 
@@ -93,4 +95,36 @@ explore3 <- plots_output %>%
 nrow(unique(plots_output[plots_output$Label == "Dominant","Type"]))
 nrow(unique(plots_output[plots_output$Label == "Codominant","Type"]))
 
+mixed <- filter(plots_output, Label == "Mixed")
+mixed_sel <- mixed[,4:ncol(mixed)]
+mixed_sel <- mixed_sel[,colSums(mixed_sel) != 0]
 
+#test <- mixed_sel[1:600,]
+#test
+
+#cluster <- kmeans(x = mixed_sel, centers = 20)
+#cluster <- specc(x = mixed_sel, centers = 3) #This one takes too long to run right now...
+#cluster <- dbscan(mixed_sel, eps = 0.23)
+cluster <- hclust(dist(mixed_sel, method = "euclidean"), method = "ward.D")
+
+#based on the dendrogram, it looks like it can be cut at a number of heights. Let's do 3.
+plot(cluster)
+
+cluster <- cutree(cluster, k = 3)
+cluster
+
+
+pc <- prcomp(mixed_sel)
+pc1 <- pc$x[,1]
+pc2 <- pc$x[,2]
+bp <- data.frame(pc1, pc2, cluster)
+ggplot(bp) + geom_point(aes(x = pc1, y = pc2, color = as.factor(cluster))) + scale_color_viridis_d()
+
+
+
+#Show the biplot with direction vectors for attributes
+biplot(pc, xlabs=rep("·", nrow(mixed_sel)))
+
+#Proportion of variance explained for each principal component
+#PC1 and PC2 only make up about 54.9% of the variance 
+summary(pc)$importance[2,]
