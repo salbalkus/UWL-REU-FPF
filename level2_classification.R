@@ -56,6 +56,13 @@ dissim <- vegdiststruct(cap, method = "bray")
 write_csv(as.data.frame(as.matrix(dissim)), "dissimilarity_matrix.csv")
 
 ###Checkpoint###
+library(tidyverse)
+library(kernlab)
+library(dbscan)
+library(vegclust)
+library(cluster)
+
+
 dissim <- read_csv("dissimilarity_matrix.csv")
 dissim <- as.matrix(dissim)
 
@@ -65,9 +72,8 @@ qplot(as.vector(dissim), geom = "boxplot")
 #Evaluate different numbers of clusters for kmeans
 clusters <- 20
 cluster_k <- vector("list", length = clusters)
-for(n in 1:clusters) {
-  cluster_k[[n]] <- kmeans(dissim, n)
-}
+for(n in 1:clusters) {cluster_k[[n]] <- kmeans(dissim, n)}
+
 #Elbow method
 cluster_k_twss <- vector(length = clusters)
 for(n in 1:clusters){
@@ -98,7 +104,6 @@ plot(avg_sil_neg) #minimum is at 13 clusters
 
 #Plot regularized average silhouette
 plot(avg_sil_len*(1+ 0.1*seq(2:clusters)))
-
   
 
 #Gap statistics
@@ -106,10 +111,22 @@ gap <- clusGap(as.matrix(dissim), kmeans, K.max = 20, B = 10, d.power = 2, verbo
 write_csv(as.data.frame(gap[[1]]), "gap_kmeans.csv")
 plot(as.matrix(gap[[1]])[,3])
 
-#Hierarchical Clustering
-cluster_h <- hclust(dist(dissim), method = "ward.D")
-plot(cluster_h$
 
+#Hierarchical Clustering
+cluster_h <- hclust(as.dist(dissim), method = "single")
+plot(cluster_h, labels = FALSE, xlab = "Forest Plot")
+
+cluster_h <- hclust(as.dist(dissim), method = "complete")
+plot(cluster_h, labels = FALSE, xlab = "Forest Plot")
+
+cluster_h <- hclust(as.dist(dissim), method = "ward.D")
+plot(cluster_h, labels = FALSE, xlab = "Forest Plot")
+
+clusters <- 20
+cluster_h_twss <- vector(length = clusters)
+for(n in 1:clusters){cluster_h_twss[n] <- cutree(cluster_h, k = n)$tot.withinss}
+
+test <- cutree(cluster_h, k = 5)
 
 #OPTICS
 #Note that with minPts = 2, the algorithm is identical to hierarchical clustering. Must determine some larger
