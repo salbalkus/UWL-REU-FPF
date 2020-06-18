@@ -103,11 +103,11 @@ qplot(FRPE_TPA, data = plots, binwidth = 2)
 qplot(SALIX_TPA, data = plots, binwidth = 2)
 
 #By top 5 species relative TPA
-qplot(ACSA2_rel_TPA, data = plots, binwidth = 0.01, geom = "boxplot")
-qplot(PODE3_rel_TPA, data = plots, binwidth = 0.01, geom = "boxplot")
-qplot(SNAG_rel_TPA, data = plots, binwidth = 0.1, geom = "boxplot")
-qplot(FRPE_rel_TPA, data = plots, binwidth = 0.01, geom = "boxplot")
-qplot(SALIX_rel_TPA, data = plots, binwidth = 0.01, geom = "boxplot")
+qplot(ACSA2_rel_TPA, data = plots, binwidth = 0.01)
+qplot(PODE3_rel_TPA, data = plots, binwidth = 0.01)
+qplot(SNAG_rel_TPA, data = plots, binwidth = 0.1)
+qplot(FRPE_rel_TPA, data = plots, binwidth = 0.01)
+qplot(SALIX_rel_TPA, data = plots, binwidth = 0.01)
 
 plots
 
