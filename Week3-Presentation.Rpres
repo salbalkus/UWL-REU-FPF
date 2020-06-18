@@ -3,7 +3,7 @@ Floodplain Forest Group: Progress Report, Week 2
 author: Sal Balkus, Noah Dean, Makayla McDevitt 
 date: 6/12/20
 autosize: true
-css: Week2-Presentation.css
+css: Week3-Presentation.css
 type: section
 
 ```{r echo = F}
@@ -17,15 +17,21 @@ library(rlist)
 library(gridExtra)
 
 df <- read_csv('clean_data/UMRS_FPF_clean.csv')
-plots <- read_csv("clean_data/plots.csv")
+plots <- read_csv("clean_data/plots_classification.csv")
 ```
 
 
-Slide 1
+Level 1 Classification
 ========================================================
 
 
-Slide 2
+
+CAP
+========================================================
+
+
+
+Clustering Methods
 ========================================================
 
 
