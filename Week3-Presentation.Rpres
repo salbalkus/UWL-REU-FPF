@@ -1,0 +1,36 @@
+Floodplain Forest Group: Progress Report, Week 2
+========================================================
+author: Sal Balkus, Noah Dean, Makayla McDevitt 
+date: 6/12/20
+autosize: true
+css: Week2-Presentation.css
+type: section
+
+```{r echo = F}
+
+knitr::opts_chunk$set(warning = F, error = F, message = F, echo = F, include = F)
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+
+
+library(tidyverse)
+library(rlist)
+library(gridExtra)
+
+df <- read_csv('clean_data/UMRS_FPF_clean.csv')
+plots <- read_csv("clean_data/plots.csv")
+```
+
+
+Slide 1
+========================================================
+
+
+Slide 2
+========================================================
+
+
+
+Endnotes
+========================================================
+
+Cover Image: Forest Landscape Ecology of the Upper Mississippi River Floodplain, United States Geological Survey
