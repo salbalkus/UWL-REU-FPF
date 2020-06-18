@@ -1,38 +1,191 @@
-Floodplain Forest Group: Progress Report, Week 2
+Floodplain Forest Group: Progress Report, Week 3
 ========================================================
 author: Sal Balkus, Noah Dean, Makayla McDevitt 
-date: 6/12/20
+date: 6/19/20
 autosize: true
 css: Week3-Presentation.css
 type: section
 
-```{r echo = F}
+```{r, include = FALSE}
 
-knitr::opts_chunk$set(warning = F, error = F, message = F, echo = F, include = F)
-knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+#knitr::opts_chunk$set(warning = F, error = F, message = F, echo = F, include = F)
+#knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
 
+
+#library(tidyverse)
+
+#df <- read_csv('clean_data/UMRS_FPF_clean.csv')
+#plots <- read_csv("clean_data/plots_classification.csv")
 
 library(tidyverse)
-library(rlist)
-library(gridExtra)
+library(kernlab)
+library(dbscan)
+library(vegclust)
+library(cluster)
 
-df <- read_csv('clean_data/UMRS_FPF_clean.csv')
-plots <- read_csv("clean_data/plots_classification.csv")
+df <- read_csv("clean_data/UMRS_FPF_clean.csv")
+labels <- read_csv("clean_data/plot_classification.csv")
+
+df_cols <- left_join(df, labels, by = "PID") %>% select(PID, TR_SP, BasalArea, TreesPerAcre, Type, Label, TR_DIA)
+df_acsa2 <- filter(df_cols, Type == "ACSA2")
 ```
-
 
 Level 1 Classification
 ========================================================
 
 
 
-CAP
+
+
+
+What is CAP
+========================================================
+- Cumulative abundance profile
+
+  - Total amount of trees in or above a size class
+
+- Uses the distribution of sizes within a species
+
+- Allows for exploration of variation with same-species plots
+
+CAP Example
+=====
+![](week_3_pres_images/graphs.png)
+
+(DeCaceres et al, 2013)
+
+Why care about the size distribution?
+======
+- The size distribution will affect how the forest behaves
+
+- External processes may have different impacts
+
+- Time to restore
+
+- Allows for more efficient use of management resources
+
+Size distribution example
+====
+![Emerald ash borer](week_3_pres_images/eab.jpg)
+
+Emerald ash borer (Arbor day foundation)
+
+***
+![Ash tree](week_3_pres_images/ash.jpg)
+
+Ash tree (Arbor day foundation)
+
+
+How are plots compared?
+=====
+- Uses 3 metrics
+
+![3 equations](week_3_pres_images/eq1.png)
+
+- Bray-Curtis dissimilarity coefficient:
+
+![Dissimilarity equation](week_3_pres_images/eq2.png)
+
+(DeCaceres et al, 2013)
+
+
+Example of metrics
+====
+![Examples of metrics](week_3_pres_images/examples.png)
+
+(DeCaceres et al, 2013)
+
+
+Our plots
+====
+```{r echo = F, include = F}
+
+# unique(df_acsa2$PID)
+
+# df_acsa2 %>% count(PID, sort = T)
+
+example_df <- df_acsa2 %>% filter(PID %in% c('GILBERT-2-96', 'COTTONWOOD-1-2'))
+
+DIA_bins <- 1:70
+
+test <- stratifyvegdata(example_df, sizes1 = DIA_bins, plotColumn = "PID", speciesColumn = "TR_SP", abundanceColumn = "TreesPerAcre", size1Column = "TR_DIA" )
+cap <- CAP(test)
+
+# test
+
+plot.CAP(cap[1], xlab = 'Tree diameter', ylab = 'Trees per acre', main = 'CAP of two plots', col = 'black')
+plot.CAP(cap[2], xlab = 'Tree diameter', ylab = 'Trees per acre', col = 'red', add = T)
+legend('topright', legend = c('ACSA2', 'SNAG'), lty = c('solid', 'dashed'))
+legend(51, 190, legend = c('COTTONWOOD-1-2','GILBERT-2-96'), fill = c('black', 'red'))
+
+dissim <- vegdiststruct(cap, method = "bray")
+dissim
+```
+![Our plots](week_3_pres_images/Rplot.png)
+
+***
+- The distance between them is `r round(dissim[1], digits = 4)`
+
+Level 2 Classification
 ========================================================
 
+Our next goal is to subdivide the Level 1 categories using clustering.
+
+The number of clusters should be numerous enough to capture different forest types within the Level 1 categories, but not so numerous that similar forest types are repeated across multiple clusters.
 
 
-Clustering Methods
+
+Strategy
 ========================================================
+Because the Level 1 categories are so numerous, a systematic approach must be developed to generate subcategories.
+
+First, we perform experimentation using the ACSA2-dominant (silver maple) plots. Through this, we develop a function to select the appropriate number of clusters. Since "silver maple dominant" is the most numerous and complex (besides mixed), our approach developed here will not be too simplistic for any other group.
+
+Once our function is developed, we will apply it across all level 1 classifications. Mixed plots will be clustered separately, since they are the largest level 1 category, much larger than others.
+
+
+
+Potential Clustering Methods
+========================================================
+Level 2 categories are determined via clustering, which groups plots based on their dissimilarity (Bray-Curtis, based on CAP values).
+
+We considered several potential clustering algorithms:
+- K-means
+- Hierarchical (single linkage, complete linkage, Ward's method)
+- DBSCAN/OPTICS
+- Spectral Clustering
+
+These clustering algorithms were each tested on our data to determine their effectiveness
+
+
+Spectral Clustering
+========================================================
+A graph-based clustering algorithm especially good for high-dimensional data
+- Uses graph Laplacian eigenvalues to partition the data points
+- Performs dimension reduction
+- Good at picking out unique shapes
+-O(n^3)
+
+We discussed using this algorithm to cluster the data without using CAP. However, our data was too large for the slow algorithm, and the CAP values solved the high-dimensionality problem.
+
+=======
+http://people.csail.mit.edu/dsontag/courses/ml14/notes/Luxburg07_tutorial_spectral_clustering.pdf
+
+
+DBSCAN & OPTICS
+========================================================
+Algorithms that group observations based on density
+- DBSCAN: specify minimum distance and minimum observations in each cluster
+- OPTICS: specify minimum observations per cluster; creates a dendrogram that can be cut
+- Can mark points as outliers if they do not fit a cluster
+- No need to specify number of clusters!
+
+
+
+
+DBSCAN & OPTICS
+========================================================
+
 
 
 
@@ -40,3 +193,4 @@ Endnotes
 ========================================================
 
 Cover Image: Forest Landscape Ecology of the Upper Mississippi River Floodplain, United States Geological Survey
+
