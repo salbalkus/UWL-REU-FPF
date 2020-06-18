@@ -16,6 +16,18 @@ type: section
 
 #df <- read_csv('clean_data/UMRS_FPF_clean.csv')
 #plots <- read_csv("clean_data/plots_classification.csv")
+
+library(tidyverse)
+library(kernlab)
+library(dbscan)
+library(vegclust)
+library(cluster)
+
+df <- read_csv("clean_data/UMRS_FPF_clean.csv")
+labels <- read_csv("clean_data/plot_classification.csv")
+
+df_cols <- left_join(df, labels, by = "PID") %>% select(PID, TR_SP, BasalArea, TreesPerAcre, Type, Label, TR_DIA)
+df_acsa2 <- filter(df_cols, Type == "ACSA2")
 ```
 
 Level 1 Classification
@@ -86,8 +98,33 @@ Example of metrics
 
 Our plots
 ====
+```{r echo = F, include = F}
 
+# unique(df_acsa2$PID)
 
+# df_acsa2 %>% count(PID, sort = T)
+
+example_df <- df_acsa2 %>% filter(PID %in% c('GILBERT-2-96', 'COTTONWOOD-1-2'))
+
+DIA_bins <- 1:70
+
+test <- stratifyvegdata(example_df, sizes1 = DIA_bins, plotColumn = "PID", speciesColumn = "TR_SP", abundanceColumn = "TreesPerAcre", size1Column = "TR_DIA" )
+cap <- CAP(test)
+
+# test
+
+plot.CAP(cap[1], xlab = 'Tree diameter', ylab = 'Trees per acre', main = 'CAP of two plots', col = 'black')
+plot.CAP(cap[2], xlab = 'Tree diameter', ylab = 'Trees per acre', col = 'red', add = T)
+legend('topright', legend = c('ACSA2', 'SNAG'), lty = c('solid', 'dashed'))
+legend(51, 190, legend = c('COTTONWOOD-1-2','GILBERT-2-96'), fill = c('black', 'red'))
+
+dissim <- vegdiststruct(cap, method = "bray")
+dissim
+```
+![Our plots](week_3_pres_images/Rplot.png)
+
+***
+- The distance between them is `r round(dissim[1], digits = 4)`
 
 Level 2 Classification
 ========================================================
