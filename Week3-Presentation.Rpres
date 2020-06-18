@@ -25,8 +25,66 @@ Slide 1
 ========================================================
 
 
-Slide 2
+What is CAP
 ========================================================
+- Cumulative abundance profile
+
+  - Total amount of trees in or above a size class
+
+- Uses the distribution of sizes within a species
+
+- Allows for exploration of variation with same-species plots
+
+CAP Example
+=====
+![](week_3_pres_images/graphs.png)
+
+(DeCaceres et al, 2013)
+
+Why care about the size distribution?
+======
+- The size distribution will affect how the forest behaves
+
+- External processes may have different impacts
+
+- Time to restore
+
+- Allows for more efficient use of management resources
+
+Size distribution example
+====
+![Emerald ash borer](week_3_pres_images/eab.jpg)
+
+Emerald ash borer (Arbor day foundation)
+
+***
+![Ash tree](week_3_pres_images/ash.jpg)
+
+Ash tree (Arbor day foundation)
+
+
+How are plots compared?
+=====
+- Uses 3 metrics
+
+![3 equations](week_3_pres_images/eq1.png)
+
+- Bray-Curtis dissimilarity coefficient:
+
+![Dissimilarity equation](week_3_pres_images/eq2.png)
+
+(DeCaceres et al, 2013)
+
+
+Example of metrics
+====
+![Examples of metrics](week_3_pres_images/examples.png)
+
+(DeCaceres et al, 2013)
+
+
+Our plots
+====
 
 
 
