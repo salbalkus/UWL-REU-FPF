@@ -6,13 +6,19 @@ autosize: true
 css: Week3-Presentation.css
 type: section
 
-```{r, include = FALSE}
+```{r, echo = FALSE}
 
 #knitr::opts_chunk$set(warning = F, error = F, message = F, echo = F, include = F)
 #knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+opts_chunk$set(cache=TRUE)
 
 
-#library(tidyverse)
+library(tidyverse)
+library(cluster)
+library(dbscan)
+
+dissim <- read_csv("dissimilarity_matrix.csv")
+dissim <- as.matrix(dissim)
 
 #df <- read_csv('clean_data/UMRS_FPF_clean.csv')
 #plots <- read_csv("clean_data/plots_classification.csv")
@@ -84,14 +90,158 @@ Algorithms that group observations based on density
 - Can mark points as outliers if they do not fit a cluster
 - No need to specify number of clusters!
 
+https://medium.com/@xzz201920/optics-d80b41fd042a#:~:text=Reachability%2Dplot%20to%20Clustering&text=It%20is%20a%202D%20plot,valleys%20in%20the%20reachability%20plot.
 
 
 
-DBSCAN & OPTICS
+
+OPTICS: Reachability plot
 ========================================================
 
+The deeper the valley, the denser the cluster.
+
+```{r, echo = FALSE}
+cluster_o <- optics(as.matrix(dissim), eps = 10, minPts = 6)
+
+cluster_db <- extractDBSCAN(cluster_o, eps_cl = 2)
+plot(cluster_db)
+
+cluster_count <- length(unique(cluster_db$cluster))
+cat("Number of clusters from DBSCAN:", cluster_count)
+
+```
+
+***
+
+```{r, echo = FALSE}
+
+cluster_db <- extractDBSCAN(cluster_o, eps_cl = 1)
+plot(cluster_db)
+
+cluster_count <- length(unique(cluster_db$cluster))
+cat("Number of clusters from DBSCAN:", cluster_count)
+```
+
+K-means
+========================================================
+Clustering method that performs partitioning by optimizing centroid placement
+- assumes clusters to be spherical
+- assumes equal variance within clusters
 
 
+K-means
+========================================================
+
+```{r, echo = FALSE}
+#Evaluate different numbers of clusters for kmeans
+clusters <- 20
+cluster_k <- vector("list", length = clusters)
+for(n in 1:clusters) {cluster_k[[n]] <- kmeans(dissim, n)}
+
+#Elbow method
+cluster_k_twss <- vector(length = clusters)
+for(n in 1:clusters){
+  cluster_k_twss[n] <- cluster_k[[n]]$tot.withinss
+}
+
+plt_df <- as.data.frame(list(cluster_k_twss, seq(1:clusters)), row.names = NULL, col.names = c("TWSS","Index"))
+ggplot(data = plt_df, mapping = aes(x = Index, y = TWSS)) + geom_line(color = "lightblue") + geom_point() + theme_light() +
+  xlab("Number of Clusters") + ylab("Total within-cluster sum of squares")
+
+```
+
+K-means
+========================================================
+
+```{r, echo = FALSE}
+#Silhouette
+sil <- vector("list", length = clusters)
+for(n in 1:clusters){sil[[n]] <- silhouette(x = cluster_k[[n]]$cluster, dmatrix = as.matrix(dissim))}
+plot(sil[[3]], col = c("red","blue","black"), border = NA)
+```
+
+***
+
+```{r, echo = FALSE}
+#Plot average sil length
+avg_sil_len <- vector(length = clusters-1)
+min_sil_len <- vector(length = clusters-1)
+avg_sil_neg <- vector(length = clusters-1)
+for(n in 2:clusters){avg_sil_len[n-1] <- mean(sil[[n]][,3])}
+for(n in 2:clusters){min_sil_len[n-1] <- min(sil[[n]][,3])}
+for(n in 2:clusters){avg_sil_neg[n-1] <- mean(sil[[n]][sil[[n]][,3] < 0,3])}
+
+plt_df <- as.data.frame(list(avg_sil_len, min_sil_len, avg_sil_neg, seq(2:clusters)), col.names = c("avg","min","avgneg","Index"))
+ggplot(data = plt_df) + geom_point(aes(x = Index, y = avg, color = "Average Silhouette Length")) + geom_line(aes(x = Index, y = avg, color = "Average Silhouette Length")) + 
+  geom_point(aes(x = Index, y = min, color = "Minimum Silhouette Length")) + geom_line(aes(x = Index, y = min, color = "Minimum Silhouette Length")) + 
+  geom_point(aes(x = Index, y = avgneg, color = "Average Negative Silhouette Length")) + geom_line(aes(x = Index, y = avgneg, color = "Average Negative Silhouette Length")) + theme_light() + ylab("Silhouette Length") + xlab("Number of Clusters") + theme(legend.title = element_blank())
+```
+
+K-means
+========================================================
+```{r, echo = FALSE}
+gap <- read_csv("gap_kmeans.csv")
+gap$Index <- seq(1:20)
+ggplot(gap,aes(x = Index, y = gap)) + geom_line(color = "lightblue") + geom_point() + theme_light()
+
+selected_value <- maxSE(gap$gap, gap$SE.sim, method = "Tibs2001SEmax")
+cat("Recommended clusters:", selected_value)
+
+```
+
+Hierarchical Clustering
+========================================================
+Joins points based on closeness to create a dendrogram
+- Single-linkage agglomerative: joins clusters based on closest point
+  - Good at differentiating complex shapes with clear boundaries
+  - Without clear boundaries, often creates #Hierarchical Clustering
+- Complete-linkage agglomerative: joins clusters based on farthest point
+- Ward's method: joins clusters based on minimizing within-cluster variance
+
+Single Linkage
+========================================================
+Unsuitable, yields an output similar to OPTICS
+
+The single linkage picks out too many outliers, preventing the clusters from being split into actual groups
+
+***
+
+```{r, echo = FALSE}
+cluster_h <- hclust(as.dist(dissim), method = "single")
+plot(cluster_h, labels = FALSE, xlab = "Forest Plot")
+```
+
+Complete Linkage
+========================================================
+
+Still problematic - no clear cut point
+
+Clusters are too close together, indicating that there is no real difference between the clusters
+
+***
+
+```{r, echo = FALSE}
+cluster_h <- hclust(as.dist(dissim), method = "complete")
+plot(cluster_h, labels = FALSE, xlab = "Forest Plot")
+```
+
+Ward's Method (ward.D)
+========================================================
+
+Best approach thus far; clusters are appropriately distanced, and split into roughly even-sized groups.
+
+Still need to investigate where to cut the dendrogram, and how to validate this clustering solution.
+
+***
+
+```{r, echo = FALSE}
+cluster_h <- hclust(as.dist(dissim), method = "ward.D")
+plot(cluster_h, labels = FALSE, xlab = "Forest Plot")
+```
+
+
+Next Steps
+========================================================
 
 
 Endnotes

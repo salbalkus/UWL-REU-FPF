@@ -74,14 +74,103 @@ Algorithms that group observations based on density
 - Can mark points as outliers if they do not fit a cluster
 - No need to specify number of clusters!
 
+https://medium.com/@xzz201920/optics-d80b41fd042a#:~:text=Reachability%2Dplot%20to%20Clustering&text=It%20is%20a%202D%20plot,valleys%20in%20the%20reachability%20plot.
 
 
 
-DBSCAN & OPTICS
+
+OPTICS: Reachability plot
 ========================================================
 
+The deeper the valley, the denser the cluster.
+
+![plot of chunk unnamed-chunk-2](Week3-Presentation-figure/unnamed-chunk-2-1.png)
+
+```
+Number of clusters from DBSCAN: 6
+```
+
+***
+
+![plot of chunk unnamed-chunk-3](Week3-Presentation-figure/unnamed-chunk-3-1.png)
+
+```
+Number of clusters from DBSCAN: 36
+```
+
+K-means
+========================================================
+Clustering method that performs partitioning by optimizing centroid placement
+- assumes clusters to be spherical
+- assumes equal variance within clusters
 
 
+K-means
+========================================================
+
+![plot of chunk unnamed-chunk-4](Week3-Presentation-figure/unnamed-chunk-4-1.png)
+
+K-means
+========================================================
+
+![plot of chunk unnamed-chunk-5](Week3-Presentation-figure/unnamed-chunk-5-1.png)
+
+***
+
+![plot of chunk unnamed-chunk-6](Week3-Presentation-figure/unnamed-chunk-6-1.png)
+
+K-means
+========================================================
+![plot of chunk unnamed-chunk-7](Week3-Presentation-figure/unnamed-chunk-7-1.png)
+
+```
+Recommended clusters: 18
+```
+
+Hierarchical Clustering
+========================================================
+Joins points based on closeness to create a dendrogram
+- Single-linkage agglomerative: joins clusters based on closest point
+  - Good at differentiating complex shapes with clear boundaries
+  - Without clear boundaries, often creates #Hierarchical Clustering
+- Complete-linkage agglomerative: joins clusters based on farthest point
+- Ward's method: joins clusters based on minimizing within-cluster variance
+
+Single Linkage
+========================================================
+Unsuitable, yields an output similar to OPTICS
+
+The single linkage picks out too many outliers, preventing the clusters from being split into actual groups
+
+***
+
+![plot of chunk unnamed-chunk-8](Week3-Presentation-figure/unnamed-chunk-8-1.png)
+
+Complete Linkage
+========================================================
+
+Still problematic - no clear cut point
+
+Clusters are too close together, indicating that there is no real difference between the clusters
+
+***
+
+![plot of chunk unnamed-chunk-9](Week3-Presentation-figure/unnamed-chunk-9-1.png)
+
+Ward's Method (ward.D)
+========================================================
+
+Best approach thus far; clusters are appropriately distanced, and split into roughly even-sized groups.
+
+Still need to investigate where to cut the dendrogram, and how to validate this clustering solution.
+
+***
+
+![plot of chunk unnamed-chunk-10](Week3-Presentation-figure/unnamed-chunk-10-1.png)
+
+
+Next Steps
+========================================================
 
 
 Endnotes
