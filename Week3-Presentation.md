@@ -62,6 +62,7 @@ nrow(dominant)
 ========================================================
 <img src="week_3_pres_images/codominant_photo.png" width=70% height=100%>
 
+
 *** 
 
 ```r
