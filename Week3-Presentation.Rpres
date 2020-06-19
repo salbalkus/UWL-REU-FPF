@@ -30,12 +30,52 @@ df_cols <- left_join(df, labels, by = "PID") %>% select(PID, TR_SP, BasalArea, T
 df_acsa2 <- filter(df_cols, Type == "ACSA2")
 ```
 
-Level 1 Classification
+Classification Overview 
 ========================================================
 
+Goal: Classify UMRS floodplain forests in terms of composition and structure 
+
+Two levels of classification: 
+
+1. Tree species dominance
+
+  -Density 
+  
+  -Basal area 
+  
+2. Clustering 
 
 
+========================================================
+![](week_3_pres_images/classification .png)
 
+
+========================================================
+![](week_3_pres_images/single-species.png)
+
+***
+
+
+![](week_3_pres_images/dominant.png) 
+
+![](week_3_pres_images/dominant_number.png)
+
+
+========================================================
+![](week_3_pres_images/codominant_photo .png)
+
+*** 
+
+![](week_3_pres_images/codominant .png)
+![](week_3_pres_images/codominant_number.png)
+
+========================================================
+![](week_3_pres_images/mixed_photo.png)
+
+*** 
+
+![](week_3_pres_images/mixed.png) 
+![](week_3_pres_images/Mixed_number.png)
 
 
 What is CAP
