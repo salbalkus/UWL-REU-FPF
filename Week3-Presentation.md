@@ -29,6 +29,7 @@ Two levels of classification:
 
 
 ========================================================
+class: small-code
 <img src="week_3_pres_images/single-species.png" width=70% height=100%>
 
 ***
@@ -60,19 +61,21 @@ nrow(dominant)
 
 
 ========================================================
+class: small-code
+
 <img src="week_3_pres_images/codominant_photo.png" width=70% height=100%>
 
-
 *** 
+
 
 ```r
 codominant <- plots %>%
   filter(relTPA<=0.8 | relBA<=0.8) %>%
   filter(relTPA>=0.2 | relBA>=0.2) %>%
   group_by(PID) %>%
-  filter(relTPA + max(relTPA) > 0.8 & relBA + max(relBA) > 0.8) %>%
+  filter(relTPA + max(relTPA)>0.8 & relBA + max(relBA)>0.8) %>%
   filter(n() > 1) %>%
-  filter(sum(relTPA) > 0.8 & sum(relBA) > 0.8)
+  filter(sum(relTPA)>0.8 & sum(relBA)>0.8)
 ```
 
 
@@ -80,11 +83,11 @@ codominant <- plots %>%
 
 
 ```r
-length(codominant$Type)
+length(unique(codominant$Type))
 ```
 
 ```
-[1] 6648
+[1] 190
 ```
 
 ```r
@@ -97,6 +100,7 @@ nrow(codominant)
 
 
 ========================================================
+class: small-code
 <img src="week_3_pres_images/mixed_photo.png" width=70% height=100%>
 
 *** 
@@ -212,20 +216,19 @@ Our plots
 
 Strategy
 ========================================================
-Because the Level 1 categories are so numerous, a systematic approach must be developed to generate subcategories.
+Because the Level 1 categories are so numerous, use systematic approach for Level 2.
 
 1. Perform experimentation using ACSA2-dominant (silver maple) plots
   - Develop a function to select  appropriate number of clusters
-  - Since "silver maple dominant" is most numerous and complex (besides mixed), ensures solution will fit simpler level-1 plots
 
-2. Develop function and apply across all level 1 classifications
+2. Apply function across all level 1 classifications
   - Mixed plots clustered separately, since category is much larger
 
 
 
 Potential Clustering Methods
 ========================================================
-Level 2 categories are determined via clustering, which groups plots based on their dissimilarity (Bray-Curtis, based on CAP values).
+Level 2 categories determined via clustering, which groups plots based on their dissimilarity (Bray-Curtis, based on CAP values).
 
 We considered several potential clustering algorithms:
 - K-means
@@ -233,7 +236,6 @@ We considered several potential clustering algorithms:
 - DBSCAN/OPTICS
 - Spectral Clustering
 
-These clustering algorithms were each tested on ACSA2 to determine effectiveness.
 
 
 Spectral Clustering
@@ -246,7 +248,7 @@ A graph-based clustering algorithm especially good for high-dimensional data
 
 We discussed using this algorithm to cluster the data without using CAP. However, algorithm was too slow, and the CAP values solved the high-dimensionality problem.
 
-http://people.csail.mit.edu/dsontag/courses/ml14/notes/Luxburg07_tutorial_spectral_clustering.pdf
+<!-- http://people.csail.mit.edu/dsontag/courses/ml14/notes/Luxburg07_tutorial_spectral_clustering.pdf -->
 
 
 DBSCAN & OPTICS
@@ -259,7 +261,7 @@ Algorithms that group observations based on density
 
 OPTICS generates a "reachability plot" that can be cut like a dendrogram to generate clusters
 
-https://medium.com/@xzz201920/optics-d80b41fd042a#:~:text=Reachability%2Dplot%20to%20Clustering&text=It%20is%20a%202D%20plot,valleys%20in%20the%20reachability%20plot.
+<!-- https://medium.com/@xzz201920/optics-d80b41fd042a#:~:text=Reachability%2Dplot%20to%20Clustering&text=It%20is%20a%202D%20plot,valleys%20in%20the%20reachability%20plot. -->
 
 
 OPTICS: Reachability plots
@@ -308,13 +310,13 @@ Changes in silhouette statistics by cluster
 K-means: Gap Statistic
 ========================================================
 
-The gap statistic measures the goodness of a clustering measure by comparing the clustering on the true data to the expected value of a clustering on bootstrapped data.
+Measures goodness of a clustering measure by comparing true data clusters to  expected value of bootstrapped data clustering.
 
-Results in a recommended clustering of k = 18, based on the criterion proposed by Tibshirani et al (2001): 
+Results in a recommended k = 18, based on  criterion from Tibshirani et al (2001): 
 
 “the smallest k such that f(k) ≥ f(k+1) - s_{k+1}”
 
-https://web.stanford.edu/~hastie/Papers/gap.pdf
+<!-- https://web.stanford.edu/~hastie/Papers/gap.pdf -->
 
 ***
 ![plot of chunk unnamed-chunk-15](Week3-Presentation-figure/unnamed-chunk-15-1.png)
@@ -363,9 +365,19 @@ Still need to investigate where to cut the dendrogram, and how to validate this 
 
 Next Steps
 ========================================================
+- Determine which clustering is best via validation methods
+  - Research proper validation methods for our data
+- Formulate function to apply across all dominant species
+- Cluster mixed forest types
+
 
 Endnotes
 ========================================================
 
 Cover Image: Forest Landscape Ecology of the Upper Mississippi River Floodplain, United States Geological Survey
 
+http://people.csail.mit.edu/dsontag/courses/ml14/notes/Luxburg07_tutorial_spectral_clustering.pdf
+
+https://medium.com/@xzz201920/optics-d80b41fd042a#:~:text=Reachability%2Dplot%20to%20Clustering&text=It%20is%20a%202D%20plot,valleys%20in%20the%20reachability%20plot
+
+https://web.stanford.edu/~hastie/Papers/gap.pdf
