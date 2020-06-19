@@ -11,3 +11,6 @@ stringr
 forcats
 cluster
 dbscan
+kernlab
+Rcpp
+vegclust

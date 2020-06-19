@@ -48,7 +48,6 @@ ggplot(filter(df_acsa2, PID == "Cuivre-1-41")) + geom_step(aes(x = BasalArea, y 
 #Compare CAP for multiple plots
 example <- cap[[1]][rowSums(cap[[1]][,-1]) > 0,colSums(cap[[1]][-1,]) > 0]
 example
-ggplot()
 
 plot(cap, plots = "1", sizes = BA_bins[1:5])
 
