@@ -63,12 +63,12 @@ Two levels of classification:
 
 
 ========================================================
-<img src="week_3_pres_images/classification.png" width=100% height=100%>
+<img src="week_3_pres_images/classification.png" width=95% height=100%>
 
 
 ========================================================
 class: small-code
-<img src="week_3_pres_images/single-species.png" width=70% height=100%>
+<img src="week_3_pres_images/single-species.png" width=100%>
 
 ***
 
@@ -91,7 +91,7 @@ nrow(dominant)
 ========================================================
 class: small-code
 
-<img src="week_3_pres_images/codominant_photo.png" width=70% height=100%>
+<img src="week_3_pres_images/codominant_photo.png" width=100%>
 
 *** 
 
@@ -121,7 +121,7 @@ nrow(codominant)
 
 ========================================================
 class: small-code
-<img src="week_3_pres_images/mixed_photo.png" width=70% height=100%>
+<img src="week_3_pres_images/mixed_photo.png" width=100%>
 
 *** 
 
@@ -281,7 +281,7 @@ A graph-based clustering algorithm especially good for high-dimensional data
 - Uses graph Laplacian eigenvalues to partition the data points
 - Performs dimension reduction
 - Good at picking out unique shapes
-- O(n^3)
+- O(n^3 )
 
 We discussed using this algorithm to cluster the data without using CAP. However, algorithm was too slow, and the CAP values solved the high-dimensionality problem.
 
@@ -420,8 +420,6 @@ Hierarchical Clustering
 ========================================================
 Joins points based on closeness to create a dendrogram
 - Single-linkage agglomerative: joins clusters based on closest point
-  - Good at differentiating complex shapes with clear boundaries
-  - Without clear boundaries, often creates #Hierarchical Clustering
 - Complete-linkage agglomerative: joins clusters based on farthest point
 - Ward's method: joins clusters based on minimizing within-cluster variance
 
@@ -470,9 +468,9 @@ plot(cluster_h, labels = FALSE, xlab = "Forest Plot")
 Next Steps
 ========================================================
 - Determine which clustering is best via validation methods
-  - Research proper validation methods for our data
+  - Supervised learning with cluster labels?
 - Formulate function to apply across all dominant species
-- Cluster mixed forest types
+- Cluster mixed forest types separately
 
 
 Endnotes
