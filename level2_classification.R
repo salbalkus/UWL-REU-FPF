@@ -3,6 +3,7 @@ library(kernlab)
 library(dbscan)
 library(vegclust)
 library(cluster)
+library(ggsci)
 
 path_of_code <- dirname(rstudioapi::getSourceEditorContext()$path)
 setwd(path_of_code)
@@ -105,10 +106,6 @@ gap <- clusGap(as.matrix(dissim), kmeans, K.max = 20, B = 10, d.power = 2, verbo
 write_csv(as.data.frame(gap[[1]]), "gap_kmeans.csv")
 plot(as.matrix(gap[[1]])[,3])
 
-#Hierarchical Clustering
-cluster_h <- hclust(dist(dissim), method = "ward.D")
-plot(cluster_h$
-
 
 #OPTICS
 #Note that with minPts = 2, the algorithm is identical to hierarchical clustering. Must determine some larger
@@ -119,3 +116,29 @@ plot(cluster_db)
 sort(unique(cluster_db$cluster))
 
 #Personally, I am dissatisfied with this approach. We should stick to hierarchical
+
+heatmap(dissim[1:100,1:100])
+qplot(as.vector(dissim))
+
+
+#Hierarchical Clustering
+
+cluster_h <- hclust(as.dist(dissim), method = "average")
+plot(cluster_h, labels = FALSE)
+
+cluster_h <- hclust(as.dist(dissim), method = "ward.D")
+plot(cluster_h)
+
+#I like Ward better, let's see the results
+result <- cutree(cluster_h, k = 3)
+plots <- read_csv("clean_data/plots_full.csv")
+plots_acsa2 <- filter(plots, Type == "ACSA2")
+plots_acsa2$cluster <- result
+
+plots_acsa2$cluster
+
+ggplot(plots_acsa2) + geom_point(aes(x = ba_ACSA2, y = tpa_ACSA2, color = as.factor(cluster))) + scale_color_jco()
+ggplot(plots_acsa2) + geom_point(aes(x = ba_PODE3, y = tpa_PODE3, color = as.factor(cluster))) + scale_color_jco()
+
+
+
