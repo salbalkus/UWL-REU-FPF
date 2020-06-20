@@ -3,6 +3,7 @@ library(kernlab)
 library(dbscan)
 library(vegclust)
 library(cluster)
+library(ggsci)
 
 path_of_code <- dirname(rstudioapi::getSourceEditorContext()$path)
 setwd(path_of_code)
@@ -48,7 +49,6 @@ ggplot(filter(df_acsa2, PID == "Cuivre-1-41")) + geom_step(aes(x = BasalArea, y 
 #Compare CAP for multiple plots
 example <- cap[[1]][rowSums(cap[[1]][,-1]) > 0,colSums(cap[[1]][-1,]) > 0]
 example
-ggplot()
 
 plot(cap, plots = "1", sizes = BA_bins[1:5])
 
@@ -56,13 +56,6 @@ dissim <- vegdiststruct(cap, method = "bray")
 write_csv(as.data.frame(as.matrix(dissim)), "dissimilarity_matrix.csv")
 
 ###Checkpoint###
-library(tidyverse)
-library(kernlab)
-library(dbscan)
-library(vegclust)
-library(cluster)
-
-
 dissim <- read_csv("dissimilarity_matrix.csv")
 dissim <- as.matrix(dissim)
 
@@ -72,8 +65,9 @@ qplot(as.vector(dissim), geom = "boxplot")
 #Evaluate different numbers of clusters for kmeans
 clusters <- 20
 cluster_k <- vector("list", length = clusters)
-for(n in 1:clusters) {cluster_k[[n]] <- kmeans(dissim, n)}
-
+for(n in 1:clusters) {
+  cluster_k[[n]] <- kmeans(dissim, n)
+}
 #Elbow method
 cluster_k_twss <- vector(length = clusters)
 for(n in 1:clusters){
@@ -86,7 +80,7 @@ plot(cluster_k_twss)
 #Silhouette
 sil <- vector("list", length = clusters)
 for(n in 1:clusters){
-    sil[[n]] <- silhouette(x = cluster_k[[n]]$cluster, dmatrix = as.matrix(dissim))
+  sil[[n]] <- silhouette(x = cluster_k[[n]]$cluster, dmatrix = as.matrix(dissim))
 }
 plot(sil[[2]], col = 1:2, border = NA)
 
@@ -104,29 +98,14 @@ plot(avg_sil_neg) #minimum is at 13 clusters
 
 #Plot regularized average silhouette
 plot(avg_sil_len*(1+ 0.1*seq(2:clusters)))
-  
+
+
 
 #Gap statistics
 gap <- clusGap(as.matrix(dissim), kmeans, K.max = 20, B = 10, d.power = 2, verbose = TRUE)
 write_csv(as.data.frame(gap[[1]]), "gap_kmeans.csv")
 plot(as.matrix(gap[[1]])[,3])
 
-
-#Hierarchical Clustering
-cluster_h <- hclust(as.dist(dissim), method = "single")
-plot(cluster_h, labels = FALSE, xlab = "Forest Plot")
-
-cluster_h <- hclust(as.dist(dissim), method = "complete")
-plot(cluster_h, labels = FALSE, xlab = "Forest Plot")
-
-cluster_h <- hclust(as.dist(dissim), method = "ward.D")
-plot(cluster_h, labels = FALSE, xlab = "Forest Plot")
-
-clusters <- 20
-cluster_h_twss <- vector(length = clusters)
-for(n in 1:clusters){cluster_h_twss[n] <- cutree(cluster_h, k = n)$tot.withinss}
-
-test <- cutree(cluster_h, k = 5)
 
 #OPTICS
 #Note that with minPts = 2, the algorithm is identical to hierarchical clustering. Must determine some larger
@@ -137,3 +116,30 @@ plot(cluster_db)
 sort(unique(cluster_db$cluster))
 
 #Personally, I am dissatisfied with this approach. We should stick to hierarchical
+
+heatmap(dissim[1:100,1:100])
+qplot(as.vector(dissim))
+
+
+#Hierarchical Clustering
+
+cluster_h <- hclust(as.dist(dissim), method = "average")
+plot(cluster_h, labels = FALSE)
+
+cluster_h <- hclust(as.dist(dissim), method = "ward.D")
+plot(cluster_h)
+
+#I like Ward better, let's see the results
+result <- cutree(cluster_h, k = 3)
+plots <- read_csv("clean_data/plots_full.csv")
+plots_acsa2 <- filter(plots, Type == "ACSA2")
+plots_acsa2$cluster <- result
+
+plots_acsa2$cluster
+
+ggplot(plots_acsa2) + geom_point(aes(x = ba_ACSA2, y = tpa_ACSA2, color = as.factor(cluster))) + scale_color_jco()
+ggplot(plots_acsa2) + geom_point(aes(x = ba_PODE3, y = tpa_PODE3, color = as.factor(cluster))) + scale_color_jco()
+
+
+
+
