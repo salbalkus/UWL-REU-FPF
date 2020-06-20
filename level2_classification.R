@@ -12,7 +12,6 @@ setwd(path_of_code)
 
 df <- read_csv("clean_data/UMRS_FPF_clean.csv")
 labels <- read_csv("clean_data/plot_classification.csv")
-labels
 df_cols <- left_join(df, labels, by = "PID") %>% select(PID, TR_SP, BasalArea, TreesPerAcre, Type, Label)
 df_acsa2 <- filter(df_cols, Type == "ACSA2")
 #Only 28 species to deal with in the silver maple dominant communities!
@@ -129,16 +128,6 @@ plot(cluster_h, labels = FALSE)
 cluster_h <- hclust(as.dist(dissim), method = "ward.D")
 plot(cluster_h)
 
-#I like Ward better, let's see the results
-result <- cutree(cluster_h, k = 3)
-plots <- read_csv("clean_data/plots_full.csv")
-plots_acsa2 <- filter(plots, Type == "ACSA2")
-plots_acsa2$cluster <- result
-
-plots_acsa2$cluster
-
-ggplot(plots_acsa2) + geom_point(aes(x = ba_ACSA2, y = tpa_ACSA2, color = as.factor(cluster))) + scale_color_jco()
-ggplot(plots_acsa2) + geom_point(aes(x = ba_PODE3, y = tpa_PODE3, color = as.factor(cluster))) + scale_color_jco()
 
 
 
