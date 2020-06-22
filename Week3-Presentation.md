@@ -8,18 +8,120 @@ type: section
 
 
 
-Level 1 Classification
+Classification Overview 
 ========================================================
 
+Goal: Classify UMRS floodplain forests in terms of composition and structure 
+
+Two levels of classification: 
+
+1. Tree species dominance
+
+  -Density 
+  
+  -Basal area 
+  
+2. Clustering 
 
 
+========================================================
+![](week_3_pres_images/classification .png)
 
 
-
-CAP
 ========================================================
 
+![](week_3_pres_images/single-species_large_photo.png)
 
+***
+
+
+![](week_3_pres_images/dominant.png) 
+
+![](week_3_pres_images/dominant_number.png)
+
+
+========================================================
+![](week_3_pres_images/codominant_large_photo.png)
+
+*** 
+
+![](week_3_pres_images/codominant .png)
+![](week_3_pres_images/codominant_number.png)
+
+========================================================
+![](week_3_pres_images/mixed_large_photo.png)
+
+*** 
+
+![](week_3_pres_images/mixed.png) 
+![](week_3_pres_images/Mixed_number.png)
+
+
+What is CAP
+========================================================
+- Cumulative abundance profile
+
+  - Total amount of trees in or above a size class
+
+- Uses the distribution of sizes within a species
+
+- Allows for exploration of variation with same-species plots
+
+CAP Example
+=====
+![](week_3_pres_images/graphs.png)
+
+(DeCaceres et al, 2013)
+
+Why care about the size distribution?
+======
+- The size distribution will affect how the forest behaves
+
+- External processes may have different impacts
+
+- Time to restore
+
+- Allows for more efficient use of management resources
+
+Size distribution example
+====
+![Emerald ash borer](week_3_pres_images/eab.jpg)
+
+Emerald ash borer (Arbor day foundation)
+
+***
+![Ash tree](week_3_pres_images/ash.jpg)
+
+Ash tree (Arbor day foundation)
+
+
+How are plots compared?
+=====
+- Uses 3 metrics
+
+![3 equations](week_3_pres_images/eq1.png)
+
+- Bray-Curtis dissimilarity coefficient:
+
+![Dissimilarity equation](week_3_pres_images/eq2.png)
+
+(DeCaceres et al, 2013)
+
+
+Example of metrics
+====
+![Examples of metrics](week_3_pres_images/examples.png)
+
+(DeCaceres et al, 2013)
+
+
+Our plots
+====
+
+![Our plots](week_3_pres_images/Rplot.png)
+
+***
+- The distance between them is 0.1318
 
 Level 2 Classification
 ========================================================
@@ -63,6 +165,7 @@ A graph-based clustering algorithm especially good for high-dimensional data
 
 We discussed using this algorithm to cluster the data without using CAP. However, our data was too large for the slow algorithm, and the CAP values solved the high-dimensionality problem.
 
+=======
 http://people.csail.mit.edu/dsontag/courses/ml14/notes/Luxburg07_tutorial_spectral_clustering.pdf
 
 
@@ -83,8 +186,8 @@ DBSCAN & OPTICS
 
 
 
-
 Endnotes
 ========================================================
 
 Cover Image: Forest Landscape Ecology of the Upper Mississippi River Floodplain, United States Geological Survey
+
