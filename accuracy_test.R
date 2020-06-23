@@ -67,7 +67,7 @@ qplot((seq(1:19) + 1), avg_widths) + theme_light() + xlab("Clusters") + ylab("Av
 which.min(avg_widths)
 
 ## Basal Area Comparisons ##
-plot_acsa2$clsuter <- cutree(cluster_h, k = 10)
+plot_acsa2$cluster <- cutree(cluster_h, k = 10)
 df <- read_csv("clean_data/UMRS_FPF_clean.csv")
 labs <- read_csv("clean_data/plot_classification.csv")
 df <- df %>% left_join(labs, by = "PID") %>% filter(Type == "ACSA2")
@@ -80,15 +80,15 @@ ggplot(df) + geom_density(aes(x = TR_DIA), fill = "lightblue") + facet_wrap(~clu
 grouped <- df %>% group_by(cluster) %>% summarize(Avg_Diam = mean(TR_DIA))
 ggplot(grouped) + geom_col(aes(x = as.factor(cluster), y = Avg_Diam, fill = as.factor(cluster))) + theme_light() + xlab("Cluster") + ylab("Average Diameter") + scale_fill_viridis_d()
 
-
 tree <- rpart(data = plots_acsa2, formula = form, method = "class", control = rpart.control(maxdepth = 4, cp = 0, minbucket = 6))
 rpart.plot(tree)
 summary(tree)
 printcp(tree)
 ggplot(plots_acsa2) + geom_point(aes(x = log(BA_ACSA2), y = log(TPA_ACSA2), color = as.factor(cluster))) + scale_color_jco() + theme_light()
 
-example_NMDS = metaMDS(dissim, k=2)
-plot(example_NMDS)
+### Using comparisons between tree and hierarchical clustering ###
 
+#Homogeneity
 
+predict(tree, plots_acsa2, )
 

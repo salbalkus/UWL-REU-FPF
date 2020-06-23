@@ -71,7 +71,6 @@ biplot(pc, xlabs=rep("·", nrow(bp)))
 #PC1 and PC2 only make up about 54.9% of the variance 
 summary(pc)$importance[2,]
 
-
 plots_acsa2$cluster <- as.factor(plots_acsa2$cluster)
 form <- paste( "cluster ~", paste0(colnames(plots_acsa2)[2:(ncol(plots_acsa2)-3)], collapse = " + "))
 tree <- rpart(data = plots_acsa2, formula = form, method = "class", control = rpart.control(maxdepth = 3, cp = 0, minbucket = 6))
