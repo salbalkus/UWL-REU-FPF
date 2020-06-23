@@ -3,6 +3,7 @@ library(kernlab)
 library(dbscan)
 library(vegclust)
 library(cluster)
+library(ggsci)
 
 path_of_code <- dirname(rstudioapi::getSourceEditorContext()$path)
 setwd(path_of_code)
@@ -11,7 +12,6 @@ setwd(path_of_code)
 
 df <- read_csv("clean_data/UMRS_FPF_clean.csv")
 labels <- read_csv("clean_data/plot_classification.csv")
-labels
 df_cols <- left_join(df, labels, by = "PID") %>% select(PID, TR_SP, BasalArea, TreesPerAcre, Type, Label)
 df_acsa2 <- filter(df_cols, Type == "ACSA2")
 #Only 28 species to deal with in the silver maple dominant communities!
@@ -39,7 +39,7 @@ qplot(sqrt(BA_bins), binwidth = sqrt(BA_bins)[2] - sqrt(BA_bins)[1])
 
 
 #Stratify the vegetation data
-test <- stratifyvegdata(df_acsa2, sizes1 = BA_bins, plotColumn = "PID", speciesColumn = "TR_SP", abundanceColumn = "TreesPerAcre", size1Column = "BasalArea" )
+test <- stratifyvegdata(df_acsa2, sizes1 = BA_bins, plotColumn = "PID", speciesColumn = "TR_SP", abundanceColumn = "TreesPerAcre", size1Column = "BasalArea", cumulative = TRUE )
 cap <- CAP(test)
 
 #Plot for individual species in one plot as in De Caceres, 2013. Probably do not want to use
@@ -48,11 +48,10 @@ ggplot(filter(df_acsa2, PID == "Cuivre-1-41")) + geom_step(aes(x = BasalArea, y 
 #Compare CAP for multiple plots
 example <- cap[[1]][rowSums(cap[[1]][,-1]) > 0,colSums(cap[[1]][-1,]) > 0]
 example
-ggplot()
 
 plot(cap, plots = "1", sizes = BA_bins[1:5])
 
-dissim <- vegdiststruct(cap, method = "bray")
+dissim <- vegdiststruct(cap, method = "manhattan")
 write_csv(as.data.frame(as.matrix(dissim)), "dissimilarity_matrix.csv")
 
 ###Checkpoint###
@@ -80,7 +79,7 @@ plot(cluster_k_twss)
 #Silhouette
 sil <- vector("list", length = clusters)
 for(n in 1:clusters){
-    sil[[n]] <- silhouette(x = cluster_k[[n]]$cluster, dmatrix = as.matrix(dissim))
+  sil[[n]] <- silhouette(x = cluster_k[[n]]$cluster, dmatrix = as.matrix(dissim))
 }
 plot(sil[[2]], col = 1:2, border = NA)
 
@@ -99,16 +98,12 @@ plot(avg_sil_neg) #minimum is at 13 clusters
 #Plot regularized average silhouette
 plot(avg_sil_len*(1+ 0.1*seq(2:clusters)))
 
-  
+
 
 #Gap statistics
 gap <- clusGap(as.matrix(dissim), kmeans, K.max = 20, B = 10, d.power = 2, verbose = TRUE)
 write_csv(as.data.frame(gap[[1]]), "gap_kmeans.csv")
 plot(as.matrix(gap[[1]])[,3])
-
-#Hierarchical Clustering
-cluster_h <- hclust(dist(dissim), method = "ward.D")
-plot(cluster_h$
 
 
 #OPTICS
@@ -120,3 +115,20 @@ plot(cluster_db)
 sort(unique(cluster_db$cluster))
 
 #Personally, I am dissatisfied with this approach. We should stick to hierarchical
+
+heatmap(dissim[1:100,1:100])
+qplot(as.vector(dissim))
+
+
+#Hierarchical Clustering
+
+cluster_h <- hclust(as.dist(dissim), method = "average")
+plot(cluster_h, labels = FALSE)
+
+cluster_h <- hclust(as.dist(dissim), method = "ward.D")
+plot(cluster_h)
+
+
+
+
+
