@@ -51,7 +51,7 @@ example
 
 plot(cap, plots = "1", sizes = BA_bins[1:5])
 
-dissim <- vegdiststruct(cap, method = "bray")
+dissim <- vegdiststruct(cap, method = "manhattan")
 write_csv(as.data.frame(as.matrix(dissim)), "dissimilarity_matrix.csv")
 
 ###Checkpoint###

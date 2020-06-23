@@ -4,6 +4,10 @@ library(dbscan)
 library(vegclust)
 library(cluster)
 library(ggsci)
+library(mclust)
+library(rpart)
+library(rpart.plot)
+
 
 path_of_code <- dirname(rstudioapi::getSourceEditorContext()$path)
 setwd(path_of_code)
@@ -16,7 +20,7 @@ df_acsa2 <- filter(df_cols, Type == "ACSA2")
 dissim <- read_csv("dissimilarity_matrix.csv")
 dissim <- as.matrix(dissim)
 
-cluster_h <- hclust(as.dist(dissim), method = "ward.D")
+cluster_h <- hclust(as.dist(dissim), method = "ward.D2")
 plot(cluster_h, labels = FALSE)
 
 #First, we must create a new data frame with the non-relative values to explore
@@ -44,11 +48,13 @@ plots_relative <- read_csv("clean_data/plots_full.csv")
 plots_acsa2 <- plots %>% filter(Type == "ACSA2")
 
 
-result <- cutree(cluster_h, k = 5)
+result <- cutree(cluster_h, k = 3)
 plots_acsa2$cluster <- result
 
+
 #Voila! The sort of result we've been looking for
-ggplot(plots_acsa2) + geom_point(aes(x = sqrt(BA_ACSA2), y = TPA_ACSA2, color = as.factor(cluster))) + scale_color_jco() + theme_light()
+ggplot(plots_acsa2) + geom_point(aes(x = log(BA_ACSA2), y = log(TPA_ACSA2), color = as.factor(cluster))) + scale_color_jco() + theme_light()
+
 
 pc <- prcomp(plots_acsa2[,2:(ncol(plots_acsa2)-3)])
 pc1 <- pc$x[,1]
@@ -57,6 +63,10 @@ cluster <- plots_acsa2$cluster
 bp <- data.frame(pc1, pc2, cluster)
 ggplot(bp) + geom_point(aes(x = pc1, y = pc2, color = as.factor(cluster))) + scale_color_jco() + theme_light()
 
+ggplot(plots_acsa2) + geom_boxplot(aes(x = log(BA_ACSA2))) + facet_wrap(~cluster)
+ggplot(plots_acsa2) + geom_boxplot(aes(x = log(TPA_ACSA2))) + facet_wrap(~cluster)
+
+
 
 #Show the biplot with direction vectors for attributes
 biplot(pc, xlabs=rep("·", nrow(bp)))
@@ -64,4 +74,21 @@ biplot(pc, xlabs=rep("·", nrow(bp)))
 #Proportion of variance explained for each principal component
 #PC1 and PC2 only make up about 54.9% of the variance 
 summary(pc)$importance[2,]
+
+
+plots_acsa2$cluster <- as.factor(plots_acsa2$cluster)
+form <- paste( "cluster ~", paste0(colnames(plots_acsa2)[2:(ncol(plots_acsa2)-3)], collapse = " + "))
+tree <- rpart(data = plots_acsa2, formula = form, method = "class", control = rpart.control(maxdepth = 3, cp = 0, minbucket = 6))
+rpart.plot(tree)
+printcp(tree)
+
+table(tree)
+table(predict(tree, t="class"), plots_acsa2$cluster)
+
+
+
+
+
+
+
 
