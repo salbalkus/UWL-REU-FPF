@@ -39,7 +39,7 @@ qplot(sqrt(BA_bins), binwidth = sqrt(BA_bins)[2] - sqrt(BA_bins)[1])
 
 
 #Stratify the vegetation data
-test <- stratifyvegdata(df_acsa2, sizes1 = BA_bins, plotColumn = "PID", speciesColumn = "TR_SP", abundanceColumn = "TreesPerAcre", size1Column = "BasalArea" )
+test <- stratifyvegdata(df_acsa2, sizes1 = BA_bins, plotColumn = "PID", speciesColumn = "TR_SP", abundanceColumn = "TreesPerAcre", size1Column = "BasalArea", cumulative = TRUE )
 cap <- CAP(test)
 
 #Plot for individual species in one plot as in De Caceres, 2013. Probably do not want to use

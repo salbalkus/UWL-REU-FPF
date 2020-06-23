@@ -43,14 +43,10 @@ plots <- left_join(plots, labels, by = "PID")
 write_csv(plots, "plots_nonrel.csv")
 
 plots_relative <- read_csv("clean_data/plots_full.csv")
-
-
 plots_acsa2 <- plots %>% filter(Type == "ACSA2")
-
 
 result <- cutree(cluster_h, k = 3)
 plots_acsa2$cluster <- result
-
 
 #Voila! The sort of result we've been looking for
 ggplot(plots_acsa2) + geom_point(aes(x = log(BA_ACSA2), y = log(TPA_ACSA2), color = as.factor(cluster))) + scale_color_jco() + theme_light()
@@ -84,6 +80,10 @@ printcp(tree)
 
 table(tree)
 table(predict(tree, t="class"), plots_acsa2$cluster)
+
+
+
+
 
 
 
