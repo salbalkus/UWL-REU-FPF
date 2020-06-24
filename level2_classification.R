@@ -1,3 +1,13 @@
+library(tidyverse)
+library(kernlab)
+library(dbscan)
+library(vegclust)
+library(cluster)
+library(ggsci)
+
+path_of_code <- dirname(rstudioapi::getSourceEditorContext()$path)
+setwd(path_of_code)
+
 dissim <- read_csv("dissimilarity_matrix.csv")
 dissim <- as.matrix(dissim)
 

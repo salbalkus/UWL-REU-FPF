@@ -86,9 +86,5 @@ summary(tree)
 printcp(tree)
 ggplot(plots_acsa2) + geom_point(aes(x = log(BA_ACSA2), y = log(TPA_ACSA2), color = as.factor(cluster))) + scale_color_jco() + theme_light()
 
-### Using comparisons between tree and hierarchical clustering ###
 
-#Homogeneity
-
-predict(tree, plots_acsa2, )
 
