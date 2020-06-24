@@ -90,14 +90,31 @@ species_dict = list(
   'QUPA' = 'pin oak'
 )
 
-read_dict <- function(species){
+read_dict <- function(species, list_output = T, caps = T){
   full_sp <- c()
   
-  for (i in 1:length(species)){
-    full_sp <- c(full_sp, species_dict[[species[i]]])
-    if (i == length(species)){
-      full_sp <- c(full_sp[-length(species)], paste('and', species_dict[[species[i]]]))
-    }
+  CapStr <- function(y) {
+    c <- strsplit(y, " ")[[1]]
+    paste(toupper(substring(c, 1,1)), substring(c, 2),
+          sep="", collapse=" ")
   }
-  return(full_sp)
+  
+  for (i in 1:length(species)){
+      full_sp <- c(full_sp, species_dict[[species[i]]])
+  }
+   
+  if (caps){
+    full_sp <- sapply(full_sp, CapStr)
+  }
+  
+  if (!list_output){
+    last_sp <- full_sp[length(species)]
+    full_sp <- c(full_sp[-length(species)], paste('and', last_sp))
+  }
+  
+  return(full_sp)  
 }
+
+read_dict('ULAM')
+read_dict('ACSA2')
+length('ULAM')
