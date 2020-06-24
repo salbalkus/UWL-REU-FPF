@@ -64,6 +64,11 @@ mixed <- df %>%
 output <- bind_rows(dominant, codominant, mixed)
 write_csv(output, "clean_data/plot_classification.csv")
 
+
+
+
+
+
 plots_output <- df %>%
   group_by(PID, TR_SP) %>%
   summarize(TPA = n(), BasalArea = sum(BasalArea)) %>%

@@ -27,8 +27,6 @@ BA_bins = 0.25*pi*(seq(1:106)^2)
 (1/sqrt(TPA_bins))[2] - (1/sqrt(TPA_bins))[1]
 (1/sqrt(TPA_bins))[3] - (1/sqrt(TPA_bins))[2]
 
-tpa_tf < function(x){return(1/sqrt(x))}
-ba_tf <- function(x){return(sqrt(x))}
 
 #Confirm uniform distribution
 qplot(1/sqrt(TPA_bins), binwidth = 1017.306)
