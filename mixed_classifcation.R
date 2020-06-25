@@ -369,7 +369,8 @@ cluster_hclust <- hclust(dist(cluster_dissim), method = 'ward.D2')
 
 plot(cluster_hclust)
 
-plot_CAP <- function(cap, x_lim = c(0, 40), mplot = T, plot_col = 4, layout = NULL){
+plot_CAP <- function(cap, x_lim = c(0, 40), mplot = T, plot_col = 4, layout = NULL,
+                     ylab = waiver(), ylims = NULL){
   plots <- list()
   for (i in 1:length(cap)){
     ggplot_df <- as_tibble(t(as.matrix(cluster_cap[[i]]))) %>% mutate(low_bound = 0:104) %>% 
@@ -381,7 +382,7 @@ plot_CAP <- function(cap, x_lim = c(0, 40), mplot = T, plot_col = 4, layout = NU
       theme_gray() +
       theme(legend.position = 'none', axis.ticks.y = element_blank(),
             plot.title = element_text(size = 25)) +
-      scale_y_continuous(labels = NULL, limits = c(0, 75000)) + 
+      scale_y_continuous(labels = ylab, limits = ylims) + 
       labs(x = NULL, y = NULL, title = paste('Cluster', i, sep = ' '))
       
       
@@ -395,7 +396,8 @@ plot_CAP <- function(cap, x_lim = c(0, 40), mplot = T, plot_col = 4, layout = NU
     geom_col() + 
     ylim(0, 75000) +
     theme_gray() + 
-    theme(legend.title = element_text(size = 30), legend.text = element_text(size = 25))
+    theme(legend.title = element_text(size = 30), legend.text = element_text(size = 25)) +
+    labs(fill = 'Species')
     
   cap_legend <- ggpubr::as_ggplot(ggpubr::get_legend(cap_plot))
   
@@ -410,6 +412,8 @@ layout = matrix(c(1,2,3,4,5,6,7,11,8,9,10,11), nrow = 3, byrow = T)
 plot_CAP(cluster_cap, layout = layout)
 
 df_clust %>% filter(cluster == 4) %>% .$PID %>% n_distinct
+
+scale_y_
 
 ##### Ordination #####
 

@@ -220,7 +220,8 @@ plot_CAP <- function(cap, x_lim = c(0, 40), mplot = T, plot_col = 4, layout = NU
     geom_col() + 
     ylim(0, 75000) +
     theme_gray() + 
-    theme(legend.title = element_text(size = 30), legend.text = element_text(size = 25))
+    theme(legend.title = element_text(size = 30), legend.text = element_text(size = 25)) +
+    labs(fill = 'Species')
   
   cap_legend <- ggpubr::as_ggplot(ggpubr::get_legend(cap_plot))
   
