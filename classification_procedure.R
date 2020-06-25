@@ -28,6 +28,26 @@ dissim <- function(df, meth = "manhattan"){
   return(d)
 }
 
+oversample <- function(plots){
+  output <- filter(plots, cluster == which.max(table(plots$cluster)))
+  for(c in 1:length(unique(plots$cluster))){
+    len <- max(table(plots$cluster)) - table(plots$cluster)[c]
+    if(len == 0){next}
+    
+    plots_target <- filter(plots, cluster == c)
+    target <- plots_target
+    
+    n <- floor(len / table(plots$cluster)[c])
+    remain <- len %% table(plots$cluster)[c]
+    
+    target <- target[rep(seq_len(nrow(target)), n + 1), ]
+    target <- rbind(target, plots_target[sample(1:nrow(plots_target), remain),])
+    
+    output <- rbind(output, target)
+  }
+  return(output)
+}
+
 #Classification output for a single dominant species type
 #This needs to be tested, and introspection must be able to be performed
 best_clustering <- function(df, dissim, dom_species, max_clusters, meth = "ward.D2"){
@@ -48,7 +68,6 @@ best_clustering <- function(df, dissim, dom_species, max_clusters, meth = "ward.
     replace(is.na(.), 0)
   
   plots <- left_join(plots, read_csv("clean_data/plot_classification.csv"))
-  
   form <- paste( "cluster ~", paste0(colnames(plots)[2:(ncol(plots)-2)], collapse = " + "))
   
   vmeasures <- vector(length = max_clusters - 1)
@@ -56,13 +75,13 @@ best_clustering <- function(df, dissim, dom_species, max_clusters, meth = "ward.
   for(n in 2:max_clusters){
     cut <- cutree(cluster_h, k = n)
     plots$cluster <- cut
-    
-    trees[[n-1]] <- rpart(data = plots, formula = form, method = "class", control = rpart.control(maxdepth = ceiling(log(2*n,2)), cp = 0, minbucket = 1))
+    new_plots <- oversample(plots)
+    trees[[n-1]] <- rpart(data = new_plots, formula = form, method = "class", control = rpart.control(maxdepth = ceiling(log(2*n,2)), cp = 0, minbucket = 1))
     sel_tree <- trees[[n-1]]
-    plots$tree <- predict(sel_tree, plots, type = "vector")
-    
-    h <- 1 - condentropy(plots$cluster, plots$tree) / entropy(plots$cluster)
-    c <- 1 - condentropy(plots$tree, plots$cluster) / entropy(plots$tree)
+    new_plots$tree <- predict(sel_tree, new_plots, type = "vector")
+    #Should this be using the oversampled df or the previous df?
+    h <- 1 - condentropy(new_plots$cluster, new_plots$tree) / entropy(new_plots$cluster)
+    c <- 1 - condentropy(new_plots$tree, new_plots$cluster) / entropy(new_plots$tree)
     
     vmeasures[n-1] <- 2 * ((h*c) / (h + c))
   }
@@ -70,7 +89,6 @@ best_clustering <- function(df, dissim, dom_species, max_clusters, meth = "ward.
   best_k <- which.max(vmeasures)
   
   plots$cluster <- predict(trees[[best_k]], plots, type = "vector")
-  plots <- select(plots, -tree)
   return(list(plots, trees[[best_k]]))
 }
 

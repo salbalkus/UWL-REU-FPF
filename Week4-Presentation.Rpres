@@ -1,0 +1,29 @@
+Week4-Presentation
+========================================================
+author: Sal Balkus, Noah Dean, Makayla McDevitt
+date: 6/26/20
+autosize: true
+css: Week2-Presentation.css
+
+Decision Trees
+========================================================
+
+For more details on authoring R presentations please visit <https://support.rstudio.com/hc/en-us/articles/200486468>.
+
+- Bullet 1
+- Bullet 2
+- Bullet 3
+
+Mixed Plots
+========================================================
+
+```{r}
+summary(cars)
+```
+
+Non-metric Multidimensional Scaling
+========================================================
+
+```{r, echo=FALSE}
+plot(cars)
+```
