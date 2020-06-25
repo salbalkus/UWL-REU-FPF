@@ -10,7 +10,7 @@ library(rpart)
 library(rpart.plot)
 library(zoo)
 library(vegan)
-library(ggthemes)
+
 
 
 path_of_code <- rprojroot::find_rstudio_root_file()
@@ -19,13 +19,11 @@ df <- read_csv("clean_data/UMRS_FPF_clean.csv")
 labels <- read_csv("clean_data/plot_classification.csv")
 df_cols <- left_join(df, labels, by = "PID") %>% select(PID, TR_SP, TR_DIA, BasalArea, TreesPerAcre, Label)
 mixed <- df_cols %>% filter(Label == 'Mixed')
-load('cluster_h.RData')
+load('cluster_h_d2.RData')
 plots <- read_csv("clean_data/plots_full.csv")
 source('Species_dictionary.R')
 
 theme_set(theme_gray(base_size = 30))
-
-?theme_set
 
 ##### CAP #####
 # Number of unique PIDs in mixed category
@@ -52,9 +50,32 @@ write_csv(as.data.frame(as.matrix(dissim)), 'mixed_dissim.csv')
 
 ##### Hierarchical clustering ######
 
-dissim <- read.csv('mixed_dissim.csv')
+dissim <- read_csv('mixed_dissim.csv')
 
-cluster_h <- hclust(dist(dissim), method = "ward.D")
+# cluster_h <- hclust(as.dist(dissim), method = "ward.D")
+
+start <- now()
+cluster_h_d2 <- hclust(as.dist(dissim), method = "ward.D2")
+save(cluster_h_d2, file = 'cluster_h_d2.RData')
+saveRDS(cluster_h_d2, file = 'cluster_h_d2.rds')
+print(now() - start)
+
+start <- now()
+cluster_h_d <- hclust(as.dist(dissim), method = "ward.D")
+save(cluster_h_d, file = 'cluster_h_d.RData')
+saveRDS(cluster_h_d, file = 'cluster_h_d.rds')
+print(now() - start)
+
+plot(cluster_h_d2, labels = F)
+plot(cluster_h_d)
+
+
+
+plot_classifier(plots %>% filter(PID == 'TBD'))
+
+plots %>% filter(PID == 'TBD') %>% .$SNAG_rel_BA
+plots %>% filter(PID == 'TBD') %>% .$PLOC_rel_TPA
+
 
 # Saves cluster_h object so you dont have to run it again
 # save(cluster_h, file = 'cluster_h.RData')
@@ -143,6 +164,7 @@ pam_cluster <- pam(dissim, k = 5, diss = T, medoid = clusts)
 
 ##### Distribution of clusters #####
 
+
 multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
   library(grid)
   
@@ -192,13 +214,12 @@ most_abund_species <- mixed %>% count(TR_SP) %>% filter(n/sum(n) >= 0.01) %>% .$
 # The primary arguments that should be altered are k and filter.  k is the number of clusters
 # to make, and filter will only include species that make up at least 1% of the total count
 # across all individuals
-make_clusters <- function(k, clusters = cluster_h, tot_df = df, mixed_df = mixed,
+make_clusters <- function(k, clusters = cluster_h_d2, tot_df = df, mixed_df = mixed,
                           species_abund = most_abund_species, filter = T){
-  # Breaks into clusters
-  clusts <- cutree(clusters, k = k)
   
   # Joins clusters with PIDs
-  pid_clusts <- tibble(PID = sort(unique(mixed_df$PID)), cluster = clusts)
+  pid_clusts <- rownames_to_column(as.data.frame(cutree(clusters, k = k)), 'PID')
+  colnames(pid_clusts)[2] <- 'cluster'
   
   # Creates a tibble with cluster and info about individual trees
   if (!filter){
@@ -221,8 +242,9 @@ make_clusters <- function(k, clusters = cluster_h, tot_df = df, mixed_df = mixed
 # and ba.  The k and filter arguments are passed on to make_clusters.  The pos argument
 # determines the type of bar chart (either 'fill', 'stack', or 'dodge').  The mplot
 # argument will generate a multiplot if true or return a list of the plots if false
-species_multiplot <- function(k = 10, pos = 'fill', filter = T, mplot = T, leg_col = 3, codes = F){
-  df_clust <- make_clusters(k = k, filter = filter)
+species_multiplot <- function(k = 10, pos = 'fill', filter = T, mplot = T, leg_col = 3, codes = F,
+                              clusters = cluster_h){
+  df_clust <- make_clusters(k = k, filter = filter, clusters = clusters)
   sp_summary <- df_clust %>% group_by(cluster, TR_SP) %>% 
     summarize(count = n(), tpa = sum(TreesPerAcre), ba = sum(BasalArea)) 
   if (!codes) {sp_summary <- sp_summary %>% mutate(Species = read_dict(TR_SP))}
@@ -274,11 +296,11 @@ species_multiplot <- function(k = 10, pos = 'fill', filter = T, mplot = T, leg_c
   }
 }
 
-species_multiplot(leg_col = 1, pos = 'stack')
+species_multiplot(k = 3, leg_col = 1, pos = 'fill', clusters = cluster_h_d2, codes = T, filter = F)
 # This functions exactly like the species multiplot in terms of arguments.  It 
 # will generate a multiplot with average tpa and ba across clusters to look for any patterns
-tpa_ba_multiplot <- function(k = 10, filter = T, mplot = T){
-  df_clust <- make_clusters(k = k, filter = filter)
+tpa_ba_multiplot <- function(k = 10, filter = T, mplot = T, clusters = cluster_h){
+  df_clust <- make_clusters(k = k, filter = filter, clusters = clusters)
   
   tpa_ba_sum <- df_clust %>% group_by(cluster) %>% 
     summarize(tpa = mean(TreesPerAcre), ba = mean(BasalArea))
@@ -299,7 +321,6 @@ tpa_ba_multiplot <- function(k = 10, filter = T, mplot = T){
   
 }
 
-read_dict('ULAM')
 
 df_clust <- make_clusters(10)
 # Histogram of TR_DIA in clusters (doesnt account for species)
@@ -314,7 +335,11 @@ dia_dens <- df_clust %>% ggplot(aes(x = TR_DIA)) +
   facet_wrap(~cluster, nrow = 2)
 dia_dens
 
+left_join(mixed, as.data.frame(cutree(cluster_h_d2, k = 3)))
 
+read_dict('FOAC')
+rownames(as.data.frame(cutree(cluster_h_d2, k = 3)))
+    
 
 species_multiplot(10, pos = 'stack', leg_col = 1)
 tpa_ba_multiplot(10)
@@ -324,6 +349,7 @@ tpa_ba_multiplot(10)
 
 k = 10
 df_clust <- make_clusters(k, filter = T)
+DIA_bins <- 1:106
 
 cluster_cap <- df_clust %>% stratifyvegdata(sizes1 = DIA_bins, plotColumn = 'cluster', speciesColumn = 'TR_SP', 
                                             abundanceColumn = 'TreesPerAcre', size1Column = 'TR_DIA',
@@ -338,25 +364,9 @@ print(end - start)
 
 cluster_dissim
 
-plot.CAP(cluster_cap, plots = 1, xlim = c(0, 40), lty = 1:4, col = c('black', 'blue','red'), lwd = 2)
-legend(x = 'topright', col = 1:3, legend = sort(unique(df_clust$TR_SP)),
-       lty = 1:4, lw = 2)
-?legend
-mixed
-df_clust
+cluster_hclust <- hclust(dist(cluster_dissim), method = 'ward.D2')
 
-plot.CAP
-
-as.numeric(cluster_cap[[1]]['ACNE2', ])
-cluster_cap[[1]]
-
-as.data.frame(cluster_cap[[1]])
-
-data.table::transpose(as.data.frame(cluster_cap[[1]]))
-
-ggplot_df %>% ggplot(aes(x = low_bound, y = CAP)) +
-  geom_step(aes(color = TR_SP), direction = 'hv') + 
-  xlim(c(0,40))
+plot(cluster_hclust)
 
 plot_CAP <- function(cap, x_lim = c(0, 40), mplot = T, plot_col = 4, layout = NULL){
   plots <- list()
@@ -398,13 +408,14 @@ plot_CAP <- function(cap, x_lim = c(0, 40), mplot = T, plot_col = 4, layout = NU
 layout = matrix(c(1,2,3,4,5,6,7,11,8,9,10,11), nrow = 3, byrow = T)
 plot_CAP(cluster_cap, layout = layout)
 
+df_clust %>% filter(cluster == 4) %>% .$PID %>% n_distinct
+
 ##### Ordination #####
 
 k <- 10
 
 df_clust <- make_clusters(k = 10, filter = F) %>% group_by(cluster)
-
-clust_sample <- df_clust %>% sample_n(size = 100)
+clust_sample <- df_clust %>% sample_n(size = 75)
 
 sample_cap <- clust_sample %>% stratifyvegdata(sizes1 = DIA_bins, plotColumn = 'PID', speciesColumn = 'TR_SP', 
                                                abundanceColumn = 'TreesPerAcre', size1Column = 'TR_DIA',
@@ -415,7 +426,7 @@ sample_dissim <- vegdiststruct(sample_cap, method = 'manhattan')
 end <- now()
 print(end - start)
 
-sample_MDS <- metaMDS(sample_dissim, trymax = 100)
+sample_MDS <- metaMDS(dist(sample_dissim), trymax = 100)
 
 sample_MDS$species
 
