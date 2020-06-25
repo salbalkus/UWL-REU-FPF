@@ -11,8 +11,6 @@ library(rpart.plot)
 library(zoo)
 library(vegan)
 
-
-
 path_of_code <- rprojroot::find_rstudio_root_file()
 
 df <- read_csv("clean_data/UMRS_FPF_clean.csv")
@@ -243,7 +241,7 @@ make_clusters <- function(k, clusters = cluster_h_d2, tot_df = df, mixed_df = mi
 # determines the type of bar chart (either 'fill', 'stack', or 'dodge').  The mplot
 # argument will generate a multiplot if true or return a list of the plots if false
 species_multiplot <- function(k = 10, pos = 'fill', filter = T, mplot = T, leg_col = 3, codes = F,
-                              clusters = cluster_h){
+                              clusters = cluster_h_d2, legend = T){
   df_clust <- make_clusters(k = k, filter = filter, clusters = clusters)
   sp_summary <- df_clust %>% group_by(cluster, TR_SP) %>% 
     summarize(count = n(), tpa = sum(TreesPerAcre), ba = sum(BasalArea)) 
@@ -269,9 +267,12 @@ species_multiplot <- function(k = 10, pos = 'fill', filter = T, mplot = T, leg_c
   # sp_tpa
 
   # Shows total BA by species in each cluster
+  if (legend) leg_pos <- 'left'
+  if (!legend) leg_pos <- 'none'
+  
   sp_ba_leg <- sp_summary %>% ggplot(aes(x = cluster, y = ba, fill = Species)) +
     geom_bar(position = pos, stat = 'identity') +
-    theme(legend.position = 'right') + 
+    theme(legend.position = leg_pos) + 
     guides(fill = guide_legend(ncol = leg_col)) 
 
   sp_ba <- sp_summary %>%  ggplot(aes(x = cluster, y = ba, fill = Species)) +
@@ -368,7 +369,8 @@ cluster_hclust <- hclust(dist(cluster_dissim), method = 'ward.D2')
 
 plot(cluster_hclust)
 
-plot_CAP <- function(cap, x_lim = c(0, 40), mplot = T, plot_col = 4, layout = NULL){
+plot_CAP <- function(cap, x_lim = c(0, 40), mplot = T, plot_col = 4, layout = NULL,
+                     ylab = waiver(), ylims = NULL){
   plots <- list()
   for (i in 1:length(cap)){
     ggplot_df <- as_tibble(t(as.matrix(cluster_cap[[i]]))) %>% mutate(low_bound = 0:104) %>% 
@@ -380,7 +382,7 @@ plot_CAP <- function(cap, x_lim = c(0, 40), mplot = T, plot_col = 4, layout = NU
       theme_gray() +
       theme(legend.position = 'none', axis.ticks.y = element_blank(),
             plot.title = element_text(size = 25)) +
-      scale_y_continuous(labels = NULL, limits = c(0, 75000)) + 
+      scale_y_continuous(labels = ylab, limits = ylims) + 
       labs(x = NULL, y = NULL, title = paste('Cluster', i, sep = ' '))
       
       
@@ -394,7 +396,8 @@ plot_CAP <- function(cap, x_lim = c(0, 40), mplot = T, plot_col = 4, layout = NU
     geom_col() + 
     ylim(0, 75000) +
     theme_gray() + 
-    theme(legend.title = element_text(size = 30), legend.text = element_text(size = 25))
+    theme(legend.title = element_text(size = 30), legend.text = element_text(size = 25)) +
+    labs(fill = 'Species')
     
   cap_legend <- ggpubr::as_ggplot(ggpubr::get_legend(cap_plot))
   
@@ -409,6 +412,8 @@ layout = matrix(c(1,2,3,4,5,6,7,11,8,9,10,11), nrow = 3, byrow = T)
 plot_CAP(cluster_cap, layout = layout)
 
 df_clust %>% filter(cluster == 4) %>% .$PID %>% n_distinct
+
+scale_y_
 
 ##### Ordination #####
 
