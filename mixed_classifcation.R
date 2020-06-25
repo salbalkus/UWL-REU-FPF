@@ -11,8 +11,6 @@ library(rpart.plot)
 library(zoo)
 library(vegan)
 
-
-
 path_of_code <- rprojroot::find_rstudio_root_file()
 
 df <- read_csv("clean_data/UMRS_FPF_clean.csv")
@@ -243,7 +241,7 @@ make_clusters <- function(k, clusters = cluster_h_d2, tot_df = df, mixed_df = mi
 # determines the type of bar chart (either 'fill', 'stack', or 'dodge').  The mplot
 # argument will generate a multiplot if true or return a list of the plots if false
 species_multiplot <- function(k = 10, pos = 'fill', filter = T, mplot = T, leg_col = 3, codes = F,
-                              clusters = cluster_h){
+                              clusters = cluster_h_d2, legend = T){
   df_clust <- make_clusters(k = k, filter = filter, clusters = clusters)
   sp_summary <- df_clust %>% group_by(cluster, TR_SP) %>% 
     summarize(count = n(), tpa = sum(TreesPerAcre), ba = sum(BasalArea)) 
@@ -269,9 +267,12 @@ species_multiplot <- function(k = 10, pos = 'fill', filter = T, mplot = T, leg_c
   # sp_tpa
 
   # Shows total BA by species in each cluster
+  if (legend) leg_pos <- 'left'
+  if (!legend) leg_pos <- 'none'
+  
   sp_ba_leg <- sp_summary %>% ggplot(aes(x = cluster, y = ba, fill = Species)) +
     geom_bar(position = pos, stat = 'identity') +
-    theme(legend.position = 'right') + 
+    theme(legend.position = leg_pos) + 
     guides(fill = guide_legend(ncol = leg_col)) 
 
   sp_ba <- sp_summary %>%  ggplot(aes(x = cluster, y = ba, fill = Species)) +
