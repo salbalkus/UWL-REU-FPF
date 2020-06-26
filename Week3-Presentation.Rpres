@@ -135,6 +135,30 @@ mixed <- df %>%
 
 nrow(mixed)
 ```
+=======
+```{r, include = FALSE}
+
+#knitr::opts_chunk$set(warning = F, error = F, message = F, echo = F, include = F)
+#knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+
+
+#library(tidyverse)
+
+#df <- read_csv('clean_data/UMRS_FPF_clean.csv')
+#plots <- read_csv("clean_data/plots_classification.csv")
+```
+
+Level 1 Classification
+========================================================
+
+
+
+
+
+
+CAP
+========================================================
+>>>>>>> Sal
 
 
 
@@ -145,6 +169,7 @@ Our next goal is to subdivide the Level 1 categories using clustering.
 
 The number of clusters should be numerous enough to capture different forest types within the Level 1 categories, but not so numerous that similar forest types are repeated across multiple clusters.
 
+<<<<<<< HEAD
 CAP will measure dissimilarity between plots.
 
 
@@ -249,10 +274,13 @@ dissim
 
 ***
 - The distance between them is `r round(dissim[1], digits = 4)`
+=======
+>>>>>>> Sal
 
 
 Strategy
 ========================================================
+<<<<<<< HEAD
 Because the Level 1 categories are so numerous, use systematic approach for Level 2.
 
 1. Perform experimentation using ACSA2-dominant (silver maple) plots
@@ -260,12 +288,23 @@ Because the Level 1 categories are so numerous, use systematic approach for Leve
 
 2. Apply function across all level 1 classifications
   - Mixed plots clustered separately, since category is much larger
+=======
+Because the Level 1 categories are so numerous, a systematic approach must be developed to generate subcategories.
+
+First, we perform experimentation using the ACSA2-dominant (silver maple) plots. Through this, we develop a function to select the appropriate number of clusters. Since "silver maple dominant" is the most numerous and complex (besides mixed), our approach developed here will not be too simplistic for any other group.
+
+Once our function is developed, we will apply it across all level 1 classifications. Mixed plots will be clustered separately, since they are the largest level 1 category, much larger than others.
+>>>>>>> Sal
 
 
 
 Potential Clustering Methods
 ========================================================
+<<<<<<< HEAD
 Level 2 categories determined via clustering, which groups plots based on their dissimilarity (Bray-Curtis, based on CAP values).
+=======
+Level 2 categories are determined via clustering, which groups plots based on their dissimilarity (Bray-Curtis, based on CAP values).
+>>>>>>> Sal
 
 We considered several potential clustering algorithms:
 - K-means
@@ -273,6 +312,10 @@ We considered several potential clustering algorithms:
 - DBSCAN/OPTICS
 - Spectral Clustering
 
+<<<<<<< HEAD
+=======
+These clustering algorithms were each tested on our data to determine their effectiveness
+>>>>>>> Sal
 
 
 Spectral Clustering
@@ -281,17 +324,26 @@ A graph-based clustering algorithm especially good for high-dimensional data
 - Uses graph Laplacian eigenvalues to partition the data points
 - Performs dimension reduction
 - Good at picking out unique shapes
+<<<<<<< HEAD
 - O(n^3 )
 
 We discussed using this algorithm to cluster the data without using CAP. However, algorithm was too slow, and the CAP values solved the high-dimensionality problem.
 
 <!-- http://people.csail.mit.edu/dsontag/courses/ml14/notes/Luxburg07_tutorial_spectral_clustering.pdf -->
+=======
+-O(n^3)
+
+We discussed using this algorithm to cluster the data without using CAP. However, our data was too large for the slow algorithm, and the CAP values solved the high-dimensionality problem.
+
+http://people.csail.mit.edu/dsontag/courses/ml14/notes/Luxburg07_tutorial_spectral_clustering.pdf
+>>>>>>> Sal
 
 
 DBSCAN & OPTICS
 ========================================================
 Algorithms that group observations based on density
 - DBSCAN: specify minimum distance and minimum observations in each cluster
+<<<<<<< HEAD
 - OPTICS: specify minimum observations per cluster
 - Can mark points as outliers if they do not fit a cluster
 - No need to specify number of clusters!
@@ -471,15 +523,24 @@ Next Steps
   - Supervised learning with cluster labels?
 - Formulate function to apply across all dominant species
 - Cluster mixed forest types separately
+=======
+- OPTICS: specify minimum observations per cluster; creates a dendrogram that can be cut
+- Can mark points as outliers if they do not fit a cluster
+- No need to specify number of clusters!
+
+
+
 
 
 Endnotes
 ========================================================
 
 Cover Image: Forest Landscape Ecology of the Upper Mississippi River Floodplain, United States Geological Survey
+<<<<<<< HEAD
 
 http://people.csail.mit.edu/dsontag/courses/ml14/notes/Luxburg07_tutorial_spectral_clustering.pdf
 
 https://medium.com/@xzz201920/optics-d80b41fd042a#:~:text=Reachability%2Dplot%20to%20Clustering&text=It%20is%20a%202D%20plot,valleys%20in%20the%20reachability%20plot
 
 https://web.stanford.edu/~hastie/Papers/gap.pdf
+

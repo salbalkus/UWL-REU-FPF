@@ -99,7 +99,6 @@ plot(avg_sil_neg) #minimum is at 13 clusters
 #Plot regularized average silhouette
 plot(avg_sil_len*(1+ 0.1*seq(2:clusters)))
 
-  
 
 #Gap statistics
 gap <- clusGap(as.matrix(dissim), kmeans, K.max = 20, B = 10, d.power = 2, verbose = TRUE)
@@ -129,6 +128,7 @@ plot(cluster_h, labels = FALSE)
 cluster_h <- hclust(as.dist(dissim), method = "ward.D")
 plot(cluster_h)
 
+
 #I like Ward better, let's see the results
 result <- cutree(cluster_h, k = 3)
 plots <- read_csv("clean_data/plots_full.csv")
@@ -139,6 +139,8 @@ plots_acsa2$cluster
 
 ggplot(plots_acsa2) + geom_point(aes(x = ba_ACSA2, y = tpa_ACSA2, color = as.factor(cluster))) + scale_color_jco()
 ggplot(plots_acsa2) + geom_point(aes(x = ba_PODE3, y = tpa_PODE3, color = as.factor(cluster))) + scale_color_jco()
+
+
 
 
 
