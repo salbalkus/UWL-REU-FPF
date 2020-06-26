@@ -149,9 +149,9 @@ Take the decision tree classification most similar to the Ward clustering, deter
 V-measure takes into account cluster homogeneity and completeness, which rely on entropy
 
 <div align = "center">
-<img src="Week4-Presentation-figure/v-measure.png" width = 40%></img><br>
-<img src="Week4-Presentation-figure/homogeneity.png" width = 40%></img>
-<img src="Week4-Presentation-figure/completeness.png" width = 40%></img>
+<img src="week_4_pres_images/v-measure.png" width = 40%></img><br>
+<img src="week_4_pres_images/homogeneity.png" width = 40%></img>
+<img src="week_4_pres_images/completeness.png" width = 40%></img>
 </div>
 
 ***
