@@ -2,6 +2,7 @@
 *.html
 Datasets/
 clean_data/
+Week3-Presentation-cache
 
 # History files
 .Rhistory
