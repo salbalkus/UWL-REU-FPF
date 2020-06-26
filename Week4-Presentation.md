@@ -1,9 +1,24 @@
+<<<<<<< HEAD
+Week4-Presentation
+=======
 Floodplain Forest: Week 4 Progress Report
+>>>>>>> f389da0becee90a750e5f3820f7d80beeb9b1b13
 ========================================================
 author: Sal Balkus, Noah Dean, Makayla McDevitt
 date: 6/26/20
 autosize: true
 css: Week2-Presentation.css
+<<<<<<< HEAD
+
+Decision Trees
+========================================================
+
+For more details on authoring R presentations please visit <https://support.rstudio.com/hc/en-us/articles/200486468>.
+
+- Bullet 1
+- Bullet 2
+- Bullet 3
+=======
 type: section
 
 
@@ -106,6 +121,7 @@ Ecological Significance
 
 Minimum bin size has large impact on decision tree solution
 
+>>>>>>> f389da0becee90a750e5f3820f7d80beeb9b1b13
 
 
 
@@ -136,7 +152,11 @@ left: 50%
 
 ***
 
+<<<<<<< HEAD
+<img src="Week4-Presentation-figure/unnamed-chunk-2-1.png" title="plot of chunk unnamed-chunk-2" alt="plot of chunk unnamed-chunk-2" width="90%" style="display: block; margin: auto;" />
+=======
 <img src="Week4-Presentation-figure/unnamed-chunk-8-1.png" title="plot of chunk unnamed-chunk-8" alt="plot of chunk unnamed-chunk-8" width="90%" style="display: block; margin: auto;" />
+>>>>>>> f389da0becee90a750e5f3820f7d80beeb9b1b13
 
 The Lone Plot 
 ====
@@ -157,7 +177,64 @@ left: 40%
 The Lone Plot 
 ====
 
+<<<<<<< HEAD
 <center><b>Proportion of species in each category (count, trees per acre, and basal area)</b></center>
+=======
+<<<<<<< HEAD
+<img src="Week4-Presentation-figure/unnamed-chunk-3-1.png" title="plot of chunk unnamed-chunk-3" alt="plot of chunk unnamed-chunk-3" width="80%" style="display: block; margin: auto;" />
+
+The Lone Plot 
+====
+
+<center> <font size = '24'> Proportion of species in each category (count, trees per acre, and basal area) </font> </center>
+
+<img src="Week4-Presentation-figure/unnamed-chunk-4-1.png" title="plot of chunk unnamed-chunk-4" alt="plot of chunk unnamed-chunk-4" width="62%" style="display: block; margin: auto;" />
+
+
+Taking more clusters
+======
+right: 25%
+
+<center> <font size = '20'> Proportion of common species in each category (count, trees per acre, and basal area) </font> </center>
+
+<img src="Week4-Presentation-figure/unnamed-chunk-5-1.png" title="plot of chunk unnamed-chunk-5" alt="plot of chunk unnamed-chunk-5" width="80%" style="display: block; margin: auto;" />
+
+***
+- We need to determine the correct amount clusters to make while still retaining ecological relevance
+
+- Requires looking at the species and size distributions of the plots
+
+- Some of the plots look similar in structure
+  - 8 and 9
+  - 1 and 6
+  
+- Need a good way to quantify the differences between clusters
+  - Could potentially use CAPs of the clusters
+
+
+Comparing CAPs among clusters
+======
+
+<img src="Week4-Presentation-figure/unnamed-chunk-6-1.png" title="plot of chunk unnamed-chunk-6" alt="plot of chunk unnamed-chunk-6" width="62%" style="display: block; margin: auto;" />
+
+Next steps for the mixed plots
+======
+- Determine the best clusters for these plots
+
+- Exact methods for this will be discussed next week
+  - Possibly multidimensional scaling
+  - May need to sub sample due to long run time
+  
+- Once clusters are picked out, we can use decision trees to find the rules for each cluster
+
+
+
+Non-metric Multidimensional Scaling
+========================================================
+
+![plot of chunk unnamed-chunk-7](Week4-Presentation-figure/unnamed-chunk-7-1.png)
+=======
+>>>>>>> 2ac8d5123e20715c3ae65044e4f076f918d2af0f
 
 <img src="Week4-Presentation-figure/unnamed-chunk-10-1.png" title="plot of chunk unnamed-chunk-10" alt="plot of chunk unnamed-chunk-10" width="62%" style="display: block; margin: auto;" />
 
@@ -199,4 +276,11 @@ Endnotes
 
 Cover Image: Forest Landscape Ecology of the Upper Mississippi River Floodplain, United States Geological Survey
 
+<<<<<<< HEAD
 V-measure: http://www1.cs.columbia.edu/~amaxwell/pubs/v_measure-emnlp07.pdf
+=======
+```
+Error in loadNamespace(name) : there is no package called 'ggpubr'
+```
+>>>>>>> f389da0becee90a750e5f3820f7d80beeb9b1b13
+>>>>>>> 2ac8d5123e20715c3ae65044e4f076f918d2af0f
