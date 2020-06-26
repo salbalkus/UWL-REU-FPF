@@ -1,14 +1,11 @@
-library(tidyverse)
-library(vegclust)
-library(rpart)
-library(infotheo)
-
+library(tidyverse, quietly = TRUE)
+library(vegclust, quietly = TRUE)
+library(rpart, quietly = TRUE)
+library(infotheo, quietly = TRUE)
 
 
 #Load in the data that will be used for clustering
 load_data <- function(dom_species){
-  path_of_code <- dirname(rstudioapi::getSourceEditorContext()$path)
-  setwd(path_of_code)
 
   df <- read_csv("clean_data/UMRS_FPF_clean.csv")
   labels <- read_csv("clean_data/plot_classification.csv")
@@ -18,7 +15,7 @@ load_data <- function(dom_species){
 }
 
 #Produce the dissimilarity matrix for the given dominant species type
-dissim <- function(df, meth = "manhattan"){
+dissimilarity_matrix <- function(df, meth = "manhattan"){
   
   TPA_bins = 1 / (pi * (seq(1:max(df$TR_DIA))*2.75)^2) / 43560
   BA_bins = 0.25*pi*(seq(1:max(df$TR_DIA))^2)
@@ -50,7 +47,7 @@ oversample <- function(plots){
 
 #Classification output for a single dominant species type
 #This needs to be tested, and introspection must be able to be performed
-best_clustering <- function(df, dissim, dom_species, max_clusters, meth = "ward.D2"){
+best_clustering <- function(df, dissim, dom_species, max_clusters, os = FALSE, meth = "ward.D2"){
   cluster_h <- hclust(as.dist(dissim), method = meth)
   
   plot_abundance <- df %>%
@@ -75,7 +72,12 @@ best_clustering <- function(df, dissim, dom_species, max_clusters, meth = "ward.
   for(n in 2:max_clusters){
     cut <- cutree(cluster_h, k = n)
     plots$cluster <- cut
-    new_plots <- oversample(plots)
+    if(os){
+      new_plots <- oversample(plots)
+    }
+    else {
+      new_plots <- plots
+    }
     trees[[n-1]] <- rpart(data = new_plots, formula = form, method = "class", control = rpart.control(maxdepth = ceiling(log(2*n,2)), cp = 0, minbucket = 1))
     sel_tree <- trees[[n-1]]
     new_plots$tree <- predict(sel_tree, new_plots, type = "vector")

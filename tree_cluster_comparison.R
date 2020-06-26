@@ -38,7 +38,7 @@ c <- 1 - condentropy(plots_acsa2$tree, plots_acsa2$cluster) / entropy(plots_acsa
 validity <- 2 * ((h*c) / (h + c))
 
 #Now we compare across multiple clusters
-max_clusters <- 100
+max_clusters <- 10
 vmeasures <- vector(length = max_clusters - 1)
 for(n in 2:max_clusters){
   cut <- cutree(cluster_h, k = n)
@@ -52,9 +52,10 @@ for(n in 2:max_clusters){
   
   vmeasures[n-1] <- 2 * ((h*c) / (h + c))
 }
-
 #higher validity measures are better
-plot((seq(1:99) + 1),vmeasures)
+wrap <- data.frame(Clusters = (seq(1:9) + 1), V.measure = vmeasures)
+wrap
+ggplot(wrap, mapping = aes(x = Clusters, y = V.measure)) + geom_point() + geom_line() + theme_light()
 
 best_k <- which.max(vmeasures) + 1
 best_k

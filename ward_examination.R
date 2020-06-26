@@ -40,7 +40,7 @@ plots <- inner_join(plot_abundance, plot_size, by = c("PID", "TR_SP")) %>%
   replace(is.na(.), 0)
 
 plots <- left_join(plots, labels, by = "PID")
-write_csv(plots, "plots_nonrel.csv")
+write_csv(plots, "clean_data/plots_nonrel.csv")
 
 plots_relative <- read_csv("clean_data/plots_full.csv")
 plots_acsa2 <- plots %>% filter(Type == "ACSA2")

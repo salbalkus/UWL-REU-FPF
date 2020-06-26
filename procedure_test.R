@@ -54,7 +54,7 @@ plot(cluster)
 ###Cottonwood###
 
 pode3 <- load_data("PODE3")
-d <- dissim(pode3)
+d <- dissimilarity_matrix(pode3)
 process <- best_clustering(pode3, d, "PODE3", 20)
 test <- process[[1]]
 test_tree <- process[[2]]
@@ -68,8 +68,8 @@ ggplot(test) + geom_point(aes(x = log(TPA_PODE3), y = log(BA_PODE3), color = as.
 #The minimum number of clusters could also be something like 5% of total observations
 
 frpe <- load_data("FRPE")
-d <- dissim(frpe)
-process <- best_clustering(frpe, d, "FRPE", 20)
+d <- dissimilarity_matrix(frpe)
+process <- best_clustering(frpe, d, "FRPE", 20, os = FALSE)
 test <- process[[1]]
 test_tree <- process[[2]]
 rpart.plot(test_tree)
