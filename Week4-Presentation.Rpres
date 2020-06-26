@@ -6,7 +6,7 @@ autosize: true
 css: Week2-Presentation.css
 type: section
 
-```{r echo = F}
+```{r echo = F, include = F, warning = F}
 
 knitr::opts_chunk$set(warning = F, error = F, message = F, echo = F, include = T, cache = T)
 knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
@@ -200,7 +200,7 @@ Imbalanced Class Problem
 Further Issues to Investigate
 ========================================================
 Ecological Significance
-- How can we determine if clusters are two similar?
+- How can we determine if clusters are too similar?
 - Potential Solution: "Multi Response Permutation Procedure" or "Permutational Multivariate Analysis of Variance"    
   - Tests for significant differences between clusters
   - How can we pick out which clusters to merge?
@@ -261,6 +261,7 @@ left: 25%
 - Silver maple is prominent in both clusters 1 and 2
 
 - `TBD` has higher amounts of snags and sycamores than the two clusters
+  - As well as swamp privet
 
 ***
 <center> <font size = '20'> Proportion of common species in each category (count, trees per acre, and basal area) </font> </center>
