@@ -17,6 +17,7 @@ library(ggsci)
 library(rpart)
 library(rpart.plot)
 library(infotheo)
+library(ggpubr)
 
 source("classification_procedure.R")
 
@@ -51,8 +52,9 @@ To construct a hierarchical classification of UMRS forest types that are...
 
 
 
-Summary statistics from last week: Top 5 Types
+Summary statistics from last week
 ========================================================
+Dominant plots: 17.5 percent; codominant plots: 34.3 percent
 
 ```{r, out.width = "50%"}
 display_dom <- df_cols %>% filter(Label == "Dominant") %>% group_by(Type) %>% summarize(Count = n()) %>% mutate(Percentage = Count / sum(Count)) %>% top_n(5, Count) %>% arrange(desc(Percentage))
@@ -66,6 +68,9 @@ ggplot(display_codom) + geom_col(aes(x = Type, y = Percentage, fill = Type)) + t
         axis.title=element_text(size=16), 
         legend.text = element_text(size = 16), 
         legend.title = element_text(size = 16)) + ggtitle("Codominant") + scale_color_jco()
+#nrow(filter(df_cols, Label == "Dominant")) / nrow(df_cols)
+#nrow(filter(df_cols, Label == "Codominant")) / nrow(df_cols)
+
 ```
 
 
@@ -190,14 +195,14 @@ rpart.plot(test_tree, cex = 0.5, type = 1)
 ggplot(test) + geom_point(aes(x = log(TPA_FRPE), y = log(BA_FRPE), color = as.factor(cluster))) + scale_color_jco() + theme_light()
 ```
 
-Further Issues to Investigate
+Further Issues to Investigate in Dominant Plots
 ========================================================
 Imbalanced Class Problem
 - Some clusters may have few plots but are ecologically significant
 - Potential Solution: oversample classes such that they have the same number of observations as largest class
   - Issue: can result in poor performance, as in Green Ash and Willow clusterings
   
-Further Issues to Investigate
+Further Issues to Investigate in Dominant Plots
 ========================================================
 Ecological Significance
 - How can we determine if clusters are two similar?
@@ -208,13 +213,12 @@ Ecological Significance
 Minimum bin size has large impact on decision tree solution
 
 
+
+
 Mixed Plots
 ========================================================
 
 ```{r, echo = F, include = F, error = F}
-
-library(tidyverse)
-library(vegclust)
 
 source('useful_functions.R')
 
@@ -235,13 +239,13 @@ num_plots <- length(labels$PID)
 
 First steps
 ===========
-left: 25%
+left: 50%
 
-- Use CAP values to perform a hierarchical clustering on the mixed plots
+- Use CAP values for hierarchical clustering on the mixed plots
 
-- Cut the dendrogram and look at the composition of clusters
+- Cut dendrogram, examine cluster composition
 
-  - Take cursory glances at species composition and the size structures within clusters
+  - Species composition and the size structures within clusters
 
 ***
 
@@ -253,19 +257,19 @@ plot(cluster_h_d2, xlab = NA, sub = NA, main = 'Dendrogram of mixed plots with w
 
 The Lone Plot 
 ====
-left: 25% 
+left: 40% 
 
 
-- The plot `TDB` is in a cluster by itself when k = 3
+- Plot `TDB` is lone cluster at k = 3
 
-- Silver maple is prominent in both clusters 1 and 2
+- Silver maple prominent in both clusters 1 and 2
 
 - `TBD` has higher amounts of snags and sycamores than the two clusters
 
 ***
-<center> <font size = '20'> Proportion of common species in each category (count, trees per acre, and basal area) </font> </center>
+<center><b>Proportion of common species in each category (count, trees per acre, and basal area)</b></center>
 
-```{r echo = F, out.width = '80%', dpi = 200, fig.width = 10, fig.asp = 0.8, fig.align = 'center'}
+```{r echo = F, out.width = '90%', dpi = 200, fig.width = 10, fig.asp = 0.8, fig.align = 'center'}
 
 theme_set(theme_gray(base_size = 20))
 species_multiplot(k = 3, filter = T, codes = F, leg_col = 2, cluster = cluster_h_d2, legend = T)
@@ -276,7 +280,7 @@ species_multiplot(k = 3, filter = T, codes = F, leg_col = 2, cluster = cluster_h
 The Lone Plot 
 ====
 
-<center> <font size = '24'> Proportion of species in each category (count, trees per acre, and basal area) </font> </center>
+<center><b>Proportion of species in each category (count, trees per acre, and basal area)</b></center>
 
 ```{r echo = F, out.width = '62%', dpi = 200, fig.width = 10, fig.asp = 0.8, fig.align = 'center'}
 
@@ -288,11 +292,10 @@ species_multiplot(k = 3, filter = F, codes = T, leg_col = 3, cluster = cluster_h
 
 Taking more clusters
 ======
-right: 25%
+right: 50%
 
-<center> <font size = '20'> Proportion of common species in each category (count, trees per acre, and basal area) </font> </center>
-
-```{r echo = F, out.width = '80%', dpi = 200, fig.width = 10, fig.asp = 0.8, fig.align = 'center'}
+<center><b>Proportion of common species in each category (count, trees per acre, and basal area)</b></center>
+```{r echo = F, out.width = '90%', dpi = 200, fig.width = 10, fig.asp = 0.8, fig.align = 'center'}
 
 species_multiplot(k = 10, filter = T, codes = F, leg_col = 2, cluster = cluster_h_d2, legend = T)
 
@@ -300,16 +303,11 @@ species_multiplot(k = 10, filter = T, codes = F, leg_col = 2, cluster = cluster_
 ```
 
 ***
-- We need to determine the correct amount clusters to make while still retaining ecological relevance
-
-- Requires looking at the species and size distributions of the plots
-
-- Some of the plots look similar in structure
-  - 8 and 9
-  - 1 and 6
-  
-- Need a good way to quantify the differences between clusters
-  - Could potentially use CAPs of the clusters
+- Must determine # of clusters while retaining ecological relevance
+- Examine species and size distributions
+- 8 and 9, 1 and 6 similar in structure
+- Must quantify differences between clusters
+  - Could potentially use CAPs of clusters
 
 
 Comparing CAPs among clusters
@@ -335,11 +333,11 @@ Next steps for the mixed plots
 ======
 - Determine the best clusters for these plots
 
-- Exact methods for this will be discussed next week
+- Exact methods will be discussed next week
   - Possibly multidimensional scaling
-  - May need to sub sample due to long run time
+  - May need to subsample due to long run time
   
-- Once clusters are picked out, we can use decision trees to find the rules for each cluster
+- As for dominant, decision trees can extract rules for each cluster
 
 
 

@@ -26,8 +26,9 @@ To construct a hierarchical classification of UMRS forest types that are...
 
 
 
-Summary statistics from last week: Top 5 Types
+Summary statistics from last week
 ========================================================
+Dominant plots: 17.5 percent; codominant plots: 34.3 percent
 
 <img src="Week4-Presentation-figure/unnamed-chunk-2-1.png" title="plot of chunk unnamed-chunk-2" alt="plot of chunk unnamed-chunk-2" width="50%" /><img src="Week4-Presentation-figure/unnamed-chunk-2-2.png" title="plot of chunk unnamed-chunk-2" alt="plot of chunk unnamed-chunk-2" width="50%" />
 
@@ -88,14 +89,14 @@ Results: Green Ash
 
 <img src="Week4-Presentation-figure/unnamed-chunk-6-1.png" title="plot of chunk unnamed-chunk-6" alt="plot of chunk unnamed-chunk-6" width="49%" /><img src="Week4-Presentation-figure/unnamed-chunk-6-2.png" title="plot of chunk unnamed-chunk-6" alt="plot of chunk unnamed-chunk-6" width="49%" />
 
-Further Issues to Investigate
+Further Issues to Investigate in Dominant Plots
 ========================================================
 Imbalanced Class Problem
 - Some clusters may have few plots but are ecologically significant
 - Potential Solution: oversample classes such that they have the same number of observations as largest class
   - Issue: can result in poor performance, as in Green Ash and Willow clusterings
   
-Further Issues to Investigate
+Further Issues to Investigate in Dominant Plots
 ========================================================
 Ecological Significance
 - How can we determine if clusters are two similar?
@@ -104,6 +105,8 @@ Ecological Significance
   - How can we pick out which clusters to merge?
 
 Minimum bin size has large impact on decision tree solution
+
+
 
 
 Mixed Plots
@@ -123,13 +126,13 @@ Mixed Plots
 
 First steps
 ===========
-left: 25%
+left: 50%
 
-- Use CAP values to perform a hierarchical clustering on the mixed plots
+- Use CAP values for hierarchical clustering on the mixed plots
 
-- Cut the dendrogram and look at the composition of clusters
+- Cut dendrogram, examine cluster composition
 
-  - Take cursory glances at species composition and the size structures within clusters
+  - Species composition and the size structures within clusters
 
 ***
 
@@ -137,27 +140,63 @@ left: 25%
 
 The Lone Plot 
 ====
-left: 25% 
+left: 40% 
 
 
-- The plot `TDB` is in a cluster by itself when k = 3
+- Plot `TDB` is lone cluster at k = 3
 
-- Silver maple is prominent in both clusters 1 and 2
+- Silver maple prominent in both clusters 1 and 2
 
 - `TBD` has higher amounts of snags and sycamores than the two clusters
 
 ***
-<center> <font size = '20'> Proportion of common species in each category (count, trees per acre, and basal area) </font> </center>
+<center><b>Proportion of common species in each category (count, trees per acre, and basal area)</b></center>
+
+<img src="Week4-Presentation-figure/unnamed-chunk-9-1.png" title="plot of chunk unnamed-chunk-9" alt="plot of chunk unnamed-chunk-9" width="90%" style="display: block; margin: auto;" />
+
+The Lone Plot 
+====
+
+<center><b>Proportion of species in each category (count, trees per acre, and basal area)</b></center>
+
+<img src="Week4-Presentation-figure/unnamed-chunk-10-1.png" title="plot of chunk unnamed-chunk-10" alt="plot of chunk unnamed-chunk-10" width="62%" style="display: block; margin: auto;" />
+
+
+Taking more clusters
+======
+right: 50%
+
+<center><b>Proportion of common species in each category (count, trees per acre, and basal area)</b></center>
+<img src="Week4-Presentation-figure/unnamed-chunk-11-1.png" title="plot of chunk unnamed-chunk-11" alt="plot of chunk unnamed-chunk-11" width="90%" style="display: block; margin: auto;" />
+
+***
+- Must determine # of clusters while retaining ecological relevance
+- Examine species and size distributions
+- 8 and 9, 1 and 6 similar in structure
+- Must quantify differences between clusters
+  - Could potentially use CAPs of clusters
+
+
+Comparing CAPs among clusters
+======
+
+<img src="Week4-Presentation-figure/unnamed-chunk-12-1.png" title="plot of chunk unnamed-chunk-12" alt="plot of chunk unnamed-chunk-12" width="62%" style="display: block; margin: auto;" />
+
+Next steps for the mixed plots
+======
+- Determine the best clusters for these plots
+
+- Exact methods will be discussed next week
+  - Possibly multidimensional scaling
+  - May need to subsample due to long run time
+  
+- As for dominant, decision trees can extract rules for each cluster
 
 
 
+Endnotes
+===========
 
+Cover Image: Forest Landscape Ecology of the Upper Mississippi River Floodplain, United States Geological Survey
 
-
-
-
-
-
-```
-Error in loadNamespace(name) : there is no package called 'ggpubr'
-```
+V-measure: http://www1.cs.columbia.edu/~amaxwell/pubs/v_measure-emnlp07.pdf
