@@ -8,11 +8,47 @@ type: section
 
 
 
+Our Current Objective
+========================================================
+left: 70%
+
+To construct a hierarchical classification of UMRS forest types that are...
+- Ecologically unique
+- Useful to foresters
+- Suitable for scientific research
+
+<b>Last week</b>, we completed Level 1 using simple rules-based classification and examined various clustering algorithms.
+
+<b>This week</b>, we construct a function for Level 2 classification and visualize results.
+
+***
+<img src="Week3-Presentation-figure/unnamed-chunk-18-1.png" height = 100%></img>
+
+
+
+Summary statistics from last week
+========================================================
+Dominant plots: 17.5 percent; codominant plots: 34.3 percent
+
+<img src="Week4-Presentation-figure/unnamed-chunk-2-1.png" title="plot of chunk unnamed-chunk-2" alt="plot of chunk unnamed-chunk-2" width="50%" /><img src="Week4-Presentation-figure/unnamed-chunk-2-2.png" title="plot of chunk unnamed-chunk-2" alt="plot of chunk unnamed-chunk-2" width="50%" />
 
 
 
 
-<<<<<<< HEAD
+
+Exploration of Ward's Clustering Method
+========================================================
+
+How can we define these clusters in a simpler manner?
+
+How can we select the correct number of clusters to use in our definition?
+
+How can we ensure our clusters are ecologically significant?
+
+***
+
+![plot of chunk unnamed-chunk-3](Week4-Presentation-figure/unnamed-chunk-3-1.png)
+
 Ward's Method with Three Clusters, Silver Maple
 
 
@@ -63,18 +99,16 @@ Imbalanced Class Problem
 Further Issues to Investigate in Dominant Plots
 ========================================================
 Ecological Significance
-- How can we determine if clusters are two similar?
+- How can we determine if clusters are too similar?
 - Potential Solution: "Multi Response Permutation Procedure" or "Permutational Multivariate Analysis of Variance"    
   - Tests for significant differences between clusters
   - How can we pick out which clusters to merge?
-=======
->>>>>>> 163e80fe7520d5889b931d2c47cb5d7d4de46c18
+
+Minimum bin size has large impact on decision tree solution
 
 
 
 
-
-<<<<<<< HEAD
 Mixed Plots
 ========================================================
 
@@ -114,6 +148,7 @@ left: 40%
 - Silver maple prominent in both clusters 1 and 2
 
 - `TBD` has higher amounts of snags and sycamores than the two clusters
+  - As well as swamp privet
 
 ***
 <center><b>Proportion of common species in each category (count, trees per acre, and basal area)</b></center>
@@ -126,63 +161,43 @@ The Lone Plot
 <center><b>Proportion of species in each category (count, trees per acre, and basal area)</b></center>
 
 <img src="Week4-Presentation-figure/unnamed-chunk-10-1.png" title="plot of chunk unnamed-chunk-10" alt="plot of chunk unnamed-chunk-10" width="62%" style="display: block; margin: auto;" />
-=======
->>>>>>> 163e80fe7520d5889b931d2c47cb5d7d4de46c18
+
+
+Taking more clusters
+======
+right: 50%
+
+<center><b>Proportion of common species in each category (count, trees per acre, and basal area)</b></center>
+<img src="Week4-Presentation-figure/unnamed-chunk-11-1.png" title="plot of chunk unnamed-chunk-11" alt="plot of chunk unnamed-chunk-11" width="90%" style="display: block; margin: auto;" />
+
+***
+- Must determine # of clusters while retaining ecological relevance
+- Examine species and size distributions
+- 8 and 9, 1 and 6 similar in structure
+- Must quantify differences between clusters
+  - Could potentially use CAPs of clusters
+
+
+Comparing CAPs among clusters
+======
+
+<img src="Week4-Presentation-figure/unnamed-chunk-12-1.png" title="plot of chunk unnamed-chunk-12" alt="plot of chunk unnamed-chunk-12" width="62%" style="display: block; margin: auto;" />
+
+Next steps for the mixed plots
+======
+- Determine the best clusters for these plots
+
+- Exact methods will be discussed next week
+  - Possibly multidimensional scaling
+  - May need to subsample due to long run time
+  
+- As for dominant, decision trees can extract rules for each cluster
 
 
 
+Endnotes
+===========
 
+Cover Image: Forest Landscape Ecology of the Upper Mississippi River Floodplain, United States Geological Survey
 
-
-
-
-
-
-
-
-
-
-<<<<<<< HEAD
 V-measure: http://www1.cs.columbia.edu/~amaxwell/pubs/v_measure-emnlp07.pdf
-=======
-```
-processing file: Week4-Presentation.Rpres
-── Attaching packages ─────────────────────────────────────── tidyverse 1.3.0 ──
-✓ ggplot2 3.3.1     ✓ purrr   0.3.4
-✓ tibble  3.0.1     ✓ dplyr   1.0.0
-✓ tidyr   1.1.0     ✓ stringr 1.4.0
-✓ readr   1.3.1     ✓ forcats 0.5.0
-── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
-x dplyr::filter() masks stats::filter()
-x dplyr::lag()    masks stats::lag()
-Loading required package: Rcpp
-Parsed with column specification:
-cols(
-  PID = col_character(),
-  POOL = col_character(),
-  TR_SP = col_character(),
-  TR_DIA = col_double(),
-  TR_HLTH17 = col_character(),
-  TR_HLTH = col_character(),
-  File = col_character(),
-  District = col_character(),
-  TR_SP2 = col_character(),
-  TreesPerAcre = col_double(),
-  BasalArea = col_double()
-)
-Parsed with column specification:
-cols(
-  PID = col_character(),
-  Type = col_character(),
-  Label = col_character()
-)
-Parsed with column specification:
-cols(
-  .default = col_double()
-)
-See spec(...) for full column specifications.
-Quitting from lines 10-35 (Week4-Presentation.Rpres) 
-Error: 'clean_data/plots_nonrel.csv' does not exist in current working directory ('/Users/noahdean/REU_2020/UWL-REU-FPF').
-Execution halted
-```
->>>>>>> 163e80fe7520d5889b931d2c47cb5d7d4de46c18
