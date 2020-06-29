@@ -69,9 +69,9 @@ Decision Tree versus Ward's Method
 
 Finding the Correct Number of Clusters
 ========================================================
-Take the decision tree classification most similar to the Ward clustering, determined by v-measure
+Take decision tree classification most similar to  Ward clustering, determined by v-measure
 
-V-measure takes into account cluster homogeneity and completeness, which rely on entropy
+V-measure takes into account homogeneity and completeness (entropy-based)
 
 <div align = "center">
 <img src="week_4_pres_images/v-measure.png" width = 40%></img><br>
@@ -193,7 +193,95 @@ Next steps for the mixed plots
   
 - As for dominant, decision trees can extract rules for each cluster
 
+========================================================
+<center><img src="week_4_pres_images/title.png" width=50%></center>
 
+Ordination: summarizes multidimensional data by plotting similar species and samples close together in low-dimensional ordination space
+
+- Useful for visualizing cluster solutions 
+
+
+Goal for nMDS plot, from https://jonlefcheck.net/ 
+========================================================
+<img src="week_4_pres_images/plot_example.png" width=50% height=50%>
+
+
+
+Other Ordination Methods
+========================================================
+Alternate Methods: Principal components analysis (PCA), Principal coordinate analysis (PCoA) (graphic from https://ourcodingclub.github.io/)
+
+<img src="week_4_pres_images/pcoa.png" width=100% height=50%>
+
+***
+
+- Analytical approaches: single unique solutions 
+- Use techniques based on eigenvalues and eigenvectors 
+- Assume linear or model relationships within data 
+
+
+nMDS  
+========================================================
+- Numerical, iterative approach: no unique solution
+
+  - Stops when acceptable solution is obtained or after set number of attempts 
+
+- More configuration options
+
+- Fewer assumptions 
+
+
+Drawbacks:
+
+- Slow 
+- sometimes finds local minimum instead of best solution 
+
+Computation: nMDS process 
+========================================================
+- Calculates a distance matrix from an original matrix of samples and variables 
+- Chooses m dimensions for ordination
+- nMDS software begins with initial configuration of samples in those m dimensions
+- Calculates distances among samples
+- Regresses distances against original distance matrix
+- Calculates predicted ordination distances for each pair of samples
+
+
+
+Computation: quality of fit
+========================================================
+- Sum of squared differences between ordination-based distances and distances predicted by regression
+- Kruskal’s stress equation
+  - D_hi: ordinated distance between samples h and i 
+	- D-hat: distance predicted from regression
+	
+<img src="week_4_pres_images/stress_equation.png" width=100% height=75%>
+
+
+Computation: fit improvement 
+========================================================
+- Slightly alters positions of samples based on stress value 
+- Recalculates ordination distance matrix and stress value
+- Repeats until procedure converges or for set number of iterations 
+
+Considerations  
+========================================================
+
+Concern: too many or too few dimensions
+
+Solution: Scree Diagram 
+
+nMDS on Willow, maximum number of iterations = 500
+
+<img src="week_4_pres_images/stress.png" width=50% height=50%>
+
+
+Current Plot vs. Goal   
+========================================================
+
+<img src="week_4_pres_images/plot.png" width=100% height=100%>
+
+*** 
+<img src="week_4_pres_images/plot_example.png" width=70% height=70%>
 
 Endnotes
 ===========
@@ -201,3 +289,5 @@ Endnotes
 Cover Image: Forest Landscape Ecology of the Upper Mississippi River Floodplain, United States Geological Survey
 
 V-measure: http://www1.cs.columbia.edu/~amaxwell/pubs/v_measure-emnlp07.pdf
+
+NMDS: https://strata.uga.edu/software/pdf/mdsTutorial.pdf
