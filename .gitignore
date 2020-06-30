@@ -3,6 +3,12 @@
 Datasets/
 clean_data/
 Week3-Presentation-cache
+cluster_h.RData
+cluster_h.rds
+cluster_h_d.RData
+cluster_h_d.rds
+cluster_h_d2.RData
+cluster_h_d2.rds
 
 # History files
 .Rhistory

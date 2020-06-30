@@ -114,48 +114,115 @@ library(vegan)
 ptm <- proc.time()
 SALIX.mds2<-metaMDS(d,distance="manhattan",k=2, trymax=500) 
 SALIX.mds3<-metaMDS(d,distance="manhattan",k=3, trymax=500)
-proc.time() - ptm
 SALIX.mds4<-metaMDS(d,distance="manhattan",k=4, trymax=500)
 SALIX.mds5<-metaMDS(d,distance="manhattan",k=5, trymax=500)
+proc.time() - ptm
 ```
 ```{r}
 library(vegan)
-dimcheckMDS(d, distance = "manhattan", k = 2, trymax = 1,autotransform = TRUE)
+library(goeveg)
+#Community data, a matrix-like object with samples in rows and species in columns.
+dimcheckMDS(as.matrix(d), distance = "manhattan", k = 6, trymax = 100,autotransform = TRUE)
+```
+```{r}
+plot(SALIX.mds2)
+plot(SALIX.mds3)
+plot(SALIX.mds4)
+plot(SALIX.mds5)
 ```
 
+
+
+
+
+```{r}
+library(vegan)
+library(goeveg)
+#Community data, a matrix-like object with samples in rows and species in columns.
+dimcheckMDS(as.matrix(d), distance = "manhattan", k = 6, trymax = 500,autotransform = TRUE)
+```
 
 
 
 ```{r}
 library(vegan)
 ptm <- proc.time()
-SALIX.mds2<-metaMDS(d,distance="manhattan",k=2, trymax=1000) 
+SALIX.mds2<-metaMDS(d,distance="manhattan",k=2, trymax=100, maxit=500) 
+proc.time() - ptm
+```
+
+```{r}
+library(MASS)
+ptm <- proc.time()
+SALIX.mds2iso<-isoMDS(d)
+proc.time() - ptm
+```
+
+
+
+```{r}
+library(vegan)
+library(goeveg)
+#Community data, a matrix-like object with samples in rows and species in columns.
+dimcheckMDS(as.matrix(d), distance = "manhattan", k = 5, trymax = 100, maxit = 500)
+```
+
+```{r}
+library(vegan)
+ptm <- proc.time()
+SALIX.mds2<-metaMDS(d,distance="manhattan",k=2, trymax=100, maxit=500) 
 proc.time() - ptm 
 
 ptm <- proc.time()
-SALIX.mds3<-metaMDS(d,distance="manhattan",k=3, trymax=1000)
+SALIX.mds3<-metaMDS(d,distance="manhattan",k=3, trymax=100, maxit=500)
 proc.time() - ptm
 
 ptm <- proc.time()
-SALIX.mds4<-metaMDS(d,distance="manhattan",k=4, trymax=1000)
+SALIX.mds4<-metaMDS(d,distance="manhattan",k=4, trymax=100, maxit=500)
 proc.time() - ptm
 
 ptm <- proc.time()
-SALIX.mds5<-metaMDS(d,distance="manhattan",k=5, trymax=1000)
+SALIX.mds5<-metaMDS(d,distance="manhattan",k=5, trymax=100, maxit=500)
 proc.time() - ptm
+```
+```{r}
+
+library(vegan)
+ptm <- proc.time()
+SALIX.mds2<-metaMDS(d,distance="manhattan",k=2, trymax=500, maxit=1000) 
+proc.time() - ptm 
+
+ptm <- proc.time()
+SALIX.mds3<-metaMDS(d,distance="manhattan",k=3, trymax=500, maxit=1000)
+proc.time() - ptm
+
+ptm <- proc.time()
+SALIX.mds4<-metaMDS(d,distance="manhattan",k=4, trymax=500, maxit=1000)
+proc.time() - ptm
+
+ptm <- proc.time()
+SALIX.mds5<-metaMDS(d,distance="manhattan",k=5, trymax=5400, maxit=1000)
+proc.time() - ptm
+```
 ```
 
 
 
+
+
 ```{r}
+library(ape)
+PCOA<- pcoa(d, correction="none", rn=NULL)
+barplot(PCOA$values$Relative_eig[1:10])
+biplot.pcoa(PCOA)
 
+```
 
-
-
+```{r}
 ptm <- proc.time()
 for(k in 2:5)
 {
-  SALIX.mds.loop<-metaMDS(d, distance="manhattan", k, trymax=1000)
+  SALIX.mds.loop<-metaMDS(d, distance="manhattan", k, trymax=100, maxit=500 )
   plot(SALIX.mds.loop$ndim, SALIX.mds.loop$stress)
 }
 proc.time() - ptm
