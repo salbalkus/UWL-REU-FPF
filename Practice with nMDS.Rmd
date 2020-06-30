@@ -1,0 +1,206 @@
+---
+title: "Practice with nMDS"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+Sal's code for creating the dissimilarity matrix 
+```{r}
+library(tidyverse)
+library(kernlab)
+library(dbscan)
+library(vegclust)
+library(cluster)
+library(ggsci)
+
+path_of_code <- dirname(rstudioapi::getSourceEditorContext()$path)
+setwd(path_of_code)
+
+#Read in the code and start by analyzing ACSA2. The process used here can be applied automatically to the other species later on. 
+
+df <- read_csv("clean_data/UMRS_FPF_clean.csv")
+labels <- read_csv("clean_data/plot_classification.csv")
+df_cols <- left_join(df, labels, by = "PID") %>% select(PID, TR_SP, BasalArea, TreesPerAcre, Type, Label)
+df_acsa2 <- filter(df_cols, Type == "ACSA2")
+#Only 28 species to deal with in the silver maple dominant communities!
+length(unique(df_acsa2$TR_SP))
+
+#TPA = 1 / (pi * (DBH*2.75)^2) / 43560)
+#BA = 0.25*pi*(DBH^2)
+TPA_bins = 1 / (pi * (seq(1:106)*2.75)^2) / 43560
+BA_bins = 0.25*pi*(seq(1:106)^2)
+
+
+#confirm TPA length
+(1/sqrt(TPA_bins))[2] - (1/sqrt(TPA_bins))[1]
+(1/sqrt(TPA_bins))[3] - (1/sqrt(TPA_bins))[2]
+
+tpa_tf <- function(x){return(1/sqrt(x))}
+ba_tf <- function(x){return(sqrt(x))}
+
+#Confirm uniform distribution
+qplot(1/sqrt(TPA_bins), binwidth = 1017.306)
+qplot(sqrt(BA_bins), binwidth = sqrt(BA_bins)[2] - sqrt(BA_bins)[1])
+
+
+#Stratify the vegetation data
+test <- stratifyvegdata(df_acsa2, sizes1 = BA_bins, plotColumn = "PID", speciesColumn = "TR_SP", abundanceColumn = "TreesPerAcre", size1Column = "BasalArea", cumulative = TRUE )
+#cap <- CAP(test)
+
+#Plot for individual species in one plot as in De Caceres, 2013. Probably do not want to use
+ggplot(filter(df_acsa2, PID == "Cuivre-1-41")) + geom_step(aes(x = BasalArea, y = TreesPerAcre, color = TR_SP )) + theme_light()
+
+#Compare CAP for multiple plots
+#example <- cap[[1]][rowSums(cap[[1]][,-1]) > 0,colSums(cap[[1]][-1,]) > 0]
+#example
+
+#plot(cap, plots = "1", sizes = BA_bins[1:5])
+
+dissim <- vegdiststruct(test, method = "manhattan")
+write_csv(as.data.frame(as.matrix(dissim)), "dissimilarity_matrix.csv")
+
+
+```
+```{r}
+library(MASS)
+isoMDS(dist(dissim))
+```
+
+Sal's example (this takes several minutes)
+```{r}
+library(vegan)
+ptm <- proc.time()
+example_NMDS = metaMDS(dissim, k=2) 
+plot(example_NMDS)
+proc.time() - ptm
+```
+2)
+nMDS practice, same as Sal's example (skip)
+```{r}
+library(vegan)
+
+#mydata <- read.table("mydata.txt", header=TRUE, row.names=1, sep=",") #using dissmim 
+#mydata.mds <- metaMDS(mydata)
+dissim.mds<-metaMDS(dissim) #this uses Bray distance 
+# the default MDS ordination
+```
+Same example, but with manhattan distance 
+```{r}
+ptm <- proc.time()
+dissim.mds<-metaMDS(dissim,distance="manhattan") 
+#What determines the # of dimensions if we don't set k? In this example, ndim=2 
+proc.time() - ptm
+``` 
+Same example, using maxit 
+```{r}
+
+dissim.mds<-metaMDS(dissim,distance="manhattan",maxit=25,trymax=25) 
+```
+
+```{r}
+library(vegan)
+ptm <- proc.time()
+dissim.mds<-metaMDS(dissim,distance="manhattan",maxit=100,trymax=100) 
+proc.time() - ptm
+```
+
+
+
+
+
+
+
+
+
+
+
+Another example, k=3 trymax=50 (skip)
+```{r}
+#mydata.mds.ALT <- metaMDS(mydata, distance="euclidean", k=3, trymax=50, autotransform=FALSE)
+#Should we use Euclidian, Manhattan, or Bray? 
+
+###dissim.mds.ALT<-metaMDS(dissim, distance="manhattan", k=3, trymax=50, autotransform=FALSE)
+
+# Shows how an MDS could be performed on non-ecological data,
+# where a euclidean distance metric would be appropriate. The
+# transformations appropriate for ecological data are also
+# turned off, so one would need to make any necessary
+# transformations prior to calling the metaMDS function. This
+# MDS will be 3-dimensional (k=3), and will use 50 starts from
+# random configurations to avoid local minima.
+
+#Since our data is ecological, would we want to keep the autotransform? 
+
+dissim.mds.ALT1<-metaMDS(dissim, distance="manhattan", k=3, trymax=50) 
+```
+For loop that tests different k values 
+```{r}
+library(vegan)
+dissim.mds.loop<-metaMDS(dissim, distance="manhattan", k=1, trymax=5)
+  plot(dissim.mds.loop$ndim, dissim.mds.loop$stress)
+for(k in 2:3)
+{
+  dissim.mds.loop<-metaMDS(dissim, distance="manhattan", k, trymax=5)
+  plot(dissim.mds.loop$ndim, dissim.mds.loop$stress)
+}
+```
+
+
+
+3) View items in the list produced by metaMDS.
+```{r}
+names(dissim.mds)
+# mydata.mds$points: sample scores
+# mydata.mds$dims: number of MDS axes or dimensions
+# mydata.mds$stress: stress value of final solution
+# mydata.mds$data: what was ordinated, including any
+# transformations
+# mydata.mds$distance: distance metric used
+# mydata.mds$converged: whether solution converged or
+# not (T/F)
+# mydata.mds$tries: number of random initial configurations
+# tried
+# mydata.mds$species: scores of variables (species / taxa
+# in ecology)
+# mydata.mds$call: restates how the function was called
+```
+4) View the results of the MDS, which will display several elements of the list detailed above,
+including how the function was called (call), the data set and any transformations used (data),
+the distance measure (distance), the number of dimensions (dims), the final stress value
+(stress), whether any convergent solution was achieved (converged), how many random initial
+configurations were tried (tries), plus whether scores have been scaled, centered, or rotated.
+```{r}
+dissim.mds
+
+```
+5) Extract sample and variable scores. The column numbers correspond to the MDS axes, so
+this will return as many columns as was specified with the k parameter in the call to
+metaMDS.
+```{r}
+#will this code work with dissim?
+variableScores <- dissim.mds$species #NA
+sampleScores <- dissim.mds$points
+```
+6) Plot sample and variable scores in same space. Open black circles correspond to samples
+and red crosses indicate taxa.
+```{r}
+plot(dissim.mds)
+```
+7) MDS plots can be customized by selecting either sites or species. Also, labels may be displayed instead of symbols by specifying type=”t”.
+```{r}
+ plot(dissim.mds, type="t", display=c("species"))
+# text labels instead of symbols
+# Crowding of text labels can be alleviated by plotting to
+# a larger window
+
+#Error in order(x) : argument 1 is not a vector
+```
+8) MDS plots can be further customized. By specifying type =”n”, no sample scores or variable scores will be plotted. These can then be plotted with the points() and text() commands.
+For crowded plots, congestion of points and labels can be alleviated by plotting to a larger
+window and by using cex to reduce the size of symbols and text.
+```{r}
+
+```
+
