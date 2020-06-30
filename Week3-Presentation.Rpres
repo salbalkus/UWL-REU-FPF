@@ -6,16 +6,11 @@ autosize: true
 css: Week3-Presentation.css
 type: section
 
-```{r, include = FALSE}
+```{r, echo = FALSE}
 
 #knitr::opts_chunk$set(warning = F, error = F, message = F, echo = F, include = F)
-#knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
-
-
-#library(tidyverse)
-
-#df <- read_csv('clean_data/UMRS_FPF_clean.csv')
-#plots <- read_csv("clean_data/plots_classification.csv")
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+opts_chunk$set(cache=TRUE)
 
 library(tidyverse)
 library(kernlab)
@@ -28,6 +23,27 @@ labels <- read_csv("clean_data/plot_classification.csv")
 
 df_cols <- left_join(df, labels, by = "PID") %>% select(PID, TR_SP, BasalArea, TreesPerAcre, Type, Label, TR_DIA)
 df_acsa2 <- filter(df_cols, Type == "ACSA2")
+
+plot_abundance <- df %>%
+  group_by(PID, TR_SP) %>%
+  summarize(TPA = sum(TreesPerAcre)) %>%
+  group_by(PID) %>%
+  mutate(relTPA = TPA / sum(TPA)) %>%
+  select(-TPA) %>%
+  #spread(TR_SP, Density) %>%
+  replace(is.na(.), 0)
+
+plot_size <- df %>%
+  group_by(PID, TR_SP) %>%
+  summarize(BasalArea = sum(BasalArea)) %>%
+  group_by(PID) %>%
+  mutate(relBA = BasalArea / sum(BasalArea)) %>%
+  select(-BasalArea) %>%
+  #spread(TR_SP, PctBasalArea) %>%
+  replace(is.na(.), 0)
+
+plots <- inner_join(plot_abundance, plot_size, by = c("PID", "TR_SP"))#, suffix = c("", "_ba"))
+
 ```
 
 Classification Overview 
@@ -47,39 +63,92 @@ Two levels of classification:
 
 
 ========================================================
-![](week_3_pres_images/classification .png)
+<img src="week_3_pres_images/classification.png" width=95% height=100%>
 
 
 ========================================================
-
-![](week_3_pres_images/single-species_large_photo.png)
+class: small-code
+<img src="week_3_pres_images/single-species.png" width=100%>
 
 ***
 
+```{r}
+dominant <- plots %>%
+  filter(relTPA > 0.8 & relBA > 0.8)
+```
 
-![](week_3_pres_images/dominant.png) 
+```{r echo = FALSE}
+dominant$Type <- dominant$TR_SP
+dominant$Label <- "Dominant"
+```
 
-![](week_3_pres_images/dominant_number.png)
+```{r}
+length(unique(dominant$Type))
+nrow(dominant)
+```
 
 
 ========================================================
-![](week_3_pres_images/codominant_large_photo.png)
+class: small-code
+
+<img src="week_3_pres_images/codominant_photo.png" width=100%>
 
 *** 
 
-![](week_3_pres_images/codominant .png)
-![](week_3_pres_images/codominant_number.png)
+```{r}
+codominant <- plots %>%
+  filter(relTPA<=0.8 | relBA<=0.8) %>%
+  filter(relTPA>=0.2 | relBA>=0.2) %>%
+  group_by(PID) %>%
+  filter(relTPA + max(relTPA)>0.8 & relBA + max(relBA)>0.8) %>%
+  filter(n() > 1) %>%
+  filter(sum(relTPA)>0.8 & sum(relBA)>0.8)
+```
+
+```{r echo = FALSE}
+codominant <- codominant %>%
+  group_by(PID) %>%
+  arrange(TR_SP) %>%
+  summarize(relTPA = sum(relTPA), relBA = sum(relBA), Type = paste0(TR_SP, collapse= " and "), Label = "Codominant")
+```
+
+
+```{r}
+length(unique(codominant$Type))
+nrow(codominant)
+```
+
 
 ========================================================
-![](week_3_pres_images/mixed_large_photo.png)
+class: small-code
+<img src="week_3_pres_images/mixed_photo.png" width=100%>
 
 *** 
 
-![](week_3_pres_images/mixed.png) 
-![](week_3_pres_images/Mixed_number.png)
+```{r}
+mixed <- df %>%
+  filter(!PID %in% dominant$PID) %>%
+  filter(!PID %in% codominant$PID) %>%
+  select(PID) %>%
+  mutate(Type = NA, Label = "Mixed") %>%
+  distinct()
+
+nrow(mixed)
+```
 
 
-What is CAP
+
+Level 2 Classification
+========================================================
+
+Our next goal is to subdivide the Level 1 categories using clustering.
+
+The number of clusters should be numerous enough to capture different forest types within the Level 1 categories, but not so numerous that similar forest types are repeated across multiple clusters.
+
+CAP will measure dissimilarity between plots.
+
+
+What is CAP?
 ========================================================
 - Cumulative abundance profile
 
@@ -91,7 +160,9 @@ What is CAP
 
 CAP Example
 =====
-![](week_3_pres_images/graphs.png)
+<img src="week_3_pres_images/graphs.png" width=100% height=100%>
+
+***
 
 (DeCaceres et al, 2013)
 
@@ -107,32 +178,44 @@ Why care about the size distribution?
 
 Size distribution example
 ====
-![Emerald ash borer](week_3_pres_images/eab.jpg)
+<img src="week_3_pres_images/eab.jpg" width=80% height=60%>
 
 Emerald ash borer (Arbor day foundation)
 
 ***
-![Ash tree](week_3_pres_images/ash.jpg)
-
+<div align="center">
+<img src="week_3_pres_images/ash.jpg" width=40% height=70%>
+</div>
+<div align="center">
 Ash tree (Arbor day foundation)
+</div>
 
 
 How are plots compared?
 =====
 - Uses 3 metrics
 
-![3 equations](week_3_pres_images/eq1.png)
+<img src="week_3_pres_images/eq1.png" width=100% height=50%>
+
+***
 
 - Bray-Curtis dissimilarity coefficient:
 
-![Dissimilarity equation](week_3_pres_images/eq2.png)
+<img src="week_3_pres_images/eq2.png" width=70% height=30%>
 
 (DeCaceres et al, 2013)
 
 
 Example of metrics
 ====
-![Examples of metrics](week_3_pres_images/examples.png)
+<img src="week_3_pres_images/examples.png" width=100% height=100%>
+
+***
+ 
+ 
+ 
+ 
+ 
 
 (DeCaceres et al, 2013)
 
@@ -167,28 +250,22 @@ dissim
 ***
 - The distance between them is `r round(dissim[1], digits = 4)`
 
-Level 2 Classification
-========================================================
-
-Our next goal is to subdivide the Level 1 categories using clustering.
-
-The number of clusters should be numerous enough to capture different forest types within the Level 1 categories, but not so numerous that similar forest types are repeated across multiple clusters.
-
-
 
 Strategy
 ========================================================
-Because the Level 1 categories are so numerous, a systematic approach must be developed to generate subcategories.
+Because the Level 1 categories are so numerous, use systematic approach for Level 2.
 
-First, we perform experimentation using the ACSA2-dominant (silver maple) plots. Through this, we develop a function to select the appropriate number of clusters. Since "silver maple dominant" is the most numerous and complex (besides mixed), our approach developed here will not be too simplistic for any other group.
+1. Perform experimentation using ACSA2-dominant (silver maple) plots
+  - Develop a function to select  appropriate number of clusters
 
-Once our function is developed, we will apply it across all level 1 classifications. Mixed plots will be clustered separately, since they are the largest level 1 category, much larger than others.
+2. Apply function across all level 1 classifications
+  - Mixed plots clustered separately, since category is much larger
 
 
 
 Potential Clustering Methods
 ========================================================
-Level 2 categories are determined via clustering, which groups plots based on their dissimilarity (Bray-Curtis, based on CAP values).
+Level 2 categories determined via clustering, which groups plots based on their dissimilarity (Bray-Curtis, based on CAP values).
 
 We considered several potential clustering algorithms:
 - K-means
@@ -196,7 +273,6 @@ We considered several potential clustering algorithms:
 - DBSCAN/OPTICS
 - Spectral Clustering
 
-These clustering algorithms were each tested on our data to determine their effectiveness
 
 
 Spectral Clustering
@@ -205,29 +281,196 @@ A graph-based clustering algorithm especially good for high-dimensional data
 - Uses graph Laplacian eigenvalues to partition the data points
 - Performs dimension reduction
 - Good at picking out unique shapes
--O(n^3)
+- O(n^3 )
 
-We discussed using this algorithm to cluster the data without using CAP. However, our data was too large for the slow algorithm, and the CAP values solved the high-dimensionality problem.
+We discussed using this algorithm to cluster the data without using CAP. However, algorithm was too slow, and the CAP values solved the high-dimensionality problem.
 
-=======
-http://people.csail.mit.edu/dsontag/courses/ml14/notes/Luxburg07_tutorial_spectral_clustering.pdf
+<!-- http://people.csail.mit.edu/dsontag/courses/ml14/notes/Luxburg07_tutorial_spectral_clustering.pdf -->
 
 
 DBSCAN & OPTICS
 ========================================================
 Algorithms that group observations based on density
 - DBSCAN: specify minimum distance and minimum observations in each cluster
-- OPTICS: specify minimum observations per cluster; creates a dendrogram that can be cut
+- OPTICS: specify minimum observations per cluster
 - Can mark points as outliers if they do not fit a cluster
 - No need to specify number of clusters!
 
+OPTICS generates a "reachability plot" that can be cut like a dendrogram to generate clusters
+
+<!-- https://medium.com/@xzz201920/optics-d80b41fd042a#:~:text=Reachability%2Dplot%20to%20Clustering&text=It%20is%20a%202D%20plot,valleys%20in%20the%20reachability%20plot. -->
 
 
-
-DBSCAN & OPTICS
+OPTICS: Reachability plots
 ========================================================
 
+Cut at distance eps = 2
 
+```{r, echo = FALSE}
+dissim <- read_csv("dissimilarity_matrix.csv")
+dissim <- as.matrix(dissim)
+
+cluster_o <- optics(as.matrix(dissim), eps = 4, minPts = 6)
+cluster_db <- extractDBSCAN(cluster_o, eps_cl = 2)
+
+plot(cluster_db)
+
+#cluster_count <- length(unique(cluster_db$cluster))
+#cat("Number of clusters from DBSCAN:", cluster_count)
+
+```
+
+***
+
+Cut at distance eps = 1
+
+```{r, echo = FALSE}
+
+cluster_db <- extractDBSCAN(cluster_o, eps_cl = 1)
+plot(cluster_db)
+
+#cluster_count <- length(unique(cluster_db$cluster))
+#cat("Number of clusters from DBSCAN:", cluster_count)
+```
+
+K-means
+========================================================
+Clustering method that performs partitioning by optimizing centroid placement. The algorithm is not deterministic.
+
+Assumptions:
+- spherical clusters
+- equal variance of variables
+- clusters have roughly equal numbers of observations
+
+We run the algorithm from k = 1 to k = 20 and select the best clustering.
+
+
+K-means: Elbow Plot
+========================================================
+Here, the elbow plot is relatively smooth.
+
+Small elbows can occur depending on the random cluster initializations, but do not occur consistently. 
+
+***
+```{r, echo = FALSE}
+#Evaluate different numbers of clusters for kmeans
+clusters <- 20
+cluster_k <- vector("list", length = clusters)
+for(n in 1:clusters) {cluster_k[[n]] <- kmeans(dissim, n)}
+
+#Elbow method
+cluster_k_twss <- vector(length = clusters)
+for(n in 1:clusters){cluster_k_twss[n] <- cluster_k[[n]]$tot.withinss}
+
+plt_df <- as.data.frame(list(cluster_k_twss, seq(1:clusters)), row.names = NULL, col.names = c("TWSS","Index"))
+ggplot(data = plt_df, mapping = aes(x = Index, y = TWSS)) + geom_line(color = "lightblue") + geom_point() + theme_light() +
+  xlab("Number of Clusters") + ylab("Total within-cluster sum of squares")
+
+```
+
+K-means: Silhouette Plot
+========================================================
+Example of Silhouettes by cluster for k = 3
+```{r, echo = FALSE}
+#Silhouette
+sil <- vector("list", length = clusters)
+for(n in 1:clusters){sil[[n]] <- silhouette(x = cluster_k[[n]]$cluster, dmatrix = as.matrix(dissim))}
+plot(sil[[3]], col = c("red","blue","black"), border = NA, main = NA)
+```
+
+***
+Changes in silhouette statistics by cluster
+```{r, echo = FALSE}
+#Plot average sil length
+avg_sil_len <- vector(length = clusters-1)
+min_sil_len <- vector(length = clusters-1)
+avg_sil_neg <- vector(length = clusters-1)
+for(n in 2:clusters){avg_sil_len[n-1] <- mean(sil[[n]][,3])}
+for(n in 2:clusters){min_sil_len[n-1] <- min(sil[[n]][,3])}
+for(n in 2:clusters){avg_sil_neg[n-1] <- mean(sil[[n]][sil[[n]][,3] < 0,3])}
+
+plt_df <- as.data.frame(list(avg_sil_len, min_sil_len, avg_sil_neg, seq(2:clusters)), col.names = c("avg","min","avgneg","Index"))
+ggplot(data = plt_df) + geom_point(aes(x = Index, y = avg, color = "Average Silhouette Length")) + geom_line(aes(x = Index, y = avg, color = "Average Silhouette Length")) + 
+  geom_point(aes(x = Index, y = min, color = "Minimum Silhouette Length")) + geom_line(aes(x = Index, y = min, color = "Minimum Silhouette Length")) + 
+  geom_point(aes(x = Index, y = avgneg, color = "Average Negative Silhouette Length")) + geom_line(aes(x = Index, y = avgneg, color = "Average Negative Silhouette Length")) + theme_light() + ylab("Silhouette Length") + xlab("Number of Clusters") + theme(legend.title = element_blank())
+```
+
+K-means: Gap Statistic
+========================================================
+
+Measures goodness of a clustering measure by comparing true data clusters to  expected value of bootstrapped data clustering.
+
+Results in a recommended k = 18, based on  criterion from Tibshirani et al (2001): 
+
+“the smallest k such that f(k) ≥ f(k+1) - s_{k+1}”
+
+<!-- https://web.stanford.edu/~hastie/Papers/gap.pdf -->
+
+***
+```{r, echo = FALSE}
+gap <- read_csv("gap_kmeans.csv")
+gap$Index <- seq(1:20)
+ggplot(gap,aes(x = Index, y = gap)) + geom_line(color = "lightblue") + geom_point() + theme_light()
+
+selected_value <- maxSE(gap$gap, gap$SE.sim, method = "Tibs2001SEmax")
+
+```
+
+Hierarchical Clustering
+========================================================
+Joins points based on closeness to create a dendrogram
+- Single-linkage agglomerative: joins clusters based on closest point
+- Complete-linkage agglomerative: joins clusters based on farthest point
+- Ward's method: joins clusters based on minimizing within-cluster variance
+
+Single Linkage
+========================================================
+Unsuitable, yields an output similar to OPTICS
+
+The single linkage picks out too many outliers, preventing the clusters from being split into actual groups
+
+***
+
+```{r, echo = FALSE}
+cluster_h <- hclust(as.dist(dissim), method = "single")
+plot(cluster_h, labels = FALSE, xlab = "Forest Plot")
+```
+
+Complete Linkage
+========================================================
+
+Still problematic - no clear cut point
+
+Clusters are too close together, indicating that there is no real difference between the clusters
+
+***
+
+```{r, echo = FALSE}
+cluster_h <- hclust(as.dist(dissim), method = "complete")
+plot(cluster_h, labels = FALSE, xlab = "Forest Plot")
+```
+
+Ward's Method (ward.D)
+========================================================
+
+Best approach thus far; clusters are appropriately distanced, and split into roughly even-sized groups.
+
+Still need to investigate where to cut the dendrogram, and how to validate this clustering solution.
+
+***
+
+```{r, echo = FALSE}
+cluster_h <- hclust(as.dist(dissim), method = "ward.D")
+plot(cluster_h, labels = FALSE, xlab = "Forest Plot")
+```
+
+
+Next Steps
+========================================================
+- Determine which clustering is best via validation methods
+  - Supervised learning with cluster labels?
+- Formulate function to apply across all dominant species
+- Cluster mixed forest types separately
 
 
 Endnotes
@@ -235,3 +478,8 @@ Endnotes
 
 Cover Image: Forest Landscape Ecology of the Upper Mississippi River Floodplain, United States Geological Survey
 
+http://people.csail.mit.edu/dsontag/courses/ml14/notes/Luxburg07_tutorial_spectral_clustering.pdf
+
+https://medium.com/@xzz201920/optics-d80b41fd042a#:~:text=Reachability%2Dplot%20to%20Clustering&text=It%20is%20a%202D%20plot,valleys%20in%20the%20reachability%20plot
+
+https://web.stanford.edu/~hastie/Papers/gap.pdf
