@@ -105,74 +105,193 @@ ggplot(test) + geom_point(aes(x = log(TPA_SALIX), y = log(BA_SALIX), color = as.
 #there is clearly an issue - sometimes, a cluster will be too insignificant to be picked out by the decision tree. In this case, what should we do?
 
 ```
-```{r}
-#Do I need to create a data frame? 
-#write_csv(as.data.frame(as.matrix(d)), "dissimilarity_matrix1.csv")
-```
 
 
 ```{r}
-
 library(vegan)
 ptm <- proc.time()
 SALIX.mds2<-metaMDS(d,distance="manhattan",k=2, trymax=1000,maxit=1000) 
-SALIX.mds3<-metaMDS(d,distance="manhattan",k=3, trymax=1000,maxit=1000)
-SALIX.mds4<-metaMDS(d,distance="manhattan",k=4, trymax=1000,maxit=1000)
-SALIX.mds5<-metaMDS(d,distance="manhattan",k=5, trymax=1000,maxit=1000)
+#SALIX.mds3<-metaMDS(d,distance="manhattan",k=3, trymax=1000,maxit=1000)
+#SALIX.mds4<-metaMDS(d,distance="manhattan",k=4, trymax=1000,maxit=1000)
+#SALIX.mds5<-metaMDS(d,distance="manhattan",k=5, trymax=2000,maxit=2000)
 proc.time() - ptm
 ```
 
 ```{r}
 #plots (trymax=1000, maxit=1000 no convergence for k=5, lowest stress at k=4)
 plot(SALIX.mds2)
-plot(SALIX.mds3)
-plot(SALIX.mds4)
-plot(SALIX.mds5)
+#plot(SALIX.mds3)
+#plot(SALIX.mds4)
+#plot(SALIX.mds5)
 ```
-
 ##scree plot
 ```{r}
-library(vegan)
-library(goeveg)
-#Community data, a matrix-like object with samples in rows and species in columns.
-dimcheckMDS(as.matrix(d), distance = "manhattan", k = 6, trymax = 500,autotransform = TRUE)
+#library(vegan)
+#library(goeveg)
+#dimcheckMDS(as.matrix(d), distance = "manhattan", k = 4, trymax = 1000, maxit=1000, autotransform = TRUE)
 ```
-
 ## exploration 
 ```{r}
 names(SALIX.mds2)
 SALIX.mds2
-```
-
-```{r}
 #species names are missing 
-plot(SALIX.mds2)
-SALIX.mds2
-#ordiplot(names(SALIX.mds2))
 SALIX.mds2$species #(NA)
-scores(SALIX.mds2,display=c("sites", "species"))
 ```
 
 ```{r}
 #Doug suggested using isoMDS engine 
-SALIX.mds2alt1<-metaMDS(d,distance="manhattan",k=2, trymax=100,maxit=500,autotransform = FALSE,engine="isoMDS") 
+##SALIX.mds2alt1<-metaMDS(d,distance="manhattan",k=2, trymax=100,maxit=500,autotransform = FALSE,engine="isoMDS") 
 #Error in isoMDS(dist, k = k, trace = isotrace, maxit = maxit) : zero or negative distance between objects 10 and 18
 ```
-"Add or Replace Species Scores in Distance-Based Ordination"
+"Add or Replace Spec/s Scores in Distance-Based Ordination" for Willow, k=2
 ```{r}
+library(readr)
 sppscores(SALIX.mds2) <- d
 SALIX.mds2$species
 plot(SALIX.mds2)
 SALIX.mds2.df<-data.frame(SALIX.mds2$species)
 SALIX.mds2.df
-
 write_csv(SALIX.mds2.df, "SALIX.mds2.df.csv")
 ``` 
+# following example from http://search.r-project.org/library/vegan/html/sppscores.html
 ```{r}
+#plot(vegdist(d), dist(d))
+#plot(vegdist(d), dist(sqrt(decostand(d, "total"))))
+#sppscores(SALIX.mds2) <- sqrt(decostand(d, "total"))
+#plot(SALIX.mds2)
+```
+# Repeating process with other species (Need to change code)
+```{r}
+SALIX <- load_data("SALIX")
+d <- dissim(SALIX)
+process <- best_clustering(SALIX, d, "SALIX", 20)
+test <- process[[1]]
+test_tree <- process[[2]]
+rpart.plot(test_tree)
+ggplot(test) + geom_point(aes(x = log(TPA_SALIX), y = log(BA_SALIX), color = as.factor(cluster))) + scale_color_jco() + theme_light()
 
-plot(vegdist(d), dist(d))
-plot(vegdist(d), dist(sqrt(decostand(d, "total"))))
-sppscores(SALIX.mds2) <- sqrt(decostand(d, "total"))
+library(vegan)
+ptm <- proc.time()
+SALIX.mds2<-metaMDS(d,distance="manhattan",k=2, trymax=1000,maxit=1000) 
+proc.time() - ptm
+
 plot(SALIX.mds2)
+
+sppscores(SALIX.mds2) <- d
+SALIX.mds2$species
+plot(SALIX.mds2)
+SALIX.mds2.df<-data.frame(SALIX.mds2$species)
+SALIX.mds2.df
+write_csv(SALIX.mds2.df, "SALIX.mds2.df.csv") #doesn't contain PID
+
+nmds.df<-read_csv("SALIX.mds2.df.csv")
+```
+
+```{r}
+plot_classification <- read_csv("~/Desktop/REU /git/UWL-REU-FPF/clean_data/plot_classification.csv")
+
+plot_classificationSALIX <-plot_classification %>% 
+  filter(Type == "SALIX")
+
+plot_classificationSALIX<-subset(plot_classificationSALIX,select=-c(Type,Label))
+
+SALIX.full.df<-cbind(plot_classificationSALIX,nmds.df)
+SALIX.full.df
+write_csv(SALIX.full.df, "SALIX.full.df.csv")
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Repeating process with other species
+```{r}
+SALIX <- load_data("SALIX")
+d <- dissim(SALIX)
+process <- best_clustering(SALIX, d, "SALIX", 20)
+test <- process[[1]]
+test_tree <- process[[2]]
+rpart.plot(test_tree)
+ggplot(test) + geom_point(aes(x = log(TPA_SALIX), y = log(BA_SALIX), color = as.factor(cluster))) + scale_color_jco() + theme_light()
+
+library(vegan)
+ptm <- proc.time()
+SALIX.mds2<-metaMDS(d,distance="manhattan",k=2, trymax=1000,maxit=1000) 
+proc.time() - ptm
+
+plot(SALIX.mds2)
+
+sppscores(SALIX.mds2) <- d
+SALIX.mds2$species
+plot(SALIX.mds2)
+SALIX.mds2.df<-data.frame(SALIX.mds2$species)
+SALIX.mds2.df
+write_csv(SALIX.mds2.df, "SALIX.mds2.df.csv")
+```
+# Repeating process with other species
+```{r}
+SALIX <- load_data("SALIX")
+d <- dissim(SALIX)
+process <- best_clustering(SALIX, d, "SALIX", 20)
+test <- process[[1]]
+test_tree <- process[[2]]
+rpart.plot(test_tree)
+ggplot(test) + geom_point(aes(x = log(TPA_SALIX), y = log(BA_SALIX), color = as.factor(cluster))) + scale_color_jco() + theme_light()
+
+library(vegan)
+ptm <- proc.time()
+SALIX.mds2<-metaMDS(d,distance="manhattan",k=2, trymax=1000,maxit=1000) 
+proc.time() - ptm
+
+plot(SALIX.mds2)
+
+sppscores(SALIX.mds2) <- d
+SALIX.mds2$species
+plot(SALIX.mds2)
+SALIX.mds2.df<-data.frame(SALIX.mds2$species)
+SALIX.mds2.df
+write_csv(SALIX.mds2.df, "SALIX.mds2.df.csv")
+```
+# Repeating process with other species
+```{r}
+SALIX <- load_data("SALIX")
+d <- dissim(SALIX)
+process <- best_clustering(SALIX, d, "SALIX", 20)
+test <- process[[1]]
+test_tree <- process[[2]]
+rpart.plot(test_tree)
+ggplot(test) + geom_point(aes(x = log(TPA_SALIX), y = log(BA_SALIX), color = as.factor(cluster))) + scale_color_jco() + theme_light()
+
+library(vegan)
+ptm <- proc.time()
+SALIX.mds2<-metaMDS(d,distance="manhattan",k=2, trymax=1000,maxit=1000) 
+proc.time() - ptm
+
+plot(SALIX.mds2)
+
+sppscores(SALIX.mds2) <- d
+SALIX.mds2$species
+plot(SALIX.mds2)
+SALIX.mds2.df<-data.frame(SALIX.mds2$species)
+SALIX.mds2.df
+write_csv(SALIX.mds2.df, "SALIX.mds2.df.csv")
 ```
 
