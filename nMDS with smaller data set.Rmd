@@ -99,7 +99,6 @@ process <- best_clustering(SALIX, d, "SALIX", 20)
 test <- process[[1]]
 test_tree <- process[[2]]
 rpart.plot(test_tree)
-
 ggplot(test) + geom_point(aes(x = log(TPA_SALIX), y = log(BA_SALIX), color = as.factor(cluster))) + scale_color_jco() + theme_light()
 
 #there is clearly an issue - sometimes, a cluster will be too insignificant to be picked out by the decision tree. In this case, what should we do?
@@ -152,6 +151,8 @@ plot(SALIX.mds2)
 SALIX.mds2.df<-data.frame(SALIX.mds2$species)
 SALIX.mds2.df
 write_csv(SALIX.mds2.df, "SALIX.mds2.df.csv")
+
+nmds.df<-read_csv("SALIX.mds2.df.csv")
 ``` 
 # following example from http://search.r-project.org/library/vegan/html/sppscores.html
 ```{r}
@@ -160,138 +161,125 @@ write_csv(SALIX.mds2.df, "SALIX.mds2.df.csv")
 #sppscores(SALIX.mds2) <- sqrt(decostand(d, "total"))
 #plot(SALIX.mds2)
 ```
-# Repeating process with other species (Need to change code)
-```{r}
-SALIX <- load_data("SALIX")
-d <- dissim(SALIX)
-process <- best_clustering(SALIX, d, "SALIX", 20)
-test <- process[[1]]
-test_tree <- process[[2]]
-rpart.plot(test_tree)
-ggplot(test) + geom_point(aes(x = log(TPA_SALIX), y = log(BA_SALIX), color = as.factor(cluster))) + scale_color_jco() + theme_light()
-
-library(vegan)
-ptm <- proc.time()
-SALIX.mds2<-metaMDS(d,distance="manhattan",k=2, trymax=1000,maxit=1000) 
-proc.time() - ptm
-
-plot(SALIX.mds2)
-
-sppscores(SALIX.mds2) <- d
-SALIX.mds2$species
-plot(SALIX.mds2)
-SALIX.mds2.df<-data.frame(SALIX.mds2$species)
-SALIX.mds2.df
-write_csv(SALIX.mds2.df, "SALIX.mds2.df.csv") #doesn't contain PID
-
-nmds.df<-read_csv("SALIX.mds2.df.csv")
-```
 
 ```{r}
+library(readr)
+library(dplyr)
 plot_classification <- read_csv("~/Desktop/REU /git/UWL-REU-FPF/clean_data/plot_classification.csv")
-
 plot_classificationSALIX <-plot_classification %>% 
   filter(Type == "SALIX")
-
 plot_classificationSALIX<-subset(plot_classificationSALIX,select=-c(Type,Label))
-
 SALIX.full.df<-cbind(plot_classificationSALIX,nmds.df)
 SALIX.full.df
 write_csv(SALIX.full.df, "SALIX.full.df.csv")
-
-
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Repeating process with other species
+Silver Maple 
 ```{r}
-SALIX <- load_data("SALIX")
-d <- dissim(SALIX)
-process <- best_clustering(SALIX, d, "SALIX", 20)
+ACSA2 <- load_data("ACSA2")
+d <- dissim(ACSA2)
+process <- best_clustering(ACSA2, d, "ACSA2", 20)
 test <- process[[1]]
 test_tree <- process[[2]]
 rpart.plot(test_tree)
-ggplot(test) + geom_point(aes(x = log(TPA_SALIX), y = log(BA_SALIX), color = as.factor(cluster))) + scale_color_jco() + theme_light()
+ggplot(test) + geom_point(aes(x = log(TPA_ACSA2), y = log(BA_ACSA2), color = as.factor(cluster))) + scale_color_jco() + theme_light()
 
 library(vegan)
 ptm <- proc.time()
-SALIX.mds2<-metaMDS(d,distance="manhattan",k=2, trymax=1000,maxit=1000) 
+ACSA2.mds2<-metaMDS(d,distance="manhattan",k=2, trymax=1000,maxit=1000) 
 proc.time() - ptm
+plot(ACSA2.mds2)
 
-plot(SALIX.mds2)
+library(readr)
+sppscores(ACSA2.mds2) <- d
+ACSA2.mds2$species
+plot(ACSA2.mds2)
+ACSA2.mds2.df<-data.frame(ACSA2.mds2$species)
+ACSA2.mds2.df
+write_csv(ACSA2.mds2.df, "ACSA2.mds2.df.csv")
+nmds.df<-read_csv("ACSA2.mds2.df.csv")
 
-sppscores(SALIX.mds2) <- d
-SALIX.mds2$species
-plot(SALIX.mds2)
-SALIX.mds2.df<-data.frame(SALIX.mds2$species)
-SALIX.mds2.df
-write_csv(SALIX.mds2.df, "SALIX.mds2.df.csv")
+library(readr)
+library(dplyr)
+plot_classification <- read_csv("~/Desktop/REU /git/UWL-REU-FPF/clean_data/plot_classification.csv")
+plot_classificationACSA2 <-plot_classification %>% 
+  filter(Type == "ACSA2")
+plot_classificationACSA2<-subset(plot_classificationACSA2,select=-c(Type,Label))
+ACSA2.full.df<-cbind(plot_classificationACSA2,nmds.df)
+ACSA2.full.df
+write_csv(ACSA2.full.df, "ACSA2.full.df.csv")
 ```
-# Repeating process with other species
+Cottonwood: PODE3
 ```{r}
-SALIX <- load_data("SALIX")
-d <- dissim(SALIX)
-process <- best_clustering(SALIX, d, "SALIX", 20)
+PODE3 <- load_data("PODE3")
+d <- dissim(PODE3)
+process <- best_clustering(PODE3, d, "PODE3", 20)
 test <- process[[1]]
 test_tree <- process[[2]]
 rpart.plot(test_tree)
-ggplot(test) + geom_point(aes(x = log(TPA_SALIX), y = log(BA_SALIX), color = as.factor(cluster))) + scale_color_jco() + theme_light()
+ggplot(test) + geom_point(aes(x = log(TPA_PODE3), y = log(BA_PODE3), color = as.factor(cluster))) + scale_color_jco() + theme_light()
 
 library(vegan)
 ptm <- proc.time()
-SALIX.mds2<-metaMDS(d,distance="manhattan",k=2, trymax=1000,maxit=1000) 
+PODE3.mds2<-metaMDS(d,distance="manhattan",k=2, trymax=1000,maxit=1000) 
 proc.time() - ptm
+plot(PODE3.mds2)
 
-plot(SALIX.mds2)
+library(readr)
+sppscores(PODE3.mds2) <- d
+PODE3.mds2$species
+plot(PODE3.mds2)
+PODE3.mds2.df<-data.frame(PODE3.mds2$species)
+PODE3.mds2.df
+write_csv(PODE3.mds2.df, "PODE3.mds2.df.csv")
+nmds.df<-read_csv("PODE3.mds2.df.csv")
 
-sppscores(SALIX.mds2) <- d
-SALIX.mds2$species
-plot(SALIX.mds2)
-SALIX.mds2.df<-data.frame(SALIX.mds2$species)
-SALIX.mds2.df
-write_csv(SALIX.mds2.df, "SALIX.mds2.df.csv")
+library(readr)
+library(dplyr)
+plot_classification <- read_csv("~/Desktop/REU /git/UWL-REU-FPF/clean_data/plot_classification.csv")
+plot_classificationPODE3 <-plot_classification %>% 
+  filter(Type == "PODE3")
+plot_classificationPODE3<-subset(plot_classificationPODE3,select=-c(Type,Label))
+PODE3.full.df<-cbind(plot_classificationPODE3,nmds.df)
+PODE3.full.df
+write_csv(PODE3.full.df, "PODE3.full.df.csv")
 ```
-# Repeating process with other species
+Green Ash 
 ```{r}
-SALIX <- load_data("SALIX")
-d <- dissim(SALIX)
-process <- best_clustering(SALIX, d, "SALIX", 20)
+FRPE <- load_data("FRPE")
+d <- dissim(FRPE)
+process <- best_clustering(FRPE, d, "FRPE", 20)
 test <- process[[1]]
 test_tree <- process[[2]]
 rpart.plot(test_tree)
-ggplot(test) + geom_point(aes(x = log(TPA_SALIX), y = log(BA_SALIX), color = as.factor(cluster))) + scale_color_jco() + theme_light()
+ggplot(test) + geom_point(aes(x = log(TPA_FRPE), y = log(BA_FRPE), color = as.factor(cluster))) + scale_color_jco() + theme_light()
 
 library(vegan)
 ptm <- proc.time()
-SALIX.mds2<-metaMDS(d,distance="manhattan",k=2, trymax=1000,maxit=1000) 
+FRPE.mds2<-metaMDS(d,distance="manhattan",k=2, trymax=1000,maxit=1000) 
 proc.time() - ptm
+plot(FRPE.mds2)
 
-plot(SALIX.mds2)
+library(readr)
+sppscores(FRPE.mds2) <- d
+FRPE.mds2$species
+plot(FRPE.mds2)
+FRPE.mds2.df<-data.frame(FRPE.mds2$species)
+FRPE.mds2.df
+write_csv(FRPE.mds2.df, "FRPE.mds2.df.csv")
+nmds.df<-read_csv("FRPE.mds2.df.csv")
 
-sppscores(SALIX.mds2) <- d
-SALIX.mds2$species
-plot(SALIX.mds2)
-SALIX.mds2.df<-data.frame(SALIX.mds2$species)
-SALIX.mds2.df
-write_csv(SALIX.mds2.df, "SALIX.mds2.df.csv")
+library(readr)
+library(dplyr)
+plot_classification <- read_csv("~/Desktop/REU /git/UWL-REU-FPF/clean_data/plot_classification.csv")
+plot_classificationFRPE <-plot_classification %>% 
+  filter(Type == "FRPE")
+plot_classificationFRPE<-subset(plot_classificationFRPE,select=-c(Type,Label))
+FRPE.full.df<-cbind(plot_classificationFRPE,nmds.df)
+FRPE.full.df
+write_csv(FRPE.full.df, "FRPE.full.df.csv")
 ```
+## Classification Procedure 
+
+
+
 
