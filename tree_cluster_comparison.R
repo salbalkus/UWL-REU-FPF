@@ -6,14 +6,13 @@ library(rpart.plot)
 library(zoo)
 library(vegan)
 library(infotheo)
+library(ggsci)
 
 path_of_code <- dirname(rstudioapi::getSourceEditorContext()$path)
 setwd(path_of_code)
 
-dissim <- read_csv("dissimilarity_matrix.csv")
-dissim <- as.matrix(dissim)
+source("classification_procedure.R")
 
-cluster_h <- hclust(as.dist(dissim), method = "ward.D2")
 plots <- read_csv("clean_data/plots_nonrel.csv")
 plots_acsa2 <- plots %>% filter(Type == "ACSA2")
 plots_acsa2
@@ -22,11 +21,10 @@ plots_acsa2
 obs <- read_csv("clean_data/UMRS_FPF_clean.csv")
 labels <- read_csv("clean_data/plot_classification.csv")
 obs <- left_join(obs, labels, by = "PID")
-obs_acsa2 <- obs %>% filter(Type == "ACSA2")
 
-feature_engineer <- function(obs, dom){
+feature_engineer <- function(obs, name, dom1, dom2){
   
-  obs_target <- obs %>% filter(Type == dom)
+  obs_target <- obs %>% filter(Type == name)
   
   #Feature Engineering
   hard_mast <- c("QUPA2","QUBI","QUVE","QUMA2","QULY","CACO15","QURU","CALA21","CAOV2","QUAL")
@@ -40,8 +38,10 @@ feature_engineer <- function(obs, dom){
       Total_TPA = sum(TreesPerAcre),
       Total_BA = sum(BasalArea),
       Num_Species = n_distinct(TR_SP),
-      Dom_TPA = sum(TreesPerAcre[TR_SP == dom]),
-      Dom_BA = sum(BasalArea[TR_SP == dom ]),
+      Dom1_TPA = sum(TreesPerAcre[TR_SP == dom1]),
+      Dom1_BA = sum(BasalArea[TR_SP == dom1]),
+      Dom2_TPA = sum(TreesPerAcre[TR_SP == dom2]),
+      Dom2_BA = sum(BasalArea[TR_SP == dom2]),
       SNAG_TPA = sum(TreesPerAcre[TR_SP == "SNAG"]),
       SNAG_BA = sum(BasalArea[TR_SP == "SNAG" ]),
       HARDMAST_TPA = sum(TreesPerAcre[TR_SP %in% hard_mast]),
@@ -59,26 +59,29 @@ feature_engineer <- function(obs, dom){
   return(fe_target)
 }
 
-#Train the model
+#Test various types
+target <- "ACSA2 and PODE3"
+fe_test <- feature_engineer(obs, target, "ACSA2","PODE3")
+form <- paste( "cluster ~", paste0(colnames(fe_test)[2:(ncol(fe_test)-2)], collapse = " + "))
 
+dissim <- read_csv("dissimilarity_matrix.csv")
+dissim <- dissimilarity_matrix(load_data(target))
+dissim <- as.matrix(dissim)
+cluster_h <- hclust(as.dist(dissim), method = "ward.D2")
 
-form <- paste( "cluster ~", paste0(colnames(fe_acsa2)[2:(ncol(fe_acsa2)-2)], collapse = " + "))
+cut <- cutree(cluster_h, k = 10)
+fe_test$cluster <- as.factor(cut)
 
-### Using comparisons between tree and hierarchical clustering ###
-cut <- cutree(cluster_h, k = 4)
-fe_acsa2$cluster <- as.factor(cut)
-
-tree <- rpart(data = fe_acsa2, formula = form, method = "class", 
+tree <- rpart(data = fe_test, formula = form, method = "class", 
               parms = list(split = "information"),
               control = rpart.control(minbucket = 1))
-
-
 rpart.plot(tree)
 
-ggplot(fe_acsa2) + geom_point(aes(x = log(Dom_TPA), y = log(Dom_BA), color = cluster))
+ggplot(fe_test) + geom_point(aes(x = log(Dom1_TPA), y = log(Dom2_TPA), color = cluster)) + theme_light() + scale_color_jco()
 
-tab <- table(fe_acsa2$cluster, predict(tree, fe_acsa2, type = "vector"))
+tab <- table(fe_test$cluster, predict(tree, fe_test, type = "vector"))
 sum(diag(tab)) / sum(tab)
+
 
 #maxdepth = ceiling(log(2*10,2))
 

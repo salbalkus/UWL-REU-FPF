@@ -1,0 +1,88 @@
+library(tidyverse, quietly = TRUE)
+library(vegclust, quietly = TRUE)
+library(rpart, quietly = TRUE)
+library(infotheo, quietly = TRUE)
+library(cluster, quietly = TRUE)
+
+
+#Load in the data that will be used for clustering
+load_data <- function(dom_species){
+
+  df <- read_csv("clean_data/UMRS_FPF_clean.csv")
+  labels <- read_csv("clean_data/plot_classification.csv")
+
+  df_cols <- left_join(df, labels, by = "PID") %>% select(PID, TR_SP, TR_DIA, BasalArea, TreesPerAcre, Type, Label) %>% filter(Type == dom_species)
+  return(df_cols)
+}
+
+#Produce the dissimilarity matrix for the given dominant species type
+dissimilarity_matrix <- function(df, meth = "manhattan"){
+  #106 is the max... for some reason only works if 106 is hardcoded
+  TPA_bins = 1 / (pi * (seq(1:106)*2.75)^2) / 43560
+  BA_bins = 0.25*pi*(seq(1:106)^2)
+  
+  cap <- stratifyvegdata(df, sizes1 = BA_bins, plotColumn = "PID", speciesColumn = "TR_SP", abundanceColumn = "TreesPerAcre", size1Column = "BasalArea", cumulative = TRUE )
+  d <- vegdiststruct(cap, method = meth)
+  return(d)
+}
+
+#Classification output for a single dominant species type
+#This needs to be tested, and introspection must be able to be performed
+best_clustering <- function(df, dissim, max_clusters, meth = "ward.D2"){
+  
+  cluster_h <- hclust(as.dist(dissim), method = meth)
+  
+  plot_abundance <- df %>%
+    group_by(PID, TR_SP) %>%
+    summarize(TPA = sum(TreesPerAcre)) %>%
+    replace(is.na(.), 0) 
+  
+  plot_size <- df %>%
+    group_by(PID, TR_SP) %>%
+    summarize(BA = sum(BasalArea)) %>%
+    replace(is.na(.), 0)
+  
+  plots <- inner_join(plot_abundance, plot_size, by = c("PID", "TR_SP")) %>% 
+    pivot_wider(names_from = TR_SP, values_from = c(TPA, BA)) %>% 
+    replace(is.na(.), 0)
+  
+  plots <- left_join(plots, read_csv("clean_data/plot_classification.csv"))
+  #form <- paste( "cluster ~", paste0(colnames(plots)[2:(ncol(plots)-2)], collapse = " + "))
+  
+  num <- min(max_clusters, nrow(plots))
+  
+  sil <- vector("list", length = num-1)
+  for(n in 2:num){
+    plots$cluster <- cutree(cluster_h, k = n)
+    sil[[n-1]] <- mean(silhouette(x = plots$cluster, dmatrix = as.matrix(dissim))[,"sil_width"])
+  }
+  plots$cluster <- cutree(cluster_h, k = (which.max(sil)+1))
+  return(plots)
+}
+
+classify <- function(max_clusters_num){
+  df <- read_csv("clean_data/UMRS_FPF_clean.csv")
+  labels <- read_csv("clean_data/plot_classification.csv")
+  df <- left_join(df, labels, by = "PID")
+  df_cols_total <- df %>% filter(Label != "Mixed") %>% filter(Type %in% (df %>% group_by(Type) %>% summarize(Count = n_distinct(PID)) %>% filter(Count > 10))$Type)
+  
+  df <- load_data("ACNE2")
+  dissim <- dissimilarity_matrix(df)
+  result <- best_clustering(df, dissim, 10)
+
+  for(dom_species in unique(df_cols_total$Type)[unique(df_cols_total$Type) != "ACNE2"]){
+    print(dom_species)
+    df <- load_data(dom_species)
+    dissim <- dissimilarity_matrix(df)
+    best <- best_clustering(df, dissim, 10)
+    result <- rbind(result, best)
+
+  }
+  
+  return(result)
+}
+
+final <- classify(10)
+new_final <- final %>% select(PID, Type, Label, cluster)
+write_csv(final, "classified_plots_full.csv")
+write_csv(new_final, "classified_plots_labels.csv")
