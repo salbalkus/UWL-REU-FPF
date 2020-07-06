@@ -86,3 +86,7 @@ final <- classify(10)
 new_final <- final %>% select(PID, Type, Label, cluster)
 write_csv(final, "classified_plots_full.csv")
 write_csv(new_final, "classified_plots_labels.csv")
+
+results <- final %>% group_by(Type) %>% summarize(clusters = max(cluster), plots = n_distinct(PID))
+ggplot(results, aes(x = clusters, y = plots)) + geom_col()
+ggplot(results, aes(x = clusters)) + geom_histogram(binwidth=1)
