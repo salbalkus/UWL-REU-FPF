@@ -264,21 +264,13 @@ write_csv(SALIX.full.df, "SALIX.full.df.csv")
 ```
 Adding clusters and labels 
 ```{r}
-#plot_classificationACSA2 <-plot_classification %>% 
-  #filter(Type == "ACSA2")
-#final <- classify(10)
-#new_final <- final %>% select(PID, Type, Label, cluster)
-#write_csv(final, "classified_plots_full.csv")
-#write_csv(new_final, "classified_plots_labels.csv")
 new_final
 new_final.SALIX<-new_final %>%
   filter(Type == "SALIX")
 new_final.SALIX
-#plot_classificationACSA2<-subset(plot_classificationACSA2,select=-c(Type,Label))
 new_final.SALIX.clusters<-subset(new_final.SALIX,select=-c(PID,Type))
 new_final.SALIX.clusters
 write_csv(new_final.SALIX.clusters, "new_final.SALIX.clusters.csv")
-#ACSA2.full.df<-cbind(plot_classificationACSA2,nmds.df)
 SALIX.full.df.clust<-cbind(SALIX.full.df,new_final.SALIX.clusters)
 write_csv(SALIX.full.df.clust, "SALIX.full.df.clust.csv")
 ```
