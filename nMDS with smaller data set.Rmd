@@ -97,6 +97,10 @@ new_final <- final %>% select(PID, Type, Label, cluster)
 write_csv(final, "classified_plots_full.csv")
 write_csv(new_final, "classified_plots_labels.csv")
 
+results <- final %>% group_by(Type) %>% summarize(clusters = max(cluster), plots = n_distinct(PID))
+ggplot(results, aes(x = clusters, y = plots)) + geom_col()
+ggplot(results, aes(x = clusters)) + geom_histogram(binwidth=1)      
+
 ```
 ```{r}
 library(ggsci)
@@ -200,18 +204,11 @@ ggplot(test) + geom_point(aes(x = log(TPA_SALIX), y = log(BA_SALIX), color = as.
 library(vegan)
 ptm <- proc.time()
 SALIX.mds2<-metaMDS(d,distance="manhattan",k=2, trymax=1000,maxit=1000) 
-#SALIX.mds3<-metaMDS(d,distance="manhattan",k=3, trymax=1000,maxit=1000)
-#SALIX.mds4<-metaMDS(d,distance="manhattan",k=4, trymax=1000,maxit=1000)
-#SALIX.mds5<-metaMDS(d,distance="manhattan",k=5, trymax=2000,maxit=2000)
 proc.time() - ptm
 ```
 
 ```{r}
-#plots (trymax=1000, maxit=1000 no convergence for k=5, lowest stress at k=4)
 plot(SALIX.mds2)
-#plot(SALIX.mds3)
-#plot(SALIX.mds4)
-#plot(SALIX.mds5)
 ```
 ##scree plot
 ```{r}
@@ -262,21 +259,139 @@ SALIX.full.df<-cbind(plot_classificationSALIX,nmds.df)
 SALIX.full.df
 write_csv(SALIX.full.df, "SALIX.full.df.csv")
 ```
+nmds plot, Willow 
+```{r}
+library(tidyverse)
+library(ggsci)
+
+path_of_code <- dirname(rstudioapi::getSourceEditorContext()$path)
+setwd(path_of_code)
+
+labels <- read_csv("classified_plots_labels.csv")
+coords <- read_csv("SALIX.full.df.csv")
+nmds <- left_join(coords, labels, by = "PID")
+
+nmds
+
+ggplot(nmds) + geom_point(aes(x = MDS1, y = MDS2, color = as.factor(cluster))) + scale_color_jco() + theme_light()
+```
+nmds plot, silver maple 
+```{r}
+library(tidyverse)
+library(ggsci)
+
+path_of_code <- dirname(rstudioapi::getSourceEditorContext()$path)
+setwd(path_of_code)
+
+labels <- read_csv("classified_plots_labels.csv")
+coords <- read_csv("ACSA2.full.df.csv")
+nmds <- left_join(coords, labels, by = "PID")
+
+nmds
+
+ggplot(nmds) + geom_point(aes(x = MDS1, y = MDS2, color = as.factor(cluster))) + scale_color_jco() + theme_light()
+```
+
+
 Adding clusters and labels 
 ```{r}
-new_final
-new_final.SALIX<-new_final %>%
-  filter(Type == "SALIX")
-new_final.SALIX
-new_final.SALIX.clusters<-subset(new_final.SALIX,select=-c(PID,Type))
-new_final.SALIX.clusters
-write_csv(new_final.SALIX.clusters, "new_final.SALIX.clusters.csv")
-SALIX.full.df.clust<-cbind(SALIX.full.df,new_final.SALIX.clusters)
-write_csv(SALIX.full.df.clust, "SALIX.full.df.clust.csv")
+#new_final
+#new_final.SALIX<-new_final %>%
+ # filter(Type == "SALIX")
+#new_final.SALIX
+#new_final.SALIX.clusters<-subset(new_final.SALIX,select=-c(PID,Type))
+#new_final.SALIX.clusters
+#write_csv(new_final.SALIX.clusters, "new_final.SALIX.clusters.csv")
+#SALIX.full.df.clust<-cbind(SALIX.full.df,new_final.SALIX.clusters)
+#write_csv(SALIX.full.df.clust, "SALIX.full.df.clust.csv")
 ```
 
 Silver Maple 
 ```{r}
+library(ggsci)
+library(rpart.plot)
+
+path_of_code <- dirname(rstudioapi::getSourceEditorContext()$path)
+setwd(path_of_code)
+
+#source("classification_procedure.R")
+###########################################################
+library(tidyverse)
+library(vegclust)
+library(rpart)
+library(infotheo)
+
+
+
+#Load in the data that will be used for clustering
+load_data <- function(dom_species){
+  path_of_code <- dirname(rstudioapi::getSourceEditorContext()$path)
+  setwd(path_of_code)
+
+  df <- read_csv("clean_data/UMRS_FPF_clean.csv")
+  labels <- read_csv("clean_data/plot_classification.csv")
+
+  df_cols <- left_join(df, labels, by = "PID") %>% select(PID, TR_SP, TR_DIA, BasalArea, TreesPerAcre, Type, Label) %>% filter(Type == dom_species)
+  return(df_cols)
+}
+
+#Produce the dissimilarity matrix for the given dominant species type
+dissim <- function(df, meth = "manhattan"){
+  
+  TPA_bins = 1 / (pi * (seq(1:max(df$TR_DIA))*2.75)^2) / 43560
+  BA_bins = 0.25*pi*(seq(1:max(df$TR_DIA))^2)
+  
+  cap <- stratifyvegdata(df, sizes1 = BA_bins, plotColumn = "PID", speciesColumn = "TR_SP", abundanceColumn = "TreesPerAcre", size1Column = "BasalArea", cumulative = TRUE )
+  d <- vegdiststruct(cap, method = meth)
+  return(d)
+}
+
+#Classification output for a single dominant species type
+#This needs to be tested, and introspection must be able to be performed
+best_clustering <- function(df, dissim, dom_species, max_clusters, meth = "ward.D2"){
+  cluster_h <- hclust(as.dist(dissim), method = meth)
+  
+  plot_abundance <- df %>%
+    group_by(PID, TR_SP) %>%
+    summarize(TPA = sum(TreesPerAcre)) %>%
+    replace(is.na(.), 0) 
+  
+  plot_size <- df %>%
+    group_by(PID, TR_SP) %>%
+    summarize(BA = sum(BasalArea)) %>%
+    replace(is.na(.), 0)
+  
+  plots <- inner_join(plot_abundance, plot_size, by = c("PID", "TR_SP")) %>% 
+    pivot_wider(names_from = TR_SP, values_from = c(TPA, BA)) %>% 
+    replace(is.na(.), 0)
+  
+  plots <- left_join(plots, read_csv("clean_data/plot_classification.csv"))
+  
+  form <- paste( "cluster ~", paste0(colnames(plots)[2:(ncol(plots)-2)], collapse = " + "))
+  
+  vmeasures <- vector(length = max_clusters - 1)
+  trees <- vector("list",length = max_clusters - 1)
+  for(n in 2:max_clusters){
+    cut <- cutree(cluster_h, k = n)
+    plots$cluster <- cut
+    
+    trees[[n-1]] <- rpart(data = plots, formula = form, method = "class", control = rpart.control(maxdepth = ceiling(log(2*n,2)), cp = 0, minbucket = 1))
+    sel_tree <- trees[[n-1]]
+    plots$tree <- predict(sel_tree, plots, type = "vector")
+    
+    h <- 1 - condentropy(plots$cluster, plots$tree) / entropy(plots$cluster)
+    c <- 1 - condentropy(plots$tree, plots$cluster) / entropy(plots$tree)
+    
+    vmeasures[n-1] <- 2 * ((h*c) / (h + c))
+  }
+  
+  best_k <- which.max(vmeasures)
+  
+  plots$cluster <- predict(trees[[best_k]], plots, type = "vector")
+  plots <- select(plots, -tree)
+  return(list(plots, trees[[best_k]]))
+}
+
 ACSA2 <- load_data("ACSA2")
 d <- dissim(ACSA2)
 process <- best_clustering(ACSA2, d, "ACSA2", 20)
@@ -314,6 +429,90 @@ write_csv(ACSA2.full.df, "ACSA2.full.df.csv")
 
 Cottonwood: PODE3
 ```{r}
+library(ggsci)
+library(rpart.plot)
+
+path_of_code <- dirname(rstudioapi::getSourceEditorContext()$path)
+setwd(path_of_code)
+
+#source("classification_procedure.R")
+###########################################################
+library(tidyverse)
+library(vegclust)
+library(rpart)
+library(infotheo)
+
+
+
+#Load in the data that will be used for clustering
+load_data <- function(dom_species){
+  path_of_code <- dirname(rstudioapi::getSourceEditorContext()$path)
+  setwd(path_of_code)
+
+  df <- read_csv("clean_data/UMRS_FPF_clean.csv")
+  labels <- read_csv("clean_data/plot_classification.csv")
+
+  df_cols <- left_join(df, labels, by = "PID") %>% select(PID, TR_SP, TR_DIA, BasalArea, TreesPerAcre, Type, Label) %>% filter(Type == dom_species)
+  return(df_cols)
+}
+
+#Produce the dissimilarity matrix for the given dominant species type
+dissim <- function(df, meth = "manhattan"){
+  
+  TPA_bins = 1 / (pi * (seq(1:max(df$TR_DIA))*2.75)^2) / 43560
+  BA_bins = 0.25*pi*(seq(1:max(df$TR_DIA))^2)
+  
+  cap <- stratifyvegdata(df, sizes1 = BA_bins, plotColumn = "PID", speciesColumn = "TR_SP", abundanceColumn = "TreesPerAcre", size1Column = "BasalArea", cumulative = TRUE )
+  d <- vegdiststruct(cap, method = meth)
+  return(d)
+}
+
+#Classification output for a single dominant species type
+#This needs to be tested, and introspection must be able to be performed
+best_clustering <- function(df, dissim, dom_species, max_clusters, meth = "ward.D2"){
+  cluster_h <- hclust(as.dist(dissim), method = meth)
+  
+  plot_abundance <- df %>%
+    group_by(PID, TR_SP) %>%
+    summarize(TPA = sum(TreesPerAcre)) %>%
+    replace(is.na(.), 0) 
+  
+  plot_size <- df %>%
+    group_by(PID, TR_SP) %>%
+    summarize(BA = sum(BasalArea)) %>%
+    replace(is.na(.), 0)
+  
+  plots <- inner_join(plot_abundance, plot_size, by = c("PID", "TR_SP")) %>% 
+    pivot_wider(names_from = TR_SP, values_from = c(TPA, BA)) %>% 
+    replace(is.na(.), 0)
+  
+  plots <- left_join(plots, read_csv("clean_data/plot_classification.csv"))
+  
+  form <- paste( "cluster ~", paste0(colnames(plots)[2:(ncol(plots)-2)], collapse = " + "))
+  
+  vmeasures <- vector(length = max_clusters - 1)
+  trees <- vector("list",length = max_clusters - 1)
+  for(n in 2:max_clusters){
+    cut <- cutree(cluster_h, k = n)
+    plots$cluster <- cut
+    
+    trees[[n-1]] <- rpart(data = plots, formula = form, method = "class", control = rpart.control(maxdepth = ceiling(log(2*n,2)), cp = 0, minbucket = 1))
+    sel_tree <- trees[[n-1]]
+    plots$tree <- predict(sel_tree, plots, type = "vector")
+    
+    h <- 1 - condentropy(plots$cluster, plots$tree) / entropy(plots$cluster)
+    c <- 1 - condentropy(plots$tree, plots$cluster) / entropy(plots$tree)
+    
+    vmeasures[n-1] <- 2 * ((h*c) / (h + c))
+  }
+  
+  best_k <- which.max(vmeasures)
+  
+  plots$cluster <- predict(trees[[best_k]], plots, type = "vector")
+  plots <- select(plots, -tree)
+  return(list(plots, trees[[best_k]]))
+}
+
 PODE3 <- load_data("PODE3")
 d <- dissim(PODE3)
 process <- best_clustering(PODE3, d, "PODE3", 20)
@@ -324,7 +523,7 @@ ggplot(test) + geom_point(aes(x = log(TPA_PODE3), y = log(BA_PODE3), color = as.
 
 library(vegan)
 ptm <- proc.time()
-PODE3.mds2<-metaMDS(d,distance="manhattan",k=2, trymax=1000,maxit=1000) 
+PODE3.mds2<-metaMDS(d,distance="manhattan",k=2, trymax=500,maxit=500) 
 proc.time() - ptm
 plot(PODE3.mds2)
 
@@ -347,8 +546,113 @@ PODE3.full.df<-cbind(plot_classificationPODE3,nmds.df)
 PODE3.full.df
 write_csv(PODE3.full.df, "PODE3.full.df.csv")
 ```
+nmds plot, cottonwood 
+```{r}
+library(tidyverse)
+library(ggsci)
+
+path_of_code <- dirname(rstudioapi::getSourceEditorContext()$path)
+setwd(path_of_code)
+
+labels <- read_csv("classified_plots_labels.csv")
+coords <- read_csv("PODE3.full.df.csv")
+nmds <- left_join(coords, labels, by = "PID")
+
+nmds
+
+ggplot(nmds) + geom_point(aes(x = MDS1, y = MDS2, color = as.factor(cluster))) + scale_color_jco() + theme_light()
+```
+
+
+
+
+
+
 Green Ash 
 ```{r}
+library(ggsci)
+library(rpart.plot)
+
+path_of_code <- dirname(rstudioapi::getSourceEditorContext()$path)
+setwd(path_of_code)
+
+#source("classification_procedure.R")
+###########################################################
+library(tidyverse)
+library(vegclust)
+library(rpart)
+library(infotheo)
+
+
+
+#Load in the data that will be used for clustering
+load_data <- function(dom_species){
+  path_of_code <- dirname(rstudioapi::getSourceEditorContext()$path)
+  setwd(path_of_code)
+
+  df <- read_csv("clean_data/UMRS_FPF_clean.csv")
+  labels <- read_csv("clean_data/plot_classification.csv")
+
+  df_cols <- left_join(df, labels, by = "PID") %>% select(PID, TR_SP, TR_DIA, BasalArea, TreesPerAcre, Type, Label) %>% filter(Type == dom_species)
+  return(df_cols)
+}
+
+#Produce the dissimilarity matrix for the given dominant species type
+dissim <- function(df, meth = "manhattan"){
+  
+  TPA_bins = 1 / (pi * (seq(1:max(df$TR_DIA))*2.75)^2) / 43560
+  BA_bins = 0.25*pi*(seq(1:max(df$TR_DIA))^2)
+  
+  cap <- stratifyvegdata(df, sizes1 = BA_bins, plotColumn = "PID", speciesColumn = "TR_SP", abundanceColumn = "TreesPerAcre", size1Column = "BasalArea", cumulative = TRUE )
+  d <- vegdiststruct(cap, method = meth)
+  return(d)
+}
+
+#Classification output for a single dominant species type
+#This needs to be tested, and introspection must be able to be performed
+best_clustering <- function(df, dissim, dom_species, max_clusters, meth = "ward.D2"){
+  cluster_h <- hclust(as.dist(dissim), method = meth)
+  
+  plot_abundance <- df %>%
+    group_by(PID, TR_SP) %>%
+    summarize(TPA = sum(TreesPerAcre)) %>%
+    replace(is.na(.), 0) 
+  
+  plot_size <- df %>%
+    group_by(PID, TR_SP) %>%
+    summarize(BA = sum(BasalArea)) %>%
+    replace(is.na(.), 0)
+  
+  plots <- inner_join(plot_abundance, plot_size, by = c("PID", "TR_SP")) %>% 
+    pivot_wider(names_from = TR_SP, values_from = c(TPA, BA)) %>% 
+    replace(is.na(.), 0)
+  
+  plots <- left_join(plots, read_csv("clean_data/plot_classification.csv"))
+  
+  form <- paste( "cluster ~", paste0(colnames(plots)[2:(ncol(plots)-2)], collapse = " + "))
+  
+  vmeasures <- vector(length = max_clusters - 1)
+  trees <- vector("list",length = max_clusters - 1)
+  for(n in 2:max_clusters){
+    cut <- cutree(cluster_h, k = n)
+    plots$cluster <- cut
+    
+    trees[[n-1]] <- rpart(data = plots, formula = form, method = "class", control = rpart.control(maxdepth = ceiling(log(2*n,2)), cp = 0, minbucket = 1))
+    sel_tree <- trees[[n-1]]
+    plots$tree <- predict(sel_tree, plots, type = "vector")
+    
+    h <- 1 - condentropy(plots$cluster, plots$tree) / entropy(plots$cluster)
+    c <- 1 - condentropy(plots$tree, plots$cluster) / entropy(plots$tree)
+    
+    vmeasures[n-1] <- 2 * ((h*c) / (h + c))
+  }
+  
+  best_k <- which.max(vmeasures)
+  
+  plots$cluster <- predict(trees[[best_k]], plots, type = "vector")
+  plots <- select(plots, -tree)
+  return(list(plots, trees[[best_k]]))
+}
 FRPE <- load_data("FRPE")
 d <- dissim(FRPE)
 process <- best_clustering(FRPE, d, "FRPE", 20)
@@ -382,5 +686,20 @@ FRPE.full.df<-cbind(plot_classificationFRPE,nmds.df)
 FRPE.full.df
 write_csv(FRPE.full.df, "FRPE.full.df.csv")
 ```
+nmds plot, green ash 
+```{r}
+library(tidyverse)
+library(ggsci)
 
+path_of_code <- dirname(rstudioapi::getSourceEditorContext()$path)
+setwd(path_of_code)
+
+labels <- read_csv("classified_plots_labels.csv")
+coords <- read_csv("FRPE.full.df.csv")
+nmds <- left_join(coords, labels, by = "PID")
+
+nmds
+
+ggplot(nmds) + geom_point(aes(x = MDS1, y = MDS2, color = as.factor(cluster))) + scale_color_jco() + theme_light()
+```
 
