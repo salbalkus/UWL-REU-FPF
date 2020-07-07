@@ -50,15 +50,6 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
   }
 }
 
-# This function will make the clusters according to the hierarchical clustering algorithm we
-# ran earlier.  It will add a clusters column to the individual-level dataframe (df)
-# The primary arguments that should be altered are k and filter.  k is the number of clusters
-# to make, and filter will only include species that make up at least 1% of the total count
-# across all individuals
-
-labels$Type %>% unique()
-
-labels %>% filter(is.na(Ty))
 
 # this function will take the df at the individual tree level and add a column to determine which 
 # cluster the tree is in based off of the PID

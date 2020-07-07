@@ -45,7 +45,7 @@ dissim <- vegdiststruct(cap, method = 'manhattan')
 end <- now()
 print(end - start)
 
-write_csv(as.data.frame(as.matrix(dissim)), 'mixed_dissim.csv')
+# write_csv(as.data.frame(as.matrix(dissim)), 'mixed_dissim.csv')
 
 
 ##### Hierarchical clustering ######
@@ -194,14 +194,20 @@ dia_dens <- df_clust %>% ggplot(aes(x = TR_DIA)) +
 dia_dens
 
 
-species_multiplot(10, pos = 'stack', leg_col = 1)
-tpa_ba_multiplot(10)
+species_multiplot(2, pos = 'stack', leg_col = 1)
+tpa_ba_multiplot(2)
 
 
 ##### CAP of Clusters #####
 
-k = 10
+k = 2
 df_clust <- make_clusters(k, filter = F)
+
+df_clust %>% group_by(cluster, PID) %>% summarize(count = n()) %>% summarize(count= n())
+?count
+
+df_clust %>% count(cluster)
+
 DIA_bins <- 1:106
 
 cluster_cap <- df_clust %>% stratifyvegdata(sizes1 = DIA_bins, plotColumn = 'cluster', speciesColumn = 'TR_SP', 
@@ -220,7 +226,10 @@ cluster_hclust <- hclust(dist(cluster_dissim), method = 'ward.D2')
 plot(cluster_hclust)
 
 
-plot_CAP(cluster_cap, layout = layout, norm = T, xlims = NULL, leg = F)
+plot_CAP(cluster_cap, layout = matrix(c(1,1,3, 1,1,3,2,2,3,2,2,3),
+                                      nrow = 4, ncol = 3, byrow = T), norm = T, xlims = NULL, leg = F)
+
+
 
 source('useful_functions.R')
 
@@ -252,4 +261,51 @@ sample_dissim
 summary_stats(11)$num_plots %>% sum()
 
 
+##### Finding best clusters #####
 
+best_clustering <- function(df, dissim, max_clusters, meth = "ward.D2"){
+  
+  cluster_h <- hclust(as.dist(dissim), method = meth)
+  print(1)
+  plot_abundance <- df %>%
+    group_by(PID, TR_SP) %>%
+    summarize(TPA = sum(TreesPerAcre), BA = sum(BasalArea)) %>%
+    replace(is.na(.), 0) 
+  print(2)
+  print(3)
+  plots <- plot_abundance %>% 
+    pivot_wider(names_from = TR_SP, values_from = c(TPA, BA)) %>% 
+    replace(is.na(.), 0)
+  print(4)
+  plots <- left_join(plots, read_csv("clean_data/plot_classification.csv"))
+  #form <- paste( "cluster ~", paste0(colnames(plots)[2:(ncol(plots)-2)], collapse = " + "))
+  print(5)
+  num <- min(max_clusters, nrow(plots))
+  print(6)
+  sil <- vector("list", length = num-1)
+  for(n in 2:num){
+    print(n)
+    plots$cluster <- cutree(cluster_h_d2, k = n)
+    sil[[n-1]] <- mean(silhouette(x = plots$cluster, dmatrix = as.matrix(dissim))[,"sil_width"])
+  }
+  print(sil)
+  plots$cluster <- cutree(cluster_h, k = (which.max(sil)+1))
+  return(plots)
+}
+
+clustering <- best_clustering(mixed, dissim, 10)
+
+plot_abundance <- mixed %>%
+  group_by(PID, TR_SP) %>%
+  summarize(TPA = sum(TreesPerAcre), BA = sum(BasalArea)) %>%
+  replace(is.na(.), 0) 
+
+plots <- plot_abundance %>% 
+  pivot_wider(names_from = TR_SP, values_from = c(TPA, BA)) %>% 
+  replace(is.na(.), 0)
+
+plot_abundance
+
+plots
+
+clustering$cluster %>% unique()
