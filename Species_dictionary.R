@@ -91,17 +91,22 @@ species_dict = list(
 )
 
 read_dict <- function(species, list_output = T, caps = T){
-  full_sp <- c()
-  
+
   CapStr <- function(y) {
     c <- strsplit(y, " ")[[1]]
     paste(toupper(substring(c, 1,1)), substring(c, 2),
           sep="", collapse=" ")
   }
   
-  for (i in 1:length(species)){
-      full_sp <- c(full_sp, species_dict[[species[i]]])
+  fun <- function(x){
+    s <- species_dict[[x]]
+    
+    if (is.null(s)) s <- x
+    
+    return(s)
   }
+  
+  full_sp <- sapply(species, fun)
    
   if (caps){
     full_sp <- sapply(full_sp, CapStr)
@@ -115,6 +120,4 @@ read_dict <- function(species, list_output = T, caps = T){
   return(full_sp)  
 }
 
-read_dict('ULAM')
-read_dict('ACSA2')
-length('ULAM')
+read_dict('asd')
