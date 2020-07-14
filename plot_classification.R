@@ -1,6 +1,7 @@
 library(tidyverse)
 library(kernlab)
 library(dbscan)
+library(ggsci)
 
 df <- read_csv("clean_data/UMRS_FPF_clean.csv")
 
@@ -99,10 +100,16 @@ explore3 <- plots_output %>%
   summarize(Count = n()) %>%
   arrange(desc(Count))
 
+plots_output$Label
 
 #There are 36 dominant plot types and 190 codominant plot types
-nrow(unique(plots_output[plots_output$Label == "Dominant","Type"]))
-nrow(unique(plots_output[plots_output$Label == "Codominant","Type"]))
+dom <- nrow(filter(plots_output, Label == "Dominant")) / nrow(plots_output)
+codom <- nrow(filter(plots_output, Label == "Codominant")) / nrow(plots_output)
+mixed <- 1 - dom - codom
+names <- c("Dominant","Codominant","Mixed")
+df <- data.frame(Pct = c(dom, codom, mixed), name = names)
+ggplot(df) + geom_col(aes(x = reorder(name, Pct), fill = name, y = Pct)) + theme_light() + scale_color_jco() + labs(x = "Plot Type", y = "Proportion of Total Plots") + theme(text = element_text(size = 16), legend.position = "none")
+
 
 mixed <- filter(plots_output, Label == "Mixed")
 mixed_sel <- mixed[,4:ncol(mixed)]

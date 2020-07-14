@@ -6,6 +6,7 @@ output: html_notebook
 ```{r setup}
 library(tidyverse)
 library(moments)
+library(scales)
 
 knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
 ```
@@ -103,15 +104,19 @@ The five most abundant species by basal area are the same as by stem count: silv
 ```{r}
 output <- df %>%
   group_by(TR_SP) %>%
-  summarize(Sum_BA = sum(BasalArea)) %>%
-  mutate(Pct = Sum_BA / sum(Sum_BA)) %>%
+  summarize(Sum_BA = sum(BasalArea) / 1000000, Sum_TPA = sum(TreesPerAcre) / 1000) %>%
+  mutate(Pct_BA = Sum_BA / sum(Sum_BA)) %>%
   arrange(desc(Sum_BA)) %>%
   top_n(5)
 
 
 ggplot(data = output) + geom_col(aes(x = reorder(TR_SP, -Sum_BA), y = Sum_BA, fill = TR_SP)) + 
   scale_fill_viridis_d() + scale_y_continuous(n.breaks = 10, labels = function(x) format(x, scientific = FALSE)) +
-  xlab("Species")
+ labs(x = "Species", y = "Total Basal Area (millions of sq. ft.)", fill = "Species") + theme_light() + theme(text = element_text(size = 16))
+
+ggplot(data = output) + geom_col(aes(x = reorder(TR_SP, -Sum_TPA), y = Sum_TPA, fill = TR_SP)) + 
+  scale_fill_viridis_d() + scale_y_continuous(n.breaks = 10, labels = function(x) format(x, scientific = FALSE)) +
+  labs(x = "Species", y = "Total Trees Per Acre (thousands)", fill = "Species") + theme_light() + theme(text = element_text(size = 16))
 
 output
 ```

@@ -21,7 +21,7 @@ dissim <- read_csv("dissimilarity_matrix.csv")
 dissim <- as.matrix(dissim)
 
 cluster_h <- hclust(as.dist(dissim), method = "ward.D2")
-plot(cluster_h, labels = FALSE)
+plot(cluster_h, labels = FALSE, xlab = "Plot")
 
 #First, we must create a new data frame with the non-relative values to explore
 

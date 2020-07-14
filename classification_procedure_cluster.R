@@ -82,6 +82,14 @@ classify <- function(max_clusters_num){
   return(result)
 }
 
+#Code for silhouette plot
+
+#df <- load_data("ACSA2")
+#dissim <- read_csv("dissimilarity_matrix.csv")
+#sil <- best_clustering(df, dissim, 10)
+#plot(seq(1:9)+1, sil, ylab = "Average Silhouette Value", xlab = "Number of Clusters")
+#lines(seq(1:9)+1, sil)
+
 #Code for running the classification and plotting results:
 
 #final <- classify(10)
