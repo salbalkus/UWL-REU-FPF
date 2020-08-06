@@ -6,14 +6,13 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-## Classification Procedure 
+## Classification Procedure (Sal's Code)
 ```{r}
 library(tidyverse, quietly = TRUE)
 library(vegclust, quietly = TRUE)
 library(rpart, quietly = TRUE)
 library(infotheo, quietly = TRUE)
 library(cluster, quietly = TRUE)
-
 
 #Load in the data that will be used for clustering
 load_data <- function(dom_species){
@@ -102,6 +101,7 @@ ggplot(results, aes(x = clusters, y = plots)) + geom_col()
 ggplot(results, aes(x = clusters)) + geom_histogram(binwidth=1)      
 
 ```
+Sal's code 
 ```{r}
 library(ggsci)
 library(rpart.plot)
@@ -115,8 +115,6 @@ library(tidyverse)
 library(vegclust)
 library(rpart)
 library(infotheo)
-
-
 
 #Load in the data that will be used for clustering
 load_data <- function(dom_species){
@@ -187,6 +185,7 @@ best_clustering <- function(df, dissim, dom_species, max_clusters, meth = "ward.
   return(list(plots, trees[[best_k]]))
 }
 ###########################################################
+#Willow 
 SALIX <- load_data("SALIX")
 d <- dissim(SALIX)
 process <- best_clustering(SALIX, d, "SALIX", 20)
@@ -195,11 +194,10 @@ test_tree <- process[[2]]
 rpart.plot(test_tree)
 ggplot(test) + geom_point(aes(x = log(TPA_SALIX), y = log(BA_SALIX), color = as.factor(cluster))) + scale_color_jco() + theme_light()
 
-#there is clearly an issue - sometimes, a cluster will be too insignificant to be picked out by the decision tree. In this case, what should we do?
+#there is clearly an issue - sometimes, a cluster will be too insignificant to be picked out by the decision tree. In this case, what should we do? (-Sal)
 
 ```
-
-
+##Willow nMDS 
 ```{r}
 library(vegan)
 ptm <- proc.time()
@@ -212,6 +210,7 @@ plot(SALIX.mds2)
 ```
 ##scree plot
 ```{r}
+#didn't do scree plot because the NMDS wouldn't converge with other dimensions 
 #library(vegan)
 #library(goeveg)
 #dimcheckMDS(as.matrix(d), distance = "manhattan", k = 4, trymax = 1000, maxit=1000, autotransform = TRUE)
@@ -222,12 +221,6 @@ names(SALIX.mds2)
 SALIX.mds2
 #species names are missing 
 SALIX.mds2$species #(NA)
-```
-
-```{r}
-#Doug suggested using isoMDS engine 
-##SALIX.mds2alt1<-metaMDS(d,distance="manhattan",k=2, trymax=100,maxit=500,autotransform = FALSE,engine="isoMDS") 
-#Error in isoMDS(dist, k = k, trace = isotrace, maxit = maxit) : zero or negative distance between objects 10 and 18
 ```
 "Add or Replace Spec/s Scores in Distance-Based Ordination" for Willow, k=2
 ```{r}
@@ -240,13 +233,6 @@ SALIX.mds2.df
 write_csv(SALIX.mds2.df, "SALIX.mds2.df.csv")
 nmds.df<-read_csv("SALIX.mds2.df.csv")
 ``` 
-# following example from http://search.r-project.org/library/vegan/html/sppscores.html
-```{r}
-#plot(vegdist(d), dist(d))
-#plot(vegdist(d), dist(sqrt(decostand(d, "total"))))
-#sppscores(SALIX.mds2) <- sqrt(decostand(d, "total"))
-#plot(SALIX.mds2)
-```
 
 ```{r}
 library(readr)
@@ -273,40 +259,12 @@ nmds <- left_join(coords, labels, by = "PID")
 
 nmds
 
-ggplot(nmds) + geom_point(aes(x = MDS1, y = MDS2, color = as.factor(cluster))) + scale_color_jco() + theme_light()
+#ggplot(nmds) + geom_point(aes(x = MDS1, y = MDS2, color = as.factor(cluster))) + labs(title= "nMDS Willow") + scale_color_jco() + theme_light() 
+
+ggplot(nmds) + geom_point(aes(x = MDS1, y = MDS2, color = as.factor(cluster))) + labs(title= "nMDS Willow") + scale_color_jco() + theme(title=element_text(size=18), axis.text=element_text(size=15),legend.text=element_text(size=15))+labs(color="Cluster")
+
 ```
-nmds plot, silver maple 
-```{r}
-library(tidyverse)
-library(ggsci)
-
-path_of_code <- dirname(rstudioapi::getSourceEditorContext()$path)
-setwd(path_of_code)
-
-labels <- read_csv("classified_plots_labels.csv")
-coords <- read_csv("ACSA2.full.df.csv")
-nmds <- left_join(coords, labels, by = "PID")
-
-nmds
-
-ggplot(nmds) + geom_point(aes(x = MDS1, y = MDS2, color = as.factor(cluster))) + scale_color_jco() + theme_light()
-```
-
-
-Adding clusters and labels 
-```{r}
-#new_final
-#new_final.SALIX<-new_final %>%
- # filter(Type == "SALIX")
-#new_final.SALIX
-#new_final.SALIX.clusters<-subset(new_final.SALIX,select=-c(PID,Type))
-#new_final.SALIX.clusters
-#write_csv(new_final.SALIX.clusters, "new_final.SALIX.clusters.csv")
-#SALIX.full.df.clust<-cbind(SALIX.full.df,new_final.SALIX.clusters)
-#write_csv(SALIX.full.df.clust, "SALIX.full.df.clust.csv")
-```
-
-Silver Maple 
+Same process for Silver Maple 
 ```{r}
 library(ggsci)
 library(rpart.plot)
@@ -320,8 +278,6 @@ library(tidyverse)
 library(vegclust)
 library(rpart)
 library(infotheo)
-
-
 
 #Load in the data that will be used for clustering
 load_data <- function(dom_species){
@@ -425,8 +381,24 @@ ACSA2.full.df<-cbind(plot_classificationACSA2,nmds.df)
 ACSA2.full.df
 write_csv(ACSA2.full.df, "ACSA2.full.df.csv")
 ```
+nmds plot, silver maple 
+```{r}
+library(tidyverse)
+library(ggsci)
 
+path_of_code <- dirname(rstudioapi::getSourceEditorContext()$path)
+setwd(path_of_code)
 
+labels <- read_csv("classified_plots_labels.csv")
+coords <- read_csv("ACSA2.full.df.csv")
+nmds <- left_join(coords, labels, by = "PID")
+
+nmds
+
+ggplot(nmds) + geom_point(aes(x = MDS1, y = MDS2, color = as.factor(cluster))) + scale_color_jco() + theme_light()
+
+ggplot(nmds) + geom_point(aes(x = MDS1, y = MDS2, color = as.factor(cluster))) + labs(title= "nMDS Silver Maple") + scale_color_jco() + theme(title=element_text(size=18), axis.text=element_text(size=15),legend.text=element_text(size=15))+labs(color="Cluster")
+```
 Cottonwood: PODE3
 ```{r}
 library(ggsci)
@@ -441,8 +413,6 @@ library(tidyverse)
 library(vegclust)
 library(rpart)
 library(infotheo)
-
-
 
 #Load in the data that will be used for clustering
 load_data <- function(dom_species){
@@ -561,13 +531,9 @@ nmds <- left_join(coords, labels, by = "PID")
 nmds
 
 ggplot(nmds) + geom_point(aes(x = MDS1, y = MDS2, color = as.factor(cluster))) + scale_color_jco() + theme_light()
+
+ggplot(nmds) + geom_point(aes(x = MDS1, y = MDS2, color = as.factor(cluster))) + labs(title= "nMDS Cottonwood") + scale_color_jco() + theme(title=element_text(size=18), axis.text=element_text(size=15),legend.text=element_text(size=15))+labs(color="Cluster")
 ```
-
-
-
-
-
-
 Green Ash 
 ```{r}
 library(ggsci)
@@ -582,8 +548,6 @@ library(tidyverse)
 library(vegclust)
 library(rpart)
 library(infotheo)
-
-
 
 #Load in the data that will be used for clustering
 load_data <- function(dom_species){
@@ -701,5 +665,7 @@ nmds <- left_join(coords, labels, by = "PID")
 nmds
 
 ggplot(nmds) + geom_point(aes(x = MDS1, y = MDS2, color = as.factor(cluster))) + scale_color_jco() + theme_light()
+
+ggplot(nmds) + geom_point(aes(x = MDS1, y = MDS2, color = as.factor(cluster))) + labs(title= "nMDS Green Ash") + scale_color_jco() + theme(title=element_text(size=18), axis.text=element_text(size=15),legend.text=element_text(size=15))+labs(color="Cluster")
 ```
 
