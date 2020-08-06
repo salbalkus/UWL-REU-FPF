@@ -46,30 +46,40 @@ plot_CAP <- function(cap, x_lim = c(0, 40), mplot = T, plot_col = 3, layout = NU
   plots <- list()
   for (i in 1:length(cap)){
     ggplot_df <- as_tibble(t(as.matrix(cluster_cap[[i]]))) %>% mutate(low_bound = 0:104) %>% 
-      gather(-low_bound, key = TR_SP, value = CAP)
+      gather(-low_bound, key = TR_SP, value = CAP) %>%
+      arrange(desc(CAP))
+    totals <- ggplot_df %>% group_by(TR_SP) %>% summarize(q = sum(CAP)) %>% top_n(4, q)
+    ggplot_df <- filter(ggplot_df, TR_SP %in% unique(totals$TR_SP))
     
     cap_plot <- ggplot_df %>% ggplot(aes(x = low_bound, y = CAP)) +
-      geom_step(aes(color = TR_SP), direction = 'hv') + 
+      geom_step(aes(color = reorder(TR_SP, desc(CAP))), direction = 'hv') + 
       xlim(x_lim) + 
       theme_light() +
       theme(legend.position = 'none', axis.ticks.y = element_blank(),
             plot.title = element_text(size = 12)) +
       scale_y_continuous(labels = ylab, limits = ylims) + 
-      labs(x = "Size (BA)", y = "Abundance (TPA)", title = paste('Cluster', i, sep = ' '))
+      scale_color_jco() + 
+      labs(x = "DBH (inches)", y = "Abundance (TPA)", title = paste('Cluster', i, sep = ' '))
     
     
     plots[[i]] <- cap_plot
   }
   
   ggplot_df <- as_tibble(t(as.matrix(cluster_cap[[i]]))) %>% mutate(low_bound = 0:104) %>% 
-    gather(-low_bound, key = TR_SP, value = CAP)
+    gather(-low_bound, key = TR_SP, value = CAP) %>%
+    arrange(desc(CAP))
   
-  cap_plot <- ggplot_df %>% ggplot(aes(x = low_bound, y = CAP, fill = TR_SP)) +
+  totals <- ggplot_df %>% group_by(TR_SP) %>% summarize(q = sum(CAP)) %>% top_n(4, q)
+  ggplot_df <- filter(ggplot_df, TR_SP %in% unique(totals$TR_SP))
+
+  cap_plot <- ggplot_df %>% ggplot(aes(x = low_bound, y = CAP, fill = reorder(TR_SP, desc(CAP)))) +
     geom_col() + 
+    scale_fill_jco() +
     ylim(0, 75000) +
     theme_light() + 
     theme(legend.title = element_text(size = 12), legend.text = element_text(size = 12)) +
     labs(fill = 'Species')
+    
   
   cap_legend <- ggpubr::as_ggplot(ggpubr::get_legend(cap_plot))
   
@@ -122,9 +132,11 @@ plots <- read_csv("clean_data/plot_summary_statistics.csv")
 plots
 type_counts <- plots %>% group_by(Type) %>% summarize(clusters = max(cluster))
 
+table(type_counts$clusters)
 
-ggplot(type_counts) + geom_histogram(aes(x = as.factor(clusters), fill = as.factor(clusters)), stat = "count") +
-  scale_fill_jco() + theme_light() + labs(x = "Number of Clusters", y = "Number of Level 1 Classification Types") + 
+
+ggplot(type_counts) + geom_histogram(aes(x = as.factor(clusters)), fill = "darkgreen", stat = "count") + 
+  theme_light() + labs(x = "Number of Clusters", y = "Number of Level 1 Classification Types") + 
   theme(text = element_text(size = 16), legend.position = "none", axis.title.y = element_text(margin = margin(r = 10)))
 
 ggplot(plots) + geom_histogram(aes(x = Num_Species), binwidth = 1) +
@@ -135,19 +147,78 @@ plots_lab <- distinct(left_join(plots, select(labels, Type, Label), by = "Type")
 nrow(filter(plots_lab, Label == "Dominant"))
 nrow(filter(plots_lab, Label == "Codominant"))
 
-quick <- read_csv("clean_data/classified_plots_labels.csv")
-quick_dom <- quick %>% filter(Label == "Dominant") %>% group_by(Type) %>% summarize(Count = n()) %>% top_n(5, Count)
-quick_codom <- quick %>% filter(Label == "Codominant") %>% group_by(Type) %>% summarize(Count = n()) %>% top_n(5, Count)
+quick <- read_csv("clean_data/classified_plots_labels_with_mixed.csv")
+quick_dom <- quick %>% filter(Label == "Dominant") %>% group_by(Type) %>% summarize(Count = n()) %>% mutate(Pct = Count / sum(Count)) %>% top_n(5, Count)
+quick_codom <- quick %>% filter(Label == "Codominant") %>% group_by(Type) %>% summarize(Count = n()) %>% mutate(Pct = Count / sum(Count)) %>%  top_n(5, Count)
+quick_total <- quick %>% group_by(Type) %>% summarize(Count = n()) %>% top_n(5, Count)
 
-ggplot(quick_dom) + geom_col(aes(x = reorder(Type, desc(Count)), y = Count, fill = Type)) + 
-  scale_fill_jco() + theme_light() + labs(x = "Level 1 Classification", y = "Number of Plots") + 
-  theme(text = element_text(size = 16), legend.position = "none", axis.title.y = element_text(margin = margin(r = 10)), axis.title.x = element_text(margin = margin(t = 10)))
+ggplot(quick_dom) + geom_col(aes(x = reorder(Type, desc(Pct)), y = Pct), fill = "#0073C2FF") + 
+  theme_light() + labs(x = "Level 1 Classification", y = "Proportion of Dominant Plots") + 
+  theme(text = element_text(size = 18), legend.position = "none", axis.title.y = element_text(margin = margin(r = 10)), axis.title.x = element_text(margin = margin(t = 10))) +
+  scale_x_discrete(breaks=c("ACSA2","SALIX","PODE3","FRPE","SNAG"),
+                   labels=c("Silver Maple","Willow","Cottonwood","Green Ash","Snag"))
 
-ggplot(quick_codom) + geom_col(aes(x = reorder(Type, desc(Count)), y = Count, fill = Type)) + 
+ggplot(quick_codom) + geom_col(aes(x = reorder(Type, desc(Pct)), y = Pct), fill = "#EFC000FF") + 
+  scale_fill_jco() + theme_light() + labs(x = "Level 1 Classification", y = "Proportion of Codominant Plots") + 
+  theme(text = element_text(size = 18), legend.position = "none", axis.title.y = element_text(margin = margin(r = 10)), axis.title.x = element_text(margin = margin(t = 20)), axis.text.x = element_text(angle = -25)) +
+  scale_x_discrete(breaks=c("ACSA2 and PODE3","ACSA2 and FRPE","ACSA2 and SNAG","ACSA2 and ULAM", "ACSA2 and SALIX"),
+                   labels=c("Silver Maple and\nCottonwood","Silver Maple and\nGreen Ash", "Silver Maple\nand Snag","Silver Maple and\nAmerican Elm", "Silver Maple and Willow"))
+
+ggplot(quick_total) + geom_col(aes(x = reorder(Type, desc(Count)), y = Count, fill = Type)) + 
   scale_fill_jco() + theme_light() + labs(x = "Level 1 Classification", y = "Number of Plots") + 
-  theme(text = element_text(size = 16), legend.position = "none", axis.title.y = element_text(margin = margin(r = 10)), axis.title.x = element_text(margin = margin(t = 20)), axis.text.x = element_text(angle = -20))
+  theme(text = element_text(size = 18), legend.position = "none", axis.title.y = element_text(margin = margin(r = 10)), axis.title.x = element_text(margin = margin(t = 20)), axis.text.x = element_text(angle = -25)) +
+  scale_x_discrete(breaks=c("ACSA2","ACSA2 and PODE3","ACSA2 and FRPE","ACSA2 and SNAG","ACSA2 and ULAM"),
+                   labels=c("Silver Maple", "Silver Maple and\nCottonwood","Silver Maple and\nGreen Ash", "Silver Maple\nand Snag","Silver Maple and\nAmerican Elm"))
+
+
+names <- read_csv("clean_data/names.csv")
+quick_new <- left_join(quick, names, by = c("Type" = "Level1", "cluster" = "cluster"))
+quick_mixed_new <- quick_new %>% filter(Label == "Mixed") %>% group_by(Name) %>% summarize(Count = n() / nrow(quick_new)) %>% arrange(desc(Count))  %>% top_n(5, Count)
+quick_dom_new <- quick_new %>% filter(Label == "Dominant") %>% group_by(Name) %>% summarize(Count = n() / nrow(quick_new)) %>% arrange(desc(Count))  %>% top_n(5, Count)
+quick_codom_new <- quick_new %>% filter(Label == "Codominant") %>% group_by(Name) %>% summarize(Count = n() / nrow(quick_new)) %>% arrange(desc(Count))  %>% top_n(5, Count)
+
+ggplot(quick_mixed_new) + geom_col(aes(x = reorder(Name, desc(Count)), y = Count), fill = "#868686FF") + 
+  theme_light() + labs(x = "Level 2 Classification", y = "Percentage of Plots") + 
+  theme(text = element_text(size = 18), legend.position = "none", axis.title.y = element_text(margin = margin(r = 10)), axis.title.x = element_text(margin = margin(t = 20)), axis.text.x = element_text(angle = -20)) +
+  scale_x_discrete(breaks=c("Complex Mixed","Multistrata Mixed with primary ACSA2"),
+                   labels=c("Complex Mixed","Multistrata Mixed with\nprimary Silver Maple"))
+
+ggplot(quick_dom_new) + geom_col(aes(x = reorder(Name, desc(Count)), y = Count), fill = "#0073C2FF") + 
+  theme_light() + labs(x = "Level 2 Classification", y = "Percentage of Plots") + 
+  theme(text = element_text(size = 18), legend.position = "none", axis.title.y = element_text(margin = margin(r = 10)), axis.title.x = element_text(margin = margin(t = 20)), axis.text.x = element_text(angle = -15)) +
+  scale_x_discrete(breaks=c("Complex ACSA2 with SNAG","Reinitiation SALIX","Complex PODE3","Multistrata FRPE","Multistrata SNAG"),
+                   labels=c("Complex Silver Maple\nwith Snag","Reinitiation Willow","Complex Cottonwood","Multistrata Green Ash","Multistrata Snag"))
+
+
+ggplot(quick_codom_new) + geom_col(aes(x = reorder(Name, desc(Count)), y = Count), fill = "#EFC000FF") + 
+  theme_light() + labs(x = "Level 2 Classification", y = "Percentage of Plots") + 
+  theme(text = element_text(size = 18), legend.position = "none", axis.title.y = element_text(margin = margin(r = 10)), axis.title.x = element_text(margin = margin(t = 20)), axis.text.x = element_text(angle = -15)) +
+  scale_x_discrete(breaks=c("Complex ACSA2 and PODE3","Multistrata FRPE and ACSA2","Multistrata ACSA2 and ULAM","Multistrata SNAG and ACSA2","Multistrata ACSA2 and PODE3"),
+                   labels=c("Complex Silver Maple\nand Cottonwood","Multistrata Green Ash\nand Silver Maple","Multistrata Silver Maple\nand American Elm","Multistrata Snag and\nSilver Maple","Multistrata Silver Maple\nand Cottonwood"))
+
+quick_codom_new
+
 
 
 write_csv(plots, "plot_summary_statistics.csv")
 
+names <- read_csv("clean_data/names_expanded.csv")
+structures <- c("Initiation","Exclusionary","Reinitiation","Multistrata", "Complex")
+counts <- c(sum(str_count(names$Name, "Initiation")),
+            sum(str_count(names$Name, "Exclusionary")),
+            sum(str_count(names$Name, "Reinitiation")),
+            sum(str_count(names$Name, "Multistrata")),
+            sum(str_count(names$Name, "Complex")))
 
+df <- data.frame(Class = structures, Count = counts)
+ggplot(df) + geom_col(aes(x = factor(Class, levels = structures), y = Count, fill = factor(Class, levels = structures))) + 
+  scale_fill_jco() + labs(x = "Class") + theme_light() + 
+  theme(axis.text=element_text(size=14), axis.title=element_text(size=16), legend.position = "none")
+
+quick <- read_csv("clean_data/classified_plots_labels.csv")
+plotnames <- left_join(quick, names, by = c("Type" = "Level1","cluster" = "cluster"))
+counts <- plotnames %>% group_by(Name) %>% summarize(Count = n())
+write_csv(counts, "level2_plot_counts.csv")
+counts <- top_n(5, counts)
+
+ggplot(counts) + geom_col(aes(x = Name, y = Count))

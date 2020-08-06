@@ -57,7 +57,7 @@ best_clustering <- function(df, dissim, max_clusters, meth = "ward.D2"){
     sil[[n-1]] <- mean(silhouette(x = plots$cluster, dmatrix = as.matrix(dissim))[,"sil_width"])
   }
   plots$cluster <- cutree(cluster_h, k = (which.max(sil)+1))
-  return(plots)
+  return(sil)
 }
 
 classify <- function(max_clusters_num){
@@ -84,11 +84,13 @@ classify <- function(max_clusters_num){
 
 #Code for silhouette plot
 
-#df <- load_data("ACSA2")
-#dissim <- read_csv("dissimilarity_matrix.csv")
+#df <- load_data("ACSA2 and SALIX")
+#dissim <- dissimilarity_matrix(df)
 #sil <- best_clustering(df, dissim, 10)
+
 #plot(seq(1:9)+1, sil, ylab = "Average Silhouette Value", xlab = "Number of Clusters")
 #lines(seq(1:9)+1, sil)
+#axis(side = 1, at = c(2,3,4,5,6,7,8,9,10),labels = c(2,3,4,5,6,7,8,9,10))
 
 #Code for running the classification and plotting results:
 
@@ -97,6 +99,4 @@ classify <- function(max_clusters_num){
 #write_csv(final, "classified_plots_full.csv")
 #write_csv(new_final, "classified_plots_labels.csv")
 
-#results <- final %>% group_by(Type) %>% summarize(clusters = max(cluster), plots = n_distinct(PID))
-#ggplot(results, aes(x = clusters, y = plots)) + geom_col()
-#ggplot(results, aes(x = clusters)) + geom_histogram(binwidth=1)
+

@@ -9,5 +9,3 @@ coords <- read_csv("clean_data/SALIX.full.df.csv")
 nmds <- left_join(coords, labels, by = "PID")
 
 nmds
-
-ggplot(nmds) + geom_point(aes(x = MDS1, y = MDS2, color = as.factor(cluster))) + scale_color_jco() + theme_light()

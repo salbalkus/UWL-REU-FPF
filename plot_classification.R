@@ -110,6 +110,9 @@ names <- c("Dominant","Codominant","Mixed")
 df <- data.frame(Pct = c(dom, codom, mixed), name = names)
 ggplot(df) + geom_col(aes(x = reorder(name, Pct), fill = name, y = Pct)) + theme_light() + scale_color_jco() + labs(x = "Plot Type", y = "Proportion of Total Plots") + theme(text = element_text(size = 16), legend.position = "none")
 
+nrow(filter(plots_output, Label == "Dominant"))
+nrow(filter(plots_output, Label == "Codominant"))
+codom
 
 mixed <- filter(plots_output, Label == "Mixed")
 mixed_sel <- mixed[,4:ncol(mixed)]
