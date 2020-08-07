@@ -12,17 +12,22 @@ Here are the general datasets that we created as intermediaries for the project:
 
 
 Here is the index, or description of the function for each essential R script:
-1a. DATA CLEANING: "forest_inventory_cleaning.R" holds the script that produces a cleaned dataset from the uncleaned data. It relies on having the original datasets in their original format.
-1b. UNCLEAN MERGING: "unclean_data_join" creates a file containing all of the uncleaned forest data in just one .csv file. It relies on having the original datasets in their original format.
-2a. EXPLORATION: "initial questions.Rmd" holds the answers to all of the initial questions about the dataset, before we started making our classification system. This relies on the full cleaned data set.
-2b. ADDITIONAL EXPLORATION: "additional_exploration.Rmd" holds the answers to some more complex questions about the dataset that were added soon afer the project started. This relies on the full cleaned data set.
+1. Cleaning scripts
+a. DATA CLEANING: "forest_inventory_cleaning.R" holds the script that produces a cleaned dataset from the uncleaned data. It relies on having the original datasets in their original format.
+b. UNCLEAN MERGING: "unclean_data_join" creates a file containing all of the uncleaned forest data in just one .csv file. It relies on having the original datasets in their original format.
+2. Exploration scripts
+a. EXPLORATION: "initial questions.Rmd" holds the answers to all of the initial questions about the dataset, before we started making our classification system. This relies on the full cleaned data set.
+b. ADDITIONAL EXPLORATION: "additional_exploration.Rmd" holds the answers to some more complex questions about the dataset that were added soon afer the project started. This relies on the full cleaned data set.
 3. LEVEL 1 CLASSIFICATION: "Level_1.R" creates the level 1 classification and produces some basic graphs about them, including a Principal Component Analysis. This relies on the full cleaned data set. 
 4. TESTS FOR LEVEL 2: "level2_classification" provides our tests for potential clustering methods, including alternates as well as the final choice, Ward's method. This relies on having the dissimilarity matrix for the level 1 class you want to test.
 5. LEVEL 2 PROCEDURE: "classification_procedure_cluster.R" contains functions to load the data, produce dissimilarity matrix, and find the best clustering solution. Uncommenting the final lines allows for a file output of the level 2 classification named "classified_plots_full.csv" and "classified_plots_labels.csv." NOTE that mixed plots are added manually. This relies on "plot_classification.csv" which is produced from Level_1.R and the full cleaned data.
 6. LEVEL 2 CLASSES: "classification_summary.R" produces the CAP plots that were visually analyzed to obtain the level 2 class names. It also includes a number of other graphs that were included in the final report. This relies on "plot_classification.csv" which is produced from Level_1.R and the full cleaned data.
-7a. FINAL SUMMARY STATISTICS: "big_table.R" is used to produce summary statistics about the final classification system. Relies on the labels of the level 1 class, the names of the level 2 classes, and the cleaned data.
-7b. MAP: "mapping.R" produces a rudimentary map and can be edited for your desired stand; uses the geographic data, which was added to our original data set later.
+7. Final analyses
+a. FINAL SUMMARY STATISTICS: "big_table.R" is used to produce summary statistics about the final classification system. Relies on the labels of the level 1 class, the names of the level 2 classes, and the cleaned data.
+b. MAP: "mapping.R" produces a rudimentary map and can be edited for your desired stand; uses the geographic data, which was added to our original data set later.
 
 BONUS 1: "Species_dictionary.R" provides a useful tool for mapping species codes to names
+
 BONUS 2: "dissim.R" contains just the code needed to construct a dissimilarity matrix for the level 2 classification.
+
 BONUS 3: "ward_examination.R" produces an investigation of the Ward method for clustering as well as a principal component analysis.
