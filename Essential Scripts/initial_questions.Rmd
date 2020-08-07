@@ -1,0 +1,298 @@
+---
+title: "Initial Questions about the UMRS Floodplain Forest"
+output: html_notebook
+---
+
+```{r setup}
+library(tidyverse)
+library(moments)
+library(scales)
+library(ggsci)
+
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+```
+
+```{r}
+df <- read_csv("clean_data/UMRS_FPF_clean.csv")
+original <- read_csv("clean_data/Unclean_combined.csv")
+
+```
+##How many total plots are in the cleaned data vs the original data? How many plots were excluded vs included in each cleaning step? Would those values differ if you had an alternative order of cleaning operations? Why? Is that problematic?##
+
+The cleaned data has 18,957 plots, while the unclean data has 24,827 plots - a difference of 5,870. This does not count the unlabeled plots from Rock Island which were labeled in R, which are counted in the "unclean" dataset as well, since they have no identifier. Most plots (5,811) are removed from the dataset because they contain only unknown species or were recorded as having 0 diameter. In addition, 59 plots were removed due to being outside of the UMR Floodplain Forest. If unknowns were removed before the non-floodplain plots, it is possible the number of outside plots removed could differ since there is at least 1 unknown observation in this subset of the data; however, this would not matter, seeing as the same number of plots would be removed in the end. 
+
+```{r}
+cat("Number of plots in cleaned dataset:", length(unique(df$PID)), "\n")
+cat("Number of plots in unclean dataset:", length(unique(original$PID)))
+```
+
+##How many unique species are inventoried?##
+There are 66 unique species, not counting the "SNAG" species indicating a dead tree, "OTHER" species, or the "NONE" species.
+
+
+```{r}
+length(unique(df$TR_SP))
+unique(df$TR_SP)
+
+```
+
+##What are the five most abundant species by number of observations?##
+##How abundant are they?##
+
+The five most abundant species are silver maple (ACSA2), cottonwood (PODE3), dead tree (SNAG), green ash (FRPE), and willow (SALIX). The silver maple is the most frequent by far, with 136,089  observations making up 53.8 percent of the UMR floodplain forest. Cottonwood (33,654 observations) makes up 13.3 percent of the forest, green ash (17,962 observations) makes up 7.1 percent of the forest, and willow (10,129 observations) makes up 4.0 percent of the forest. Dead trees (18,216 observations), make up 7.2 percent.
+
+```{r}
+output <- df %>%
+  group_by(TR_SP) %>%
+  summarize(Count = n()) %>%
+  mutate(Pct = Count / sum(Count)) %>%
+  arrange(desc(Count)) 
+
+
+ggplot(data = top_n(output,6) ) + geom_col(aes(x = reorder(TR_SP, -Count), y = Count, fill = TR_SP)) + 
+  scale_fill_viridis_d() + scale_y_continuous(n.breaks = 10, labels = function(x) format(x, scientific = FALSE)) +
+  xlab("Species")
+
+output
+
+most_common_species <- output$TR_SP
+
+```
+##Does this list vary by health class?##
+While the silver maple makes up the largest proportion for all health classes, there is variation among the other tree species. Cottonwood makes up 17.3 percent of the vigorous trees, but only 10.4 and 5.4 percent of those in stressed and significant decline, respectively, indicating that the species in is better health than the others. Green ash makes up 7.6 percent of the vigorous population,7.4 percent of the stressed population, and 9.1 percent of the significant decline population. Willow makes up 3.6 percent of the vigorous population, 4.5 percent of the stressed population, and 9.7 percent of the significant decline population. American elm makes the top 5 for vigorous population, with 3.1 percent, but does not appear as frequently in the others. The boxelder does not appear in the top 5 most frequent species in the vigorous population, but does appear in the top 5 stressed and significant decline species populations, with 5.5 and 7.6 percent, respectively.
+
+
+```{r}
+output <- df %>%
+  group_by(TR_SP, TR_HLTH) %>%
+  summarize(Count = n()) %>%
+  group_by(TR_HLTH) %>%
+  mutate(Pct = Count / sum(Count)) %>%
+  top_n(5, Count) %>%
+  arrange(TR_HLTH,desc(Count)) %>%
+  filter(TR_HLTH %in% c("V","S","SD"))
+
+#This plot is misleading, so I do not include it
+#ggplot(output)  + geom_col(aes(x = reorder(TR_SP, -Pct), y = Pct, fill = TR_SP)) + 
+  #scale_fill_viridis_d() + scale_y_continuous(n.breaks = 10, labels = function(x) format(x, scientific = FALSE)) +
+  #xlab("Species") + facet_wrap(facets = vars(TR_HLTH))
+
+legend_ord <- levels(with(output, reorder(TR_SP, -Pct)))
+
+ggplot(output[output$TR_HLTH == "V",])  + geom_col(aes(x = reorder(TR_SP, -Pct), y = Pct, fill = TR_SP)) + 
+  scale_fill_viridis_d(breaks = legend_ord) + 
+  scale_y_continuous(n.breaks = 10, labels = function(x) format(x, scientific = FALSE)) +
+  xlab("Species") + ylab("Proportion of forest") + ggtitle("Trees in health category \"Vigorous\"") + theme_light()
+
+ggplot(output[output$TR_HLTH == "S",])  + geom_col(aes(x = reorder(TR_SP, -Pct), y = Pct, fill = TR_SP)) + 
+  scale_fill_viridis_d(breaks = legend_ord) + 
+  scale_y_continuous(n.breaks = 10, labels = function(x) format(x, scientific = FALSE)) +
+  xlab("Species") + ylab("Proportion of forest") + ggtitle("Trees in health category \"Stressed\"") + theme_light()
+
+ggplot(output[output$TR_HLTH == "SD",])  + geom_col(aes(x = reorder(TR_SP, -Pct), y = Pct, fill = TR_SP)) + 
+  scale_fill_viridis_d(breaks = legend_ord) + 
+  scale_y_continuous(n.breaks = 10, labels = function(x) format(x, scientific = FALSE)) +
+  xlab("Species") + ylab("Proportion of forest") + ggtitle("Trees in health category \"Significant Decline\"") + theme_light()
+
+output
+```
+
+##What are the five most abundant species by Basal Area?##
+##Are they the same as the 5 most abundant species by stem count?##
+
+The five most abundant species by basal area are the same as by stem count: silver maple (ACSA2), cottonwood (PODE3), dead tree (SNAG), green ash (FRPE), and willow (SALIX). The silver maple makes up 57.1 percent of the basal area in the UMR floodplain forest, a larger proportion than their stem count. Cottonwoon makes up 23.1 percent of the forest, which also is a much larger proportion than for its stem count. Green ash makes up 4.3 percent of the forest's basal area, and willow (10,129 observations) makes up 1.8 percent of the forest - both much smaller proportions than for their stem count. Dead trees (18,216 observations), make up 5.5 percent of the basal area.
+
+```{r}
+output <- df %>%
+  group_by(TR_SP) %>%
+  summarize(Sum_BA = sum(BasalArea) / 1000000, Sum_TPA = sum(TreesPerAcre) / 1000) %>%
+  mutate(Pct_BA = Sum_BA / sum(Sum_BA)) %>%
+  arrange(desc(Sum_BA)) %>%
+  top_n(5)
+
+
+ggplot(data = output) + geom_col(aes(x = reorder(TR_SP, -Sum_BA), y = Sum_BA, fill = TR_SP)) + 
+  scale_fill_jco() + scale_y_continuous(n.breaks = 10, labels = function(x) format(x, scientific = FALSE)) +
+ labs(x = "Species", y = "Total Basal Area (millions of sq. ft.)", fill = "Species") + theme_light() + theme(text = element_text(size = 16))
+
+ggplot(data = output) + geom_col(aes(x = reorder(TR_SP, -Sum_TPA), y = Sum_TPA, fill = TR_SP)) + 
+  scale_fill_jco() + scale_y_continuous(n.breaks = 10, labels = function(x) format(x, scientific = FALSE)) +
+  labs(x = "Species", y = "Total Trees Per Acre (thousands)", fill = "Species") + theme_light() + theme(text = element_text(size = 16))
+
+output
+```
+
+
+##What are the rarest species? How many plots are there in which they occur? Where are the plots located? What is their basal area?## What is the health condition of these trees?##
+
+There are six species that were only sampled once in the UMR Floodplain Forest. These are the Ohio buckeye (AEGL), possumhaw (ILDE), sweetgum (LIST2), black cherry (PRSE2), pin oak (QUPA), and grapes (VITIS). Each of these observations is in a separate plot (six in total). The total basal area of these species is 1237.0, and all are in vigorous condition.
+
+
+The single observation of the black cherry is especially notable, as it is listed as one of the most common species in the USACE spcies list.
+
+Pin Oak code was found here: http://www.treebenefits.com/calculator/climatezonespecieslist.cfm?thisClimateZone=Northeast&SortBy=sppCode
+
+```{r}
+output <- df %>%
+  group_by(TR_SP) %>%
+  summarize(Count = n()) %>%
+  mutate(Pct = Count / sum(Count)) %>%
+  arrange(Count) %>%
+  slice_min(n = 5, order_by = Count)
+
+
+#ggplot(data = output) + geom_col(aes(x = reorder(TR_SP, -Count), y = Count, fill = TR_SP)) + 
+  #scale_fill_viridis_d() + scale_y_continuous(n.breaks = 10, labels = function(x) format(x, scientific = FALSE)) +
+  #xlab("Species")
+
+output
+
+sum(df[df$TR_SP %in% output$TR_SP,]$BasalArea)
+
+df[df$TR_SP %in% output$TR_SP,]
+```
+
+  
+##How many "pure" plots, i.e., plots with only a single species present, are there?##
+
+There are 2,494 plots containing just a single species. These plots make up 13.1 percent of the 18,957 plots in the UMRS.
+
+```{r}
+output <- df %>%
+  filter(!is.na(TR_SP)) %>%
+  group_by(PID) %>%
+  summarize(N_species = length(unique(TR_SP))) %>%
+  arrange(desc(N_species))
+
+cat("Plots with a single species:", nrow(filter(output, N_species == 1)),"\n")
+cat("Total plots:", nrow(output),"\n")
+cat("Percentage of pure plots:",nrow(filter(output, N_species == 1)) / nrow(output))
+
+```
+
+##How many plots have only 2 species present? Express results both as counts and as percentages of the total # of plots.##
+
+There are 4,483 plots containing only two species, which comprises 23.6 percent of the UMRS.
+
+
+```{r}
+output <- df %>%
+  filter(!is.na(TR_SP)) %>%
+  group_by(PID) %>%
+  summarize(N_species = length(unique(TR_SP))) %>%
+  arrange(desc(N_species))
+
+cat("Plots with only two species:", nrow(filter(output, N_species == 2)),"\n")
+cat("Total plots:", nrow(output),"\n")
+cat("Percentage of two-species plots:",nrow(filter(output, N_species == 2)) / nrow(output))
+
+```
+
+
+##Are there any species unique to a navigation pool or USACE district? Where?##
+
+Yes, not counting the occurrence of "NONE" in Rock Island, there are 26 species unique to their USACE district. 17 are unique to St. Louis, and 9 are unique to St. Paul. Not counting NONE, the most frequent species unique to Rock Island is UNK, with 5 observations. In St. Louis, the most frequent unique species is swamp privet (FOAC), with 496 observations. For St. Paul, black ash (FRNI) was the most frequent with 81 observations.
+
+For the navigation pools, there are 17 species unique to their pool. Eight species are unique to p24, 3 are unique to p26, 2 are unique to p05 and to p08, and the rest of the plots with a unique species have only one. 
+
+```{r}
+#Analysis by district
+output <- df %>%
+  group_by(TR_SP, District) %>%
+  summarize(Count = n())
+
+#This is how many districts that they appear in
+N_districts_appearing <- output %>%
+  group_by(TR_SP) %>%
+  summarize(Count = n()) %>%
+  arrange(Count)
+
+cat("Species unique to their district:",nrow(N_districts_appearing[N_districts_appearing$Count == 1,]) , "\n")
+
+unique_species <- output[output$TR_SP %in% N_districts_appearing[N_districts_appearing$Count == 1,]$TR_SP,] %>% arrange(District, desc(Count))
+unique_species %>% group_by(District) %>% summarize(Count = n())
+unique_species
+
+#Analysis by navigational pool
+
+output <- df %>%
+  group_by(TR_SP, POOL) %>%
+  summarize(Count = n())
+
+N_pools_appearing <- output %>%
+  group_by(TR_SP) %>%
+  summarize(Count = n()) %>%
+  arrange(Count)
+
+cat("Species unique to their pool:", nrow(N_pools_appearing[N_pools_appearing$Count == 1,]), "\n")
+
+unique_species <- output[output$TR_SP %in% N_pools_appearing[N_pools_appearing$Count == 1,]$TR_SP,] %>% arrange(POOL, desc(Count))
+unique_species %>% group_by(POOL) %>% summarize(Count = n()) %>% arrange(desc(Count))
+unique_species
+
+```
+
+  
+##How common are snags in terms of abundances, proportion of plots with snags in them, and/or basal area? What is the distribution of DBHs for snags, and does that vary by species? Are there plots in which all tree stem observations are snags?##
+
+There are 17,639 observations of snags within the UMRS, which is 7.1 percent of all observations. These snags make up a Basal Area of 6,490,402, or about 5.5 percent of the total basal area of the UMRS. Out of all plots in the UMRS, 48.2 contain snags, and a total of 115 plots, or about 0.6 percent, contain exclusively snags. The plot with exclusively snags that has the greatest number of observations is p03244, containing 16 snags in total. The average snag diameter is 19.25 inches, and the distribution is right-skewed with a skewness of 0.95. This right-skewness generally holds true for the top 5 most common species, though some, such as boxelder(ACNE2), are more skewed than others like cottonwood (PODE3). 
+
+```{r}
+output <- df %>%
+  filter(TR_SP == "SNAG")
+
+cat("Number of snags:", nrow(output), "\n")
+cat("Proportion of snags:", nrow(output) / nrow(df), "\n")
+
+cat("Total Basal area:", sum(output$BasalArea), "\n")
+cat("Proportion of Basal area:", sum(output$BasalArea) / sum(df$BasalArea), "\n")
+
+
+output_plots <- df %>%
+  group_by(PID, TR_SP) %>%
+  summarize(Count = n()) %>%
+  mutate(Pct = Count / sum(Count)) %>%
+  filter(TR_SP == "SNAG") %>%
+  arrange(desc(Count))
+
+total_plots <- df %>%
+  group_by(PID) %>%
+  summarize(Count = n())
+
+
+cat("Proportion of plots with snags: ", nrow(output_plots) / nrow(total_plots), "\n")
+
+ggplot(output) + geom_density(aes(x = TR_DIA), fill = "lightblue") + theme_light() + xlab("Diameter at Breast Height for Snags")
+
+output_common <- output %>% filter(TR_SP2 %in% most_common_species)
+
+#Unfortunately, some are coded as SNAG already, so this is not entirely accurate...
+ggplot(output_common) + geom_density(aes(x = TR_DIA), fill = "lightblue") + 
+  facet_wrap(vars(TR_SP2)) + 
+  theme_light() + xlab("Diameter at Breast Height for Snags")
+  
+cat("Mean diameter of snags:", mean(output$TR_DIA), "\n")
+cat("Skewness of snag diameter distribution:", skewness(output$TR_DIA), "\n")
+
+only_snags <- output_plots %>%
+  filter(Pct == 1)
+
+cat("Number of plots with exclusively snags:", nrow(only_snags), "\n")
+cat("Proportion of plots with exclusively snags:", nrow(only_snags) / nrow(total_plots))
+
+
+legend_ord <- levels(with(only_snags, reorder(PID, -Count)))
+
+ggplot(only_snags[1:5,]) + geom_col(aes(x = reorder(PID, -Count), y = Count, fill = PID)) + 
+  scale_fill_viridis_d(breaks = legend_ord) + 
+  scale_y_continuous(labels = function(x) format(x, scientific = FALSE)) +
+  xlab("Plot") + ylab("Number of snags") + theme(axis.text.x = element_text(angle=30, hjust=1))
+
+
+```
+
+
+
+
+
+

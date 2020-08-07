@@ -1,0 +1,140 @@
+---
+title: "Further Exploration of the Floodplain Forest Data"
+output: html_notebook
+---
+
+```{r setup}
+library(tidyverse)
+library(moments)
+
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+```
+
+```{r}
+df <- read_csv("clean_data/UMRS_FPF_clean.csv")
+```
+
+##Write a function that will exclude rare species from further analyses, where the user gets to define the minimum number of unique plots in which a species should be found##
+
+```{r}
+top_species <- function(data, min_plots){
+  species <- data %>%
+    group_by(TR_SP) %>%
+    summarize(Plots = length(unique(PID))) %>%
+    filter(Plots >= min_plots)
+  
+  output <- data[data$TR_SP %in% species$TR_SP,]
+  
+  return(output)
+}
+
+test <- top_species(df, 14000) #Should only return ACSA2
+test
+
+```
+
+
+##Calculate additional metrics for plot-level species data##
+1. presence/absence of each species (data are all 1s and 0s)
+
+2. total trees per acre for each species (a measure of total abundance)
+
+3. relative trees per acre for each species (where species’ total abundance is divided by the plot total abundance across all species in that plot)
+
+*Note that later in our research, we did not use this data, but rather used a similar data frame with both trees per acre and basal area
+
+```{r}
+plot_freq <- df %>%
+  group_by(PID, TR_SP) %>%
+  summarize(Freq = n()) %>%
+  spread(TR_SP, Freq) %>%
+  replace(is.na(.), 0)
+
+plot_TPA <- df %>%
+  group_by(PID, TR_SP) %>%
+  summarize(TPA = sum(TreesPerAcre)) %>%
+  spread(TR_SP, TPA) %>%
+  replace(is.na(.), 0)
+
+plot_rel_TPA <- df %>%
+  group_by(PID, TR_SP) %>%
+  summarize(TPA = sum(TreesPerAcre)) %>%
+  group_by(PID) %>%
+  mutate(rel_TPA = TPA / sum(TPA)) %>%
+  select(-TPA) %>%
+  spread(TR_SP, rel_TPA) %>%
+  replace(is.na(.), 0)
+
+
+#Rename columns
+
+plots <- inner_join(plot_TPA, plot_rel_TPA, by = c("PID"), suffix = c("_TPA","_rel_TPA"))
+plots <- inner_join(plot_freq, plots, by = c("PID"))
+
+write_csv(plots, "clean_data/plots.csv")
+
+```
+```{r}
+plots <- read_csv("clean_data/plots.csv")
+
+```
+
+##Explore data transformations - what do the variable distributions look like?##
+
+The variable distributions for frequency are generally right-skewed, in some cases extremely so, with most plots not having any of the species of interest. In additional, for the relative trees per acre, there is often a higher number of observations of 0 or 1; either the plot contains none of the specified species, or it is made up exclusively of the species in question. This dichotomy is especially prevalent within the silver maple species. Outliers are most prominent in the trees per acre, where the maximum value can be hundreds of times larger than the mean value. The worst offender is willow - its mean TPA is 30 across all plots, but 18334 at the maximum value. This occurs in ThompsonBend-1-305, which contains just 13 observations of willow trees that are all only 1-2 inches in diameter. 
+
+
+
+```{r}
+#Main data
+qplot(TR_DIA, data = df, binwidth = 2)
+qplot(TreesPerAcre, data = df, binwidth = 50)
+qplot(BasalArea, data = df, binwidth = 500)
+
+#By top 5 species
+qplot(ACSA2, data = plots, binwidth = 2, geom = "boxplot")
+qplot(PODE3, data = plots, binwidth = 2, geom = "boxplot")
+qplot(SNAG, data = plots, binwidth = 2, geom = "boxplot")
+qplot(FRPE, data = plots, binwidth = 2, geom = "boxplot")
+qplot(SALIX, data = plots, binwidth = 2, geom = "boxplot")
+
+#By top 5 species TPA
+qplot(ACSA2_TPA, data = plots, binwidth = 2)
+qplot(PODE3_TPA, data = plots, binwidth = 2)
+qplot(SNAG_TPA, data = plots, binwidth = 2)
+qplot(FRPE_TPA, data = plots, binwidth = 2)
+qplot(SALIX_TPA, data = plots, binwidth = 2)
+
+#By top 5 species relative TPA
+qplot(ACSA2_rel_TPA, data = plots, binwidth = 0.01)
+qplot(PODE3_rel_TPA, data = plots, binwidth = 0.01)
+qplot(SNAG_rel_TPA, data = plots, binwidth = 0.1)
+qplot(FRPE_rel_TPA, data = plots, binwidth = 0.01)
+qplot(SALIX_rel_TPA, data = plots, binwidth = 0.01)
+
+plots
+
+```
+```{r}
+#Outliers
+max(plots$ACSA2_TPA) / mean(plots$ACSA2_TPA)
+max(plots$PODE3_TPA) / mean(plots$PODE3_TPA)
+max(plots$SNAG_TPA) / mean(plots$SNAG_TPA)
+max(plots$FRPE_TPA) / mean(plots$FRPE_TPA)
+max(plots$SALIX_TPA) / mean(plots$SALIX_TPA)
+
+max(plots$SALIX_TPA)
+mean(plots$SALIX_TPA)
+
+plots[which.max(plots$SALIX_TPA),]
+
+
+df %>%
+  group_by(PID) %>%
+  summarize(Count = n()) %>%
+  arrange(desc(Count))
+
+filter(df, TR_SP == "SALIX" & PID == "ThompsonBend-1-305")
+
+```
+

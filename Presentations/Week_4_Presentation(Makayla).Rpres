@@ -1,0 +1,95 @@
+Week_4_Presentation(Makayla)
+========================================================
+author: 
+date: 
+autosize: true
+
+========================================================
+<img src="week_4_images/title.png" width=85% height=85%> 
+
+Ordination: summarizes multidimensional data by plotting similar species and samples close together in low-dimensional ordination space
+
+- Useful for visualizing cluster solutions 
+
+
+Goal for nMDS plot, from https://jonlefcheck.net/ 
+========================================================
+<img src="week_4_images/plot_example.png" width=50% height=50%>
+
+
+
+Other Ordination Methods
+========================================================
+Alternate Methods: Principal components analysis (PCA), Principal coordinate analysis (PCoA) (graphic from https://ourcodingclub.github.io/)
+
+<img src="week_4_images/pcoa.png" width=50% height=50%>
+
+- Analytical approaches: single unique solutions 
+- Use techniques based on eigenvalues and eigenvectors 
+- Assume linear or model relationships within data 
+
+
+nMDS  
+========================================================
+- Numerical, iterative approach: no unique solution
+
+  - Stops when acceptable solution is obtained or after set number of attempts 
+
+- More configuration options
+
+- Fewer assumptions 
+
+
+Drawbacks:
+
+- Slow 
+- sometimes finds local minimum instead of best solution 
+
+Computation: nMDS process 
+========================================================
+- Calculates a distance matrix from an original matrix of samples and variables 
+- Chooses m dimensions for ordination
+- nMDS software begins with initial configuration of samples in those m dimensions
+- Calculates distances among samples
+- Regresses distances against original distance matrix
+- Calculates predicted ordination distances for each pair of samples
+
+
+
+Computation: quality of fit
+========================================================
+- Sum of squared differences between ordination-based distances and distances predicted by regression
+- Kruskal’s stress equation
+  - D_hi: ordinated distance between samples h and i 
+	- D-hat: distance predicted from regression
+<img src="week_4_images/stress_equation.png" width=75% height=75%>
+
+
+Computation: fit improvement 
+========================================================
+- Slightly alters positions of samples based on stress value 
+- Recalculates ordination distance matrix and stress value
+- Repeats until procedure converges or for set number of iterations 
+
+Considerations  
+========================================================
+
+Concern: too many or too few dimensions
+
+Solution: Scree Diagram 
+
+nMDS on Willow, maximum number of iterations = 500
+
+<img src="week_4_images/stress.png" width=50% height=50%>
+
+
+Current Plot vs. Goal   
+========================================================
+
+<img src="week_4_images/plot.png" width=100% height=100%>
+
+*** 
+<img src="week_4_images/plot_example.png" width=70% height=70%>
+
+
+
