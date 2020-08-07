@@ -5,10 +5,11 @@ This repo holds all of the work that we did over the summer to develop our class
 
 Here are the general datasets that we created as intermediaries for the project:
 1. Full cleaned data set: "UMRS_FPF_clean.csv" - produced by "forest_inventory_cleaning.R", this is the fully cleaned and merged original data.
-3. "classified_plots_labels_with_mixed.csv" - produced by __________
+2. Unclean data: "Unclean_combined.csv" - produced "unclean_data_join.R", it is the unclean data .csv files merged together
+3. "classified_plots_labels_with_mixed.csv" - produced by hand by adding mixed to "classified_plots_labels" which is output by Level 1 scripts (they are also known as "labels" in many scripts)
 4. "names.csv" - produced by hand, contains the level 2 classification names mapped to the cluster numbers and level 1 classes
-"FINAL_plots_summary" - produced by "big_table.R," contains the final classes for each plot, along with some useful summary statistics.
-"FINAL_types_summary" - produced by "big_table.R," contains the final list of level 2 classes and some summary statistics about them.
+5. "FINAL_plots_summary" - produced by "big_table.R," contains the final classes for each plot, along with some useful summary statistics.
+6. "FINAL_types_summary" - produced by "big_table.R," contains the final list of level 2 classes and some summary statistics about them.
 
 
 Here is the index, or description of the function for each essential R script:
