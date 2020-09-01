@@ -7,10 +7,14 @@ library(tidyverse)
 library(ggsci)
 library(grid)
 library(gridExtra)
-source("classification_procedure_cluster.R")
 
 path_of_code <- dirname(rstudioapi::getSourceEditorContext()$path)
 setwd(path_of_code)
+setwd("..")
+
+source("classification_procedure_cluster.R")
+
+
 
 #Functions to generate CAP plots
 multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
@@ -109,7 +113,7 @@ DIA_bins <- 1:106
 
 for(species in unique(df_cols_total$Type)){
 
-labels <- read_csv("clean_data/classified_plots_labels.csv") %>% select(PID, cluster)
+labels <- read_csv("clean_data/classified_plots_labels_with_mixed.csv") %>% select(PID, cluster)
 df <- left_join(load_data(species), labels, by = "PID")
 
 

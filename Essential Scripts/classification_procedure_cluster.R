@@ -68,7 +68,7 @@ classify <- function(max_clusters_num){
   df <- read_csv("clean_data/UMRS_FPF_clean.csv")
   labels <- read_csv("clean_data/plot_classification.csv")
   df <- left_join(df, labels, by = "PID")
-  df_cols_total <- df %>% filter(Label != "Mixed") %>% filter(Type %in% (df %>% group_by(Type) %>% summarize(Count = n_distinct(PID)) %>% filter(Count > 10))$Type)
+  df_cols_total <- df  %>% filter(Type %in% (df %>% group_by(Type) %>% summarize(Count = n_distinct(PID)) %>% filter(Count > 10))$Type)
   
   #Set up the data frame with the first possible level 1 class
   df <- load_data("ACNE2")
@@ -101,9 +101,10 @@ classify <- function(max_clusters_num){
 
 #Code for running the classification and plotting results:
 
-#final <- classify(10)
-#new_final <- final %>% select(PID, Type, Label, cluster)
-#write_csv(final, "classified_plots_full.csv")
-#write_csv(new_final, "classified_plots_labels.csv")
+final <- classify(10)
+unique(new_final$Label)
+new_final <- final %>% select(PID, Type, Label, cluster)
+write_csv(final, "clean_data/classified_plots_full.csv")
+write_csv(new_final, "clean_data/classified_plots_labels.csv")
 
 

@@ -5,14 +5,10 @@ library(tidyverse)
 
 #Set working directory to the repository
 
-path_of_code <- dirname(rstudioapi::getSourceEditorContext()$path)
-datasets <- paste(path_of_code, '/Datasets', sep = '')
-setwd(datasets)
+setwd(dirname(rstudioapi::getSourceEditorContext()$path))
+setwd("..")
+setwd("./Datasets")
 
-
-clean_data_repository <- paste(path_of_code, '/clean_data', sep = '')
-
-clean_data_repository
 
 ###ST PAUL CLEANING###
 StPaul <- read_csv("Forest_Inventory_Data/mvp_p2prism_testdataclean.csv")
@@ -63,9 +59,9 @@ clean2[xor(is.na(clean2$TR_HLTH17), is.na(clean2$TR_HLTH)),] #Shows that all "NA
 #In total, 3631 observations were dead. :^(
 nrow(clean[clean$TR_HLTH %in% c("D"),"TR_SP"])
 
-setwd(clean_data_repository)
+#setwd(clean_data_repository)
 write_csv(clean, "StPaul_clean.csv")
-setwd(datasets)
+#setwd(datasets)
 
 ###ST LOUIS CLEANING###
 
@@ -95,14 +91,14 @@ clean[clean$TR_SP %in% c("CARYA"), "TR_SP"] <- "CAIL2"
 clean[clean$TR_SP %in% c("CODR","COSES","COFL2"), "TR_SP"] <- "CORNU"
 clean[clean$TR_SP %in% c("ACSA"), "TR_SP"] <- "ACSA2"
 
-setwd(clean_data_repository)
+#setwd(clean_data_repository)
 write_csv(clean, "StLouis_clean.csv")
 
 
 ###Rock Island###
 #First, set your working directory to be the folder with your Rock Island data
 
-setwd(paste(datasets, '/Forest_Inventory_Data/RockIsland', sep =''))
+setwd('./Forest_Inventory_Data/RockIsland')
 
 
 #Then, we read in the data and select only the columns that we want to use
@@ -208,7 +204,10 @@ nrow(RockIsland[RockIsland$TR_SP %in% c("UNKNOWN"),])
 
 #Should we filter out "NONE" species as well?
 
-setwd(clean_data_repository)
+#setwd(clean_data_repository)
+setwd("..")
+setwd("..")
+
 write_csv(clean, "RockIsland_clean.csv")
 
 
@@ -318,7 +317,7 @@ nrow(clean[clean$TR_SP %in% c("SNAG"),])
 clean_TPA <- clean %>%
   mutate(TR_DIA = as.numeric(TR_DIA)) %>%
   mutate(TreesPerAcre = 1 / ((pi*(TR_DIA*2.75)^2) / 43560),
-         BasalArea = 0.25*pi*(TR_DIA^2))
+         BasalArea = 0.25*pi*(TR_DIA^2) / 144)
 
 #number of NA TR_DIA
 clean_TPA[is.na(clean_TPA$TR_DIA),]
@@ -329,8 +328,8 @@ unique(clean_TPA$POOL)
 unique(clean_TPA$TR_SP)
 unique(clean_TPA$TR_HLTH) #looks like we have some incorrect classifications here
 
-setwd(clean_data_repository)
-write_csv(clean_TPA, "UMRS_FPF_clean.csv")
+setwd("..")
+write_csv(clean_TPA, "clean_data/UMRS_FPF_clean.csv")
 
 
 

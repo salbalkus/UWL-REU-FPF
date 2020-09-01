@@ -38,6 +38,8 @@ dominant <- plots %>%
 dominant$Type <- dominant$TR_SP
 dominant$Label <- "Dominant"
 
+dominant
+
 codominant <- plots %>%
   filter(relTPA <= 0.8 | relBA <= 0.8) %>%
   filter(relTPA >= 0.2 | relBA >= 0.2) %>%
@@ -57,8 +59,6 @@ codominant <- codominant %>%
   arrange(TR_SP) %>%
   summarize(relTPA = sum(relTPA), relBA = sum(relBA), Type = paste0(TR_SP, collapse= " and "), Label = "Codominant")
 
-codominant
-
 dominant <- select(dominant, PID, Type, Label)
 codominant <- select(codominant, PID, Type, Label)
 
@@ -66,10 +66,11 @@ mixed <- df %>%
   filter(!PID %in% dominant$PID) %>%
   filter(!PID %in% codominant$PID) %>%
   select(PID) %>%
-  mutate(Type = NA, Label = "Mixed") %>%
+  mutate(Type = "Mixed", Label = "Mixed") %>%
   distinct()
 
 output <- bind_rows(dominant, codominant, mixed)
+output
 write_csv(output, "clean_data/plot_classification.csv")
 
 
