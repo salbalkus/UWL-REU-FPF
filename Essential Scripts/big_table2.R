@@ -24,6 +24,7 @@ labels[is.na(labels$cluster),]$cluster <- 1
 plots <- left_join(data, labels, by = c("PID"))
 plots$Name <- paste(plots$Type, plots$cluster, sep = ".")
 
+
 #plots$TR_DIA[plots$TR_SP == word(plots$Type, 1)]
 
 plots
