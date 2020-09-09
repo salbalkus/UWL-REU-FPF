@@ -141,6 +141,7 @@ plots <- df %>% left_join(select(read_csv("clean_data/classified_plots_labels.cs
             ) %>%
   filter(!is.na(cluster))
 
+
 plots <- read_csv("clean_data/plot_summary_statistics.csv")
 plots
 type_counts <- plots %>% group_by(Type) %>% summarize(clusters = max(cluster))

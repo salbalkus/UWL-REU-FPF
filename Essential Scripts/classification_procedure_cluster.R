@@ -22,7 +22,7 @@ load_data <- function(dom_species){
 dissimilarity_matrix <- function(df, meth = "manhattan"){
   #106 is the max... for some reason only works if 106 is hardcoded
   TPA_bins = 1 / (pi * (seq(1:106)*2.75)^2) / 43560
-  BA_bins = 0.25*pi*(seq(1:106)^2)
+  BA_bins = 0.25*pi*(seq(1:106)^2) / 144
   
   cap <- stratifyvegdata(df, sizes1 = BA_bins, plotColumn = "PID", speciesColumn = "TR_SP", abundanceColumn = "TreesPerAcre", size1Column = "BasalArea", cumulative = TRUE )
   d <- vegdiststruct(cap, method = meth)
@@ -59,7 +59,15 @@ best_clustering <- function(df, dissim, max_clusters, meth = "ward.D2"){
     sil[[n-1]] <- mean(silhouette(x = plots$cluster, dmatrix = as.matrix(dissim))[,"sil_width"])
   }
   plots$cluster <- cutree(cluster_h, k = (which.max(sil)+1))
+  #plots$lvl1_sil <- sil[[which.max(sil)+1]]
+  
+  sils <- silhouette(x = plots$cluster, dmatrix = as.matrix(dissim))[,1:3]
+  sils <- data.frame(sils)
+  #sils_sum <- sils %>% group_by(cluster) %>% summarize(lvl2_sil = mean(sil_width))
+  #plots <- left_join(plots, sils_sum, by = "cluster")
+  plots <- cbind(plots, select(sils, sil_width))
   return(plots)
+  
 }
 
 #This function applies the best_clustering function to all possible level 1 classes and outputs a data frame.
@@ -71,19 +79,19 @@ classify <- function(max_clusters_num){
   df_cols_total <- df  %>% filter(Type %in% (df %>% group_by(Type) %>% summarize(Count = n_distinct(PID)) %>% filter(Count > 10))$Type)
   
   #Set up the data frame with the first possible level 1 class
-  df <- load_data("ACNE2")
-  dissim <- dissimilarity_matrix(df)
-  result <- best_clustering(df, dissim, 10)
+  df_small <- df %>% filter(Type =="ACNE2")
+  dissim <- dissimilarity_matrix(df_small)
+  result <- best_clustering(df_small, dissim, 10)
   
   #Perform clustering on all other level 1 classes and append to the first classification.
-
+  
   for(dom_species in unique(df_cols_total$Type)[unique(df_cols_total$Type) != "ACNE2"]){
     print(dom_species)
-    df <- load_data(dom_species)
-    dissim <- dissimilarity_matrix(df)
-    best <- best_clustering(df, dissim, 10)
+    df_small <- df %>% filter(Type == dom_species)
+    dissim <- dissimilarity_matrix(df_small)
+    best <- best_clustering(df_small, dissim, 10)
     result <- rbind(result, best)
-
+    
   }
   
   return(result)
@@ -93,7 +101,8 @@ classify <- function(max_clusters_num){
 
 #df <- load_data("ACSA2 and SALIX")
 #dissim <- dissimilarity_matrix(df)
-#sil <- best_clustering(df, dissim, 10)
+#test <- best_clustering(df, dissim, 10)
+
 
 #plot(seq(1:9)+1, sil, ylab = "Average Silhouette Value", xlab = "Number of Clusters")
 #lines(seq(1:9)+1, sil)
@@ -101,10 +110,18 @@ classify <- function(max_clusters_num){
 
 #Code for running the classification and plotting results:
 
-final <- classify(10)
-unique(new_final$Label)
-new_final <- final %>% select(PID, Type, Label, cluster)
-write_csv(final, "clean_data/classified_plots_full.csv")
-write_csv(new_final, "clean_data/classified_plots_labels.csv")
+#final <- classify(10)
+#new_final <- final %>% select(PID, Type, Label, cluster)
+#write_csv(final, "clean_data/classified_plots_full.csv")
+#write_csv(new_final, "clean_data/classified_plots_labels.csv")
 
+#Silhouette reporting 
+
+#final$Level2 <- paste(final$Type, final$cluster, sep = ".")
+#sils <- final %>% group_by(Type, Level2) %>% 
+#  summarize(avg_sil <- mean(sil_width),
+#            median_sil <- median(sil_width)
+#            )
+sils
+write_csv(sils, "Level 2 Avg Silhouette.csv")
 
