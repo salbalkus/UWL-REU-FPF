@@ -122,6 +122,6 @@ classify <- function(max_clusters_num){
 #  summarize(avg_sil <- mean(sil_width),
 #            median_sil <- median(sil_width)
 #            )
-sils
-write_csv(sils, "Level 2 Avg Silhouette.csv")
+#sils
+#write_csv(sils, "Level 2 Avg Silhouette.csv")
 
