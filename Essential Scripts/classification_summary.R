@@ -12,9 +12,7 @@ path_of_code <- dirname(rstudioapi::getSourceEditorContext()$path)
 setwd(path_of_code)
 setwd("..")
 
-source("classification_procedure_cluster.R")
-
-
+source(paste(path_of_code, "/classification_procedure_cluster.R", sep=""))
 
 #Functions to generate CAP plots
 multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
@@ -111,11 +109,12 @@ df_cols_total <- df %>% filter(Label != "Mixed") %>% filter(Type %in% (df %>% gr
 k = 10
 DIA_bins <- 1:106
 
+labels_full <- read_csv("clean_data/classified_plots_labels_with_mixed.csv")
+labels <- labels_full %>% select(PID, cluster)
+
 for(species in unique(df_cols_total$Type)){
-
-labels <- read_csv("clean_data/classified_plots_labels_with_mixed.csv") %>% select(PID, cluster)
+  
 df <- left_join(load_data(species), labels, by = "PID")
-
 
 cluster_cap <- df %>% stratifyvegdata(sizes1 = DIA_bins, plotColumn = 'cluster', speciesColumn = 'TR_SP', 
                                       abundanceColumn = 'TreesPerAcre', size1Column = 'TR_DIA',
@@ -143,7 +142,6 @@ plots <- df %>% left_join(select(read_csv("clean_data/classified_plots_labels.cs
 
 
 plots <- read_csv("clean_data/plot_summary_statistics.csv")
-plots
 type_counts <- plots %>% group_by(Type) %>% summarize(clusters = max(cluster))
 
 table(type_counts$clusters)
@@ -158,7 +156,8 @@ ggplot(plots) + geom_histogram(aes(x = Num_Species), binwidth = 1) +
   scale_fill_jco() + theme_light() + labs(x = "Number of Species Present", y = "Number of Level 2 Classification Types") + 
   theme(text = element_text(size = 16), legend.position = "none", axis.title.y = element_text(margin = margin(r = 10)))
 
-plots_lab <- distinct(left_join(plots, select(labels, Type, Label), by = "Type"))
+
+plots_lab <- distinct(left_join(plots, select(labels_full, Type, Label), by = "Type"))
 nrow(filter(plots_lab, Label == "Dominant"))
 nrow(filter(plots_lab, Label == "Codominant"))
 
