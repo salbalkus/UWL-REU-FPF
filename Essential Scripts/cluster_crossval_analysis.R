@@ -32,10 +32,22 @@ write_csv(total_purity, "clean_data/purity_scores.csv")
 #Calculate the average purity across folds for each Level 1 classes
 avg_total_purity <- total_purity %>% group_by(Type, Label) %>% summarize(purity <- mean(pure))
 
-write_csv(total_purity, "clean_data/avg_purity_scores.csv")
+write_csv(avg_total_purity, "clean_data/avg_purity_scores.csv")
 
 #Average of the averages - an overall meaure of purity
 mean(avg_total_purity$`purity <- mean(pure)`)
 
-
+#Other analyses
+sum(avg_total_purity[,3] == 1) #Level 1 classes with perfect purity
+sum(avg_total_purity[,3] == 1) / nrow(avg_total_purity)
      
+avg_total_purity
+counts <- full %>% group_by(Type, Label) %>% summarize(count = n())
+avg_total_purity <- left_join(counts, avg_total_purity) %>% arrange(desc(count))
+
+avg_total_purity
+result <- ggplot(avg_total_purity[1:10,]) + geom_col(aes(x = reorder(Type, -count), y = `purity <- mean(pure)`), fill = "gray") +
+  labs(x = "Level 1 Class", y = "Purity") + 
+  theme_light() + 
+  theme(axis.text.x = element_text(angle = 50, hjust = 0.5, vjust = 0.5), axis.title.x = element_text(margin = margin(t = 10)), axis.title.y = element_text(margin = margin(r = 10)))
+ggsave("images/Top 10 Purity.png", result, device = "png")

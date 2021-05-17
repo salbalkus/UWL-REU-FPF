@@ -109,7 +109,7 @@ df_cols_total <- df %>% filter(Label != "Mixed") %>% filter(Type %in% (df %>% gr
 k = 10
 DIA_bins <- 1:106
 
-labels_full <- read_csv("clean_data/classified_plots_labels_with_mixed.csv")
+labels_full <- read_csv("clean_data/classified_plots_labels.csv")
 labels <- labels_full %>% select(PID, cluster)
 
 for(species in unique(df_cols_total$Type)){
@@ -163,7 +163,7 @@ nrow(filter(plots_lab, Label == "Codominant"))
 
 #Clean the data for level 1 states
 
-quick <- read_csv("clean_data/classified_plots_labels_with_mixed.csv")
+quick <- read_csv("clean_data/classified_plots_labels.csv")
 quick_dom <- quick %>% filter(Label == "Dominant") %>% group_by(Type) %>% summarize(Count = n()) %>% mutate(Pct = Count / sum(Count)) %>% top_n(5, Count)
 quick_codom <- quick %>% filter(Label == "Codominant") %>% group_by(Type) %>% summarize(Count = n()) %>% mutate(Pct = Count / sum(Count)) %>%  top_n(5, Count)
 quick_total <- quick %>% group_by(Type) %>% summarize(Count = n()) %>% top_n(5, Count)

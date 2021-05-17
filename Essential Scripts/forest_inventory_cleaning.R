@@ -256,8 +256,8 @@ nrow(clean[clean$TR_SP %in% c("SALIX"),])
 #10234 willow
 
 #iii Recode Mulberries
-clean[clean$TR_SP %in% c("MOAL", "MORU2"),"TR_SP"] <- "MOAL" #selected MOAL as the default
-nrow(clean[clean$TR_SP %in% c("MOAL"),])
+clean[clean$TR_SP %in% c("MOAL", "MORU2", "MORUS", "MORU"),"TR_SP"] <- "MORUS" #selected MOAL as the default
+nrow(clean[clean$TR_SP %in% c("MORUS"),])
 #1607 mulberry
 
 #iv Combine QUEL and QUVE. Here I pick QUVE (Black Oak) as default
@@ -290,12 +290,16 @@ clean[clean$TR_SP %in% c("VIRI", "VITI5","VIVU"),"TR_SP"] <- "VITIS"
 nrow(clean[clean$TR_SP %in% c("VITIS"),])
 #1 grapes
 
+#x Fix spelling error
+
 #fix some spelling and denotation errors identified by me via recoding
 clean[clean$TR_HLTH %in% c("H"), "TR_HLTH"] <- "V"
 #Fix typos in species names
 clean[clean$TR_SP %in% c("ACNE12"), "TR_SP"] <- "ACNE2"
 clean[clean$TR_SP %in% c("OTH1"), "TR_SP"] <- "OTHER"
 clean[clean$TR_SP %in% c("Other"), "TR_SP"] <- "OTHER"
+clean[clean$TR_SP %in% c("QUPA"),"TR_SP"] <- "QUPA2"
+
 #Recode hickory genus to bitternut hickory based on investigation from Molly
 clean[clean$TR_SP %in% c("CARYA"), "TR_SP"] <- "CACO15"
 
